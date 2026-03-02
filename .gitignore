@@ -31,6 +31,9 @@
 /build/
 build/
 
+# Ignore flutter SDK directory if accidentally placed in project
+/flutter/
+
 # Web related
 lib/generated_plugin_registrant.dart
 
