@@ -1,185 +1,572 @@
 [
-    {
-        "id": "1",
-        "title": "Омлет с сыром",
-        "timeMin": 10,
-        "tags": [
-            "quick",
-            "one_pan",
-            "breakfast"
-        ],
-        "servingsBase": 1,
-        "ingredients": [
-            {
-                "name": "Яйцо",
-                "amount": 2,
-                "unit": "pcs",
-                "required": true
-            },
-            {
-                "name": "Молоко",
-                "amount": 50,
-                "unit": "ml",
-                "required": true
-            },
-            {
-                "name": "Сыр",
-                "amount": 30,
-                "unit": "g",
-                "required": true
-            },
-            {
-                "name": "Соль",
-                "amount": 1,
-                "unit": "g",
-                "required": false
-            },
-            {
-                "name": "Перец",
-                "amount": 1,
-                "unit": "g",
-                "required": false
-            }
-        ],
-        "steps": [
-            "Взбить яйца с молоком в небольшой миске. Добавить соль и перец по вкусу.",
-            "Натереть сыр на мелкой терке.",
-            "Разогреть сковороду с небольшим количеством масла.",
-            "Вылить яичную смесь на сковороду. Готовить на среднем огне 2-3 минуты.",
-            "Когда омлет почти готов (сверху еще немного влажный), посыпать сыром половину омлета.",
-            "Сложить омлет пополам, накрыв сыр второй половиной. Снять с огня и подавать."
-        ]
-    },
-    {
-        "id": "2",
-        "title": "Салат из помидоров и огурцов",
-        "timeMin": 5,
-        "tags": [
-            "quick",
-            "no_cook",
-            "healthy"
-        ],
-        "servingsBase": 2,
-        "ingredients": [
-            {
-                "name": "Помидор",
-                "amount": 2,
-                "unit": "pcs",
-                "required": true
-            },
-            {
-                "name": "Огурец",
-                "amount": 2,
-                "unit": "pcs",
-                "required": true
-            },
-            {
-                "name": "Масло растительное",
-                "amount": 30,
-                "unit": "ml",
-                "required": true
-            },
-            {
-                "name": "Соль",
-                "amount": 1,
-                "unit": "g",
-                "required": false
-            }
-        ],
-        "steps": [
-            "Помыть овощи.",
-            "Нарезать помидоры и огурцы кубиками или дольками.",
-            "Сложить овощи в салатницу.",
-            "Посолить, заправить растительным маслом. Тщательно перемешать."
-        ]
-    },
-    {
-        "id": "3",
-        "title": "Гречка с маслом",
-        "timeMin": 25,
-        "tags": [
-            "garnish",
-            "easy",
-            "vegan_option"
-        ],
-        "servingsBase": 2,
-        "ingredients": [
-            {
-                "name": "Гречка",
-                "amount": 200,
-                "unit": "g",
-                "required": true
-            },
-            {
-                "name": "Вода",
-                "amount": 400,
-                "unit": "ml",
-                "required": true
-            },
-            {
-                "name": "Масло сливочное",
-                "amount": 20,
-                "unit": "g",
-                "required": false
-            },
-            {
-                "name": "Соль",
-                "amount": 2,
-                "unit": "g",
-                "required": false
-            }
-        ],
-        "steps": [
-            "Крупу тщательно промыть под проточной водой.",
-            "Переложить гречку в кастрюлю, залить водой.",
-            "Довести до кипения, посолить. Убавить огонь до минимума и накрыть крышкой.",
-            "Варить примерно 15-20 минут, пока вся вода не впитается.",
-            "Добавить сливочное масло, перемешать и дать настояться 5 минут."
-        ]
-    },
-    {
-        "id": "4",
-        "title": "Спагетти с сыром и маслом",
-        "timeMin": 15,
-        "tags": [
-            "pasta",
-            "quick",
-            "kids"
-        ],
-        "servingsBase": 2,
-        "ingredients": [
-            {
-                "name": "Спагетти",
-                "amount": 200,
-                "unit": "g",
-                "required": true
-            },
-            {
-                "name": "Сыр",
-                "amount": 50,
-                "unit": "g",
-                "required": true
-            },
-            {
-                "name": "Масло сливочное",
-                "amount": 30,
-                "unit": "g",
-                "required": false
-            },
-            {
-                "name": "Соль",
-                "amount": 2,
-                "unit": "g",
-                "required": false
-            }
-        ],
-        "steps": [
-            "Вскипятить воду в кастрюле, посолить.",
-            "Опустить спагетти в кипящую воду. Варить согласно инструкции на упаковке (обычно 8-10 минут).",
-            "Пока варятся спагетти, натереть сыр на терке.",
-            "Откинуть спагетти на дуршлаг, затем вернуть в теплую кастрюлю.",
-            "Добавить сливочное масло и перемешать, чтобы оно растаяло.",
-            "Разложить по тарелкам и посыпать тертым сыром."
-        ]
-    }
+  {
+    "id": "1",
+    "title": "Омлет с сыром",
+    "timeMin": 10,
+    "tags": ["quick", "one_pan", "breakfast"],
+    "servingsBase": 1,
+    "ingredients": [
+      {"name": "Яйцо", "amount": 2, "unit": "pcs", "required": true},
+      {"name": "Молоко", "amount": 50, "unit": "ml", "required": true},
+      {"name": "Сыр", "amount": 30, "unit": "g", "required": true},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false},
+      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Взбейте яйца с молоком, солью и перцем.",
+      "Разогрейте сковороду и влейте смесь.",
+      "Добавьте сыр, сложите омлет пополам и подайте."
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Салат из помидоров и огурцов",
+    "timeMin": 8,
+    "tags": ["quick", "no_oven", "healthy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Помидор", "amount": 250, "unit": "g", "required": true},
+      {"name": "Огурец", "amount": 200, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 60, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 20, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Нарежьте помидоры и огурцы крупными кусками.",
+      "Тонко нарежьте лук и смешайте с овощами.",
+      "Заправьте маслом и добавьте соль по вкусу."
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Гречка с грибами",
+    "timeMin": 30,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Гречка", "amount": 180, "unit": "g", "required": true},
+      {"name": "Грибы", "amount": 200, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 80, "unit": "g", "required": true},
+      {"name": "Масло", "amount": 15, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте лук и грибы до мягкости.",
+      "Добавьте промытую гречку и воду в пропорции 1:2.",
+      "Томите под крышкой 20 минут до готовности."
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Паста с чесноком и томатами",
+    "timeMin": 18,
+    "tags": ["quick", "one_pan", "pasta"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Макароны", "amount": 180, "unit": "g", "required": true},
+      {"name": "Помидор", "amount": 200, "unit": "g", "required": true},
+      {"name": "Чеснок", "amount": 8, "unit": "g", "required": true},
+      {"name": "Масло", "amount": 20, "unit": "ml", "required": false},
+      {"name": "Сыр", "amount": 30, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Отварите макароны до состояния al dente.",
+      "Обжарьте чеснок, добавьте нарезанные томаты.",
+      "Смешайте соус с пастой и посыпьте сыром."
+    ]
+  },
+  {
+    "id": "5",
+    "title": "Овсяная каша с яблоком",
+    "timeMin": 12,
+    "tags": ["quick", "one_pan", "breakfast"],
+    "servingsBase": 1,
+    "ingredients": [
+      {"name": "Овсяные хлопья", "amount": 60, "unit": "g", "required": true},
+      {"name": "Молоко", "amount": 250, "unit": "ml", "required": true},
+      {"name": "Яблоко", "amount": 120, "unit": "g", "required": true},
+      {"name": "Сахар", "amount": 8, "unit": "g", "required": false},
+      {"name": "Корица", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Доведите молоко до кипения, добавьте хлопья.",
+      "Варите 5-7 минут, помешивая.",
+      "Добавьте тёртое яблоко, сахар и корицу."
+    ]
+  },
+  {
+    "id": "6",
+    "title": "Картофель жареный с луком",
+    "timeMin": 25,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Картофель", "amount": 500, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 100, "unit": "g", "required": true},
+      {"name": "Масло", "amount": 25, "unit": "ml", "required": true},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false},
+      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Нарежьте картофель брусками, лук полукольцами.",
+      "Обжаривайте картофель на среднем огне 15 минут.",
+      "Добавьте лук, специи и доведите до румяной корочки."
+    ]
+  },
+  {
+    "id": "7",
+    "title": "Курица с рисом на сковороде",
+    "timeMin": 35,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 3,
+    "ingredients": [
+      {"name": "Курица", "amount": 350, "unit": "g", "required": true},
+      {"name": "Рис", "amount": 220, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 120, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 80, "unit": "g", "required": true},
+      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте кусочки курицы до лёгкой корочки.",
+      "Добавьте лук и морковь, готовьте 5 минут.",
+      "Всыпьте рис, залейте водой и тушите до готовности."
+    ]
+  },
+  {
+    "id": "8",
+    "title": "Творожный дип с зеленью",
+    "timeMin": 7,
+    "tags": ["quick", "no_oven", "garnish"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Творог", "amount": 180, "unit": "g", "required": true},
+      {"name": "Сметана", "amount": 60, "unit": "g", "required": true},
+      {"name": "Укроп", "amount": 15, "unit": "g", "required": false},
+      {"name": "Чеснок", "amount": 5, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Разомните творог вилкой до однородности.",
+      "Добавьте сметану и мелко нарезанную зелень.",
+      "Приправьте солью и чесноком."
+    ]
+  },
+  {
+    "id": "9",
+    "title": "Сэндвич с яйцом и сыром",
+    "timeMin": 10,
+    "tags": ["quick", "no_oven", "breakfast"],
+    "servingsBase": 1,
+    "ingredients": [
+      {"name": "Хлеб", "amount": 2, "unit": "pcs", "required": true},
+      {"name": "Яйцо", "amount": 1, "unit": "pcs", "required": true},
+      {"name": "Сыр", "amount": 25, "unit": "g", "required": true},
+      {"name": "Майонез", "amount": 10, "unit": "g", "required": false},
+      {"name": "Огурец", "amount": 40, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Сварите яйцо вкрутую и нарежьте.",
+      "Соберите сэндвич: хлеб, сыр, яйцо, овощи.",
+      "При желании добавьте соус и разрежьте пополам."
+    ]
+  },
+  {
+    "id": "10",
+    "title": "Суп из чечевицы",
+    "timeMin": 35,
+    "tags": ["one_pan", "healthy"],
+    "servingsBase": 3,
+    "ingredients": [
+      {"name": "Чечевица", "amount": 220, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 120, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 90, "unit": "g", "required": true},
+      {"name": "Чеснок", "amount": 8, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Промойте чечевицу и залейте водой.",
+      "Добавьте лук и морковь, варите 25 минут.",
+      "Посолите и пробейте часть супа блендером для густоты."
+    ]
+  },
+  {
+    "id": "11",
+    "title": "Рис с овощами",
+    "timeMin": 28,
+    "tags": ["one_pan", "vegan_option"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Рис", "amount": 180, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 100, "unit": "g", "required": true},
+      {"name": "Перец сладкий", "amount": 120, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 80, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 15, "unit": "ml", "required": false}
+    ],
+    "steps": [
+      "Обжарьте овощи 5 минут.",
+      "Добавьте рис и воду в пропорции 1:2.",
+      "Готовьте под крышкой до мягкости риса."
+    ]
+  },
+  {
+    "id": "12",
+    "title": "Салат с фасолью и кукурузой",
+    "timeMin": 9,
+    "tags": ["quick", "no_oven", "healthy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Фасоль", "amount": 180, "unit": "g", "required": true},
+      {"name": "Кукуруза", "amount": 150, "unit": "g", "required": true},
+      {"name": "Огурец", "amount": 120, "unit": "g", "required": true},
+      {"name": "Масло", "amount": 15, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Слейте жидкость с фасоли и кукурузы.",
+      "Нарежьте огурец и смешайте всё в миске.",
+      "Добавьте масло и соль, аккуратно перемешайте."
+    ]
+  },
+  {
+    "id": "13",
+    "title": "Кабачки в сметане",
+    "timeMin": 20,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Кабачок", "amount": 450, "unit": "g", "required": true},
+      {"name": "Сметана", "amount": 120, "unit": "g", "required": true},
+      {"name": "Чеснок", "amount": 6, "unit": "g", "required": false},
+      {"name": "Укроп", "amount": 12, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Нарежьте кабачки полукружьями и обжарьте 7 минут.",
+      "Добавьте сметану, соль и чеснок.",
+      "Потушите ещё 5 минут и посыпьте зеленью."
+    ]
+  },
+  {
+    "id": "14",
+    "title": "Картофельное пюре",
+    "timeMin": 30,
+    "tags": ["one_pan", "kids"],
+    "servingsBase": 3,
+    "ingredients": [
+      {"name": "Картофель", "amount": 800, "unit": "g", "required": true},
+      {"name": "Молоко", "amount": 220, "unit": "ml", "required": true},
+      {"name": "Масло сливочное", "amount": 40, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 3, "unit": "g", "required": false},
+      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Отварите очищенный картофель до мягкости.",
+      "Слейте воду, добавьте тёплое молоко и масло.",
+      "Разомните до пышной консистенции и приправьте."
+    ]
+  },
+  {
+    "id": "15",
+    "title": "Блины на молоке",
+    "timeMin": 25,
+    "tags": ["breakfast", "one_pan", "kids"],
+    "servingsBase": 3,
+    "ingredients": [
+      {"name": "Мука", "amount": 220, "unit": "g", "required": true},
+      {"name": "Молоко", "amount": 450, "unit": "ml", "required": true},
+      {"name": "Яйцо", "amount": 2, "unit": "pcs", "required": true},
+      {"name": "Сахар", "amount": 20, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 20, "unit": "ml", "required": false}
+    ],
+    "steps": [
+      "Смешайте яйца, сахар и молоко.",
+      "Постепенно добавьте муку, чтобы не было комков.",
+      "Жарьте тонкие блины на смазанной сковороде."
+    ]
+  },
+  {
+    "id": "16",
+    "title": "Томатный суп-пюре",
+    "timeMin": 22,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Помидор", "amount": 500, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 70, "unit": "g", "required": true},
+      {"name": "Чеснок", "amount": 6, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 10, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте лук и чеснок до мягкости.",
+      "Добавьте томаты и тушите 12 минут.",
+      "Пробейте блендером, доведите до вкуса солью."
+    ]
+  },
+  {
+    "id": "17",
+    "title": "Макароны с тунцом",
+    "timeMin": 17,
+    "tags": ["quick", "one_pan", "pasta"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Макароны", "amount": 200, "unit": "g", "required": true},
+      {"name": "Тунец", "amount": 160, "unit": "g", "required": true},
+      {"name": "Помидор", "amount": 150, "unit": "g", "required": false},
+      {"name": "Лук", "amount": 60, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Отварите макароны до готовности.",
+      "Слегка прогрейте тунец с луком и томатами.",
+      "Смешайте всё вместе и подавайте горячим."
+    ]
+  },
+  {
+    "id": "18",
+    "title": "Шакшука",
+    "timeMin": 20,
+    "tags": ["one_pan", "breakfast"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Яйцо", "amount": 4, "unit": "pcs", "required": true},
+      {"name": "Помидор", "amount": 300, "unit": "g", "required": true},
+      {"name": "Перец сладкий", "amount": 120, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 80, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте лук и перец до мягкости.",
+      "Добавьте томаты и тушите до густоты.",
+      "Сделайте углубления, вбейте яйца и готовьте под крышкой."
+    ]
+  },
+  {
+    "id": "19",
+    "title": "Ленивый плов с курицей",
+    "timeMin": 40,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 4,
+    "ingredients": [
+      {"name": "Курица", "amount": 450, "unit": "g", "required": true},
+      {"name": "Рис", "amount": 260, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 150, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 120, "unit": "g", "required": true},
+      {"name": "Чеснок", "amount": 10, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте курицу до золотистой корочки.",
+      "Добавьте лук и морковь, готовьте 6 минут.",
+      "Всыпьте рис, залейте водой и томите до готовности."
+    ]
+  },
+  {
+    "id": "20",
+    "title": "Салат с капустой и яблоком",
+    "timeMin": 10,
+    "tags": ["quick", "no_oven", "healthy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Капуста", "amount": 250, "unit": "g", "required": true},
+      {"name": "Яблоко", "amount": 120, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 80, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 15, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Тонко нашинкуйте капусту и слегка помните руками.",
+      "Добавьте тёртое яблоко и морковь.",
+      "Заправьте маслом и солью."
+    ]
+  },
+  {
+    "id": "21",
+    "title": "Гренки с чесноком",
+    "timeMin": 9,
+    "tags": ["quick", "one_pan", "garnish"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Хлеб", "amount": 4, "unit": "pcs", "required": true},
+      {"name": "Чеснок", "amount": 6, "unit": "g", "required": true},
+      {"name": "Масло", "amount": 15, "unit": "ml", "required": true},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false},
+      {"name": "Паприка", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Нарежьте хлеб полосками.",
+      "Обжарьте на масле до хруста.",
+      "Натрите чесноком и посыпьте специями."
+    ]
+  },
+  {
+    "id": "22",
+    "title": "Суп с фрикадельками",
+    "timeMin": 35,
+    "tags": ["one_pan", "kids"],
+    "servingsBase": 3,
+    "ingredients": [
+      {"name": "Фарш", "amount": 300, "unit": "g", "required": true},
+      {"name": "Картофель", "amount": 350, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 100, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 70, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Сформируйте небольшие фрикадельки из фарша.",
+      "Добавьте их в кипящую воду вместе с овощами.",
+      "Варите 20 минут и доведите до вкуса."
+    ]
+  },
+  {
+    "id": "23",
+    "title": "Паста с сырным соусом",
+    "timeMin": 20,
+    "tags": ["one_pan", "pasta", "kids"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Макароны", "amount": 190, "unit": "g", "required": true},
+      {"name": "Сыр", "amount": 120, "unit": "g", "required": true},
+      {"name": "Молоко", "amount": 220, "unit": "ml", "required": true},
+      {"name": "Масло сливочное", "amount": 20, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Отварите макароны до готовности.",
+      "Нагрейте молоко с маслом и добавьте сыр.",
+      "Смешайте соус с пастой и подавайте."
+    ]
+  },
+  {
+    "id": "24",
+    "title": "Оладьи из кабачков",
+    "timeMin": 18,
+    "tags": ["quick", "one_pan", "kids"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Кабачок", "amount": 350, "unit": "g", "required": true},
+      {"name": "Яйцо", "amount": 1, "unit": "pcs", "required": true},
+      {"name": "Мука", "amount": 70, "unit": "g", "required": true},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 20, "unit": "ml", "required": false}
+    ],
+    "steps": [
+      "Натрите кабачок и отожмите лишний сок.",
+      "Смешайте с яйцом, мукой и солью.",
+      "Жарьте оладьи до золотистой корочки с двух сторон."
+    ]
+  },
+  {
+    "id": "25",
+    "title": "Кускус с овощами",
+    "timeMin": 14,
+    "tags": ["quick", "one_pan", "vegan_option"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Кускус", "amount": 170, "unit": "g", "required": true},
+      {"name": "Перец сладкий", "amount": 120, "unit": "g", "required": true},
+      {"name": "Огурец", "amount": 100, "unit": "g", "required": false},
+      {"name": "Масло", "amount": 12, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Залейте кускус горячей водой и накройте на 5 минут.",
+      "Нарежьте овощи мелкими кубиками.",
+      "Смешайте кускус с овощами, добавьте масло и соль."
+    ]
+  },
+  {
+    "id": "26",
+    "title": "Яичница с помидорами",
+    "timeMin": 9,
+    "tags": ["quick", "one_pan", "breakfast"],
+    "servingsBase": 1,
+    "ingredients": [
+      {"name": "Яйцо", "amount": 2, "unit": "pcs", "required": true},
+      {"name": "Помидор", "amount": 120, "unit": "g", "required": true},
+      {"name": "Масло", "amount": 8, "unit": "ml", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false},
+      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте ломтики помидора 2 минуты.",
+      "Вбейте яйца на сковороду.",
+      "Готовьте до желаемой степени прожарки."
+    ]
+  },
+  {
+    "id": "27",
+    "title": "Тушеная капуста с сосисками",
+    "timeMin": 32,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 3,
+    "ingredients": [
+      {"name": "Капуста", "amount": 600, "unit": "g", "required": true},
+      {"name": "Сосиски", "amount": 240, "unit": "g", "required": true},
+      {"name": "Морковь", "amount": 100, "unit": "g", "required": false},
+      {"name": "Лук", "amount": 80, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Нашинкуйте капусту, нарежьте сосиски кружками.",
+      "Обжарьте лук с морковью, добавьте капусту.",
+      "Добавьте сосиски и тушите до мягкости капусты."
+    ]
+  },
+  {
+    "id": "28",
+    "title": "Картофель с грибами и сметаной",
+    "timeMin": 30,
+    "tags": ["one_pan", "easy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Картофель", "amount": 450, "unit": "g", "required": true},
+      {"name": "Грибы", "amount": 220, "unit": "g", "required": true},
+      {"name": "Сметана", "amount": 120, "unit": "g", "required": true},
+      {"name": "Лук", "amount": 70, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Обжарьте картофель до полуготовности.",
+      "Добавьте грибы и лук, готовьте ещё 10 минут.",
+      "Вмешайте сметану и потушите 5 минут."
+    ]
+  },
+  {
+    "id": "29",
+    "title": "Салат с творогом и огурцом",
+    "timeMin": 8,
+    "tags": ["quick", "no_oven", "healthy"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Творог", "amount": 180, "unit": "g", "required": true},
+      {"name": "Огурец", "amount": 200, "unit": "g", "required": true},
+      {"name": "Укроп", "amount": 12, "unit": "g", "required": false},
+      {"name": "Сметана", "amount": 40, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Нарежьте огурец мелким кубиком.",
+      "Смешайте с творогом и зеленью.",
+      "Добавьте сметану и соль по вкусу."
+    ]
+  },
+  {
+    "id": "30",
+    "title": "Рисовая каша на молоке",
+    "timeMin": 28,
+    "tags": ["one_pan", "breakfast", "kids"],
+    "servingsBase": 2,
+    "ingredients": [
+      {"name": "Рис", "amount": 120, "unit": "g", "required": true},
+      {"name": "Молоко", "amount": 600, "unit": "ml", "required": true},
+      {"name": "Сахар", "amount": 20, "unit": "g", "required": false},
+      {"name": "Масло сливочное", "amount": 20, "unit": "g", "required": false},
+      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+    ],
+    "steps": [
+      "Промойте рис и залейте молоком.",
+      "Варите на слабом огне до мягкости риса.",
+      "Добавьте сахар, масло и щепотку соли перед подачей."
+    ]
+  }
 ]

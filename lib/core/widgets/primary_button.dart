@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../theme/tokens.dart';
 
+/// Большая градиентная кнопка с scale-анимацией и glow.
 class PrimaryButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
@@ -18,21 +21,18 @@ class PrimaryButton extends StatefulWidget {
 
 class _PrimaryButtonState extends State<PrimaryButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void setUp() {}
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 140),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
   }
 
@@ -42,18 +42,15 @@ class _PrimaryButtonState extends State<PrimaryButton>
     super.dispose();
   }
 
-  void _onTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
+  void _onTapDown(TapDownDetails _) => _controller.forward();
 
-  void _onTapUp(TapUpDetails details) {
+  void _onTapUp(TapUpDetails _) {
     _controller.reverse();
+    HapticFeedback.lightImpact();
     widget.onPressed();
   }
 
-  void _onTapCancel() {
-    _controller.reverse();
-  }
+  void _onTapCancel() => _controller.reverse();
 
   @override
   Widget build(BuildContext context) {
@@ -63,23 +60,28 @@ class _PrimaryButtonState extends State<PrimaryButton>
       onTapCancel: _onTapCancel,
       child: ScaleTransition(
         scale: _scaleAnimation,
-        child: ElevatedButton(
-          onPressed: () {}, // Handled by GestureDetector
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 56),
+        child: Container(
+          height: 56,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: AppTokens.primaryGradient,
+            borderRadius: BorderRadius.circular(AppTokens.r20),
+            boxShadow: AppTokens.primaryGlowShadow,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.icon != null) ...[
-                Icon(widget.icon),
+                Icon(widget.icon, color: Colors.white, size: 22),
                 const SizedBox(width: 8),
               ],
               Text(
                 widget.text,
                 style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],

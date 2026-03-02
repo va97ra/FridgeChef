@@ -35,8 +35,8 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.itemToEdit?.name);
-    _amountController = TextEditingController(
-        text: widget.itemToEdit?.amount.toString() ?? '');
+    _amountController =
+        TextEditingController(text: widget.itemToEdit?.amount.toString() ?? '');
     _caloriesController = TextEditingController(
         text: widget.itemToEdit?.calories?.toString() ?? '');
     _selectedUnit = widget.itemToEdit?.unit ?? Unit.g;
@@ -51,7 +51,7 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
       final amount = double.tryParse(_amountController.text) ?? 0.0;
@@ -67,12 +67,14 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
       );
 
       if (widget.itemToEdit != null) {
-        ref.read(fridgeListProvider.notifier).updateItem(newItem);
+        await ref.read(fridgeListProvider.notifier).updateItem(newItem);
       } else {
-        ref.read(fridgeListProvider.notifier).addItem(newItem);
+        await ref.read(fridgeListProvider.notifier).addItem(newItem);
       }
 
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -106,9 +108,11 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
                             keyboardType: TextInputType.number,
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Обязательно';
-                              if (double.tryParse(v) == null) {
+                              final parsed = double.tryParse(v);
+                              if (parsed == null) {
                                 return 'Число';
                               }
+                              if (parsed <= 0) return '> 0';
                               return null;
                             },
                           ),
@@ -117,13 +121,13 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
                         Expanded(
                           flex: 1,
                           child: DropdownButtonFormField<Unit>(
-                            value: _selectedUnit,
+                            initialValue: _selectedUnit,
                             decoration: const InputDecoration(
                               filled: true,
                               fillColor: AppTokens.surface,
                               border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(AppTokens.r12)),
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(AppTokens.r12)),
                                 borderSide: BorderSide.none,
                               ),
                             ),
@@ -167,7 +171,8 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
                           context: context,
                           initialDate: DateTime.now(),
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365 * 5)),
                         );
                         if (date != null) {
                           setState(() => _expiresAt = date);

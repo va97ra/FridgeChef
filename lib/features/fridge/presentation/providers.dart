@@ -13,23 +13,24 @@ class FridgeListNotifier extends StateNotifier<List<FridgeItem>> {
     state = _repo.getAll();
   }
 
-  void addItem(FridgeItem item) {
-    _repo.upsert(item);
+  Future<void> addItem(FridgeItem item) async {
+    await _repo.upsert(item);
     _load();
   }
 
-  void updateItem(FridgeItem item) {
-    _repo.upsert(item);
+  Future<void> updateItem(FridgeItem item) async {
+    await _repo.upsert(item);
     _load();
   }
 
-  void removeItem(String id) {
-    _repo.delete(id);
+  Future<void> removeItem(String id) async {
+    await _repo.delete(id);
     _load();
   }
 }
 
-final fridgeListProvider = StateNotifierProvider<FridgeListNotifier, List<FridgeItem>>((ref) {
+final fridgeListProvider =
+    StateNotifierProvider<FridgeListNotifier, List<FridgeItem>>((ref) {
   final repo = ref.watch(fridgeRepoProvider);
   return FridgeListNotifier(repo);
 });

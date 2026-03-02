@@ -30,8 +30,14 @@ class AppRoutes {
     }
   }
 
-  static PageRouteBuilder _buildRoute(Widget page) {
-    return PageRouteBuilder(
+  static Route<T> fadeThroughRoute<T>({
+    required Widget page,
+    RouteSettings? settings,
+  }) {
+    return PageRouteBuilder<T>(
+      settings: settings,
+      transitionDuration: const Duration(milliseconds: 280),
+      reverseTransitionDuration: const Duration(milliseconds: 220),
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeThroughTransition(
@@ -41,5 +47,9 @@ class AppRoutes {
         );
       },
     );
+  }
+
+  static Route<dynamic> _buildRoute(Widget page) {
+    return fadeThroughRoute(page: page);
   }
 }

@@ -1,191 +1,210 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_scaffold.dart';
-import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/animated_tile.dart';
 import '../../../app/routes.dart';
+import '../../ai_recipes/presentation/ai_generate_screen.dart';
+import 'widgets/home_action_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          const SizedBox(height: 60),
-          Text(
-            'Помоги\nприготовить 👨‍🍳',
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  height: 1.2,
-                  fontSize: 36,
-                ),
+          // Фон с градиентом
+          const DecoratedBox(
+            decoration: BoxDecoration(gradient: AppTokens.bgGradient),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Добавь продукты и получи идеи\nдля вкусных блюд!',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTokens.textLight,
-                  fontSize: 16,
+
+          // Декоративный верхний блоб
+          Positioned(
+            top: -80,
+            right: -80,
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppTokens.primary.withValues(alpha: 0.15),
+                    Colors.transparent,
+                  ],
                 ),
+              ),
+            ),
           ),
-          const SizedBox(height: 48),
-          Expanded(
-            child: ListView(
-              children: [
-                _HomeActionButton(
-                  title: 'Мой холодильник',
-                  subtitle: 'Продукты, из которых будем готовить',
-                  icon: Icons.kitchen,
-                  color: const Color(0xFF4ECDC4),
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.fridge),
+
+          // Мелкий блоб снизу
+          Positioned(
+            bottom: 60,
+            left: -60,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppTokens.secondary.withValues(alpha: 0.12),
+                    Colors.transparent,
+                  ],
                 ),
-                const SizedBox(height: 16),
-                _HomeActionButton(
-                  title: 'Полка со специями',
-                  subtitle: 'Соль, перец, соусы и приправы',
-                  icon: Icons.eco,
-                  color: const Color(0xFFFFB703),
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.shelf),
-                ),
-                const SizedBox(height: 16),
-                _HomeActionButton(
-                  title: 'Помоги приготовить',
-                  subtitle: 'Подобрать рецепт по продуктам',
-                  icon: Icons.restaurant_menu,
-                  color: AppTokens.primary,
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.cook),
-                  isPrimary: true,
-                ),
-              ],
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppTokens.p20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+
+                  // Hero-заголовок
+                  _buildHeader(context),
+
+                  const SizedBox(height: 40),
+
+                  // Карточки-кнопки
+                  Expanded(
+                    child: ListView(
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        AnimatedTile(
+                          delay: const Duration(milliseconds: 80),
+                          child: HomeActionButton(
+                            title: 'Мой холодильник',
+                            subtitle: 'Продукты, из которых будем готовить',
+                            icon: Icons.kitchen_rounded,
+                            gradient: AppTokens.fridgeGradient,
+                            onTap: () =>
+                                Navigator.pushNamed(context, AppRoutes.fridge),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        AnimatedTile(
+                          delay: const Duration(milliseconds: 180),
+                          child: HomeActionButton(
+                            title: 'Полка',
+                            subtitle: 'Соль, перец, соусы и приправы',
+                            icon: Icons.eco_rounded,
+                            gradient: AppTokens.shelfGradient,
+                            onTap: () =>
+                                Navigator.pushNamed(context, AppRoutes.shelf),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        AnimatedTile(
+                          delay: const Duration(milliseconds: 280),
+                          child: HomeActionButton(
+                            title: 'Помоги приготовить',
+                            subtitle: 'Подобрать рецепт по продуктам',
+                            icon: Icons.restaurant_menu_rounded,
+                            gradient: AppTokens.primaryGradient,
+                            isPrimary: true,
+                            onTap: () =>
+                                Navigator.pushNamed(context, AppRoutes.cook),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        AnimatedTile(
+                          delay: const Duration(milliseconds: 380),
+                          child: HomeActionButton(
+                            title: 'AI-Рецепты ✨',
+                            subtitle:
+                                'Gemini придумает блюдо из твоих продуктов',
+                            icon: Icons.auto_awesome_rounded,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            isPrimary: false,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AiGenerateScreen(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class _HomeActionButton extends StatefulWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-  final bool isPrimary;
-
-  const _HomeActionButton({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-    this.isPrimary = false,
-  });
-
-  @override
-  State<_HomeActionButton> createState() => _HomeActionButtonState();
-}
-
-class _HomeActionButtonState extends State<_HomeActionButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 150));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Тег "приложение для готовки"
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: widget.isPrimary ? widget.color : AppTokens.surface,
-            borderRadius: BorderRadius.circular(AppTokens.r24),
-            boxShadow: [
-              BoxShadow(
-                color: widget.isPrimary
-                    ? widget.color.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.05),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+            gradient: LinearGradient(
+              colors: [
+                AppTokens.primary.withValues(alpha: 0.15),
+                AppTokens.secondary.withValues(alpha: 0.12),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(AppTokens.r12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('🍳', style: TextStyle(fontSize: 14)),
+              const SizedBox(width: 6),
+              Text(
+                'Умный холодильник',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTokens.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppTokens.p20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: widget.isPrimary
-                        ? Colors.white.withOpacity(0.2)
-                        : widget.color.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    widget.icon,
-                    size: 32,
-                    color: widget.isPrimary ? Colors.white : widget.color,
-                  ),
+        ),
+        const SizedBox(height: 14),
+
+        // Основной заголовок
+        ShaderMask(
+          shaderCallback: (bounds) =>
+              AppTokens.primaryGradient.createShader(bounds),
+          blendMode: BlendMode.srcIn,
+          child: Text(
+            'Помоги\nприготовить',
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                  fontSize: 40,
+                  height: 1.1,
+                  fontWeight: FontWeight.w900,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: widget.isPrimary ? Colors.white : null,
-                              fontSize: 20,
-                            ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.subtitle,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: widget.isPrimary
-                                  ? Colors.white.withOpacity(0.8)
-                                  : AppTokens.textLight,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: widget.isPrimary
-                      ? Colors.white.withOpacity(0.5)
-                      : AppTokens.textLight.withOpacity(0.5),
-                ),
-              ],
-            ),
           ),
         ),
-      ),
+        const SizedBox(height: 10),
+        Text(
+          'Добавь продукты и получи идеи\nдля вкусных блюд',
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppTokens.textLight,
+                height: 1.5,
+              ),
+        ),
+      ],
     );
   }
 }

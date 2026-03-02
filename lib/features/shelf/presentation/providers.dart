@@ -13,23 +13,23 @@ class ShelfListNotifier extends StateNotifier<List<ShelfItem>> {
     state = _repo.getAll();
   }
 
-  void addItem(ShelfItem item) {
-    _repo.upsert(item);
+  Future<void> addItem(ShelfItem item) async {
+    await _repo.upsert(item);
     _load();
   }
 
-  void updateItem(ShelfItem item) {
-    _repo.upsert(item);
+  Future<void> updateItem(ShelfItem item) async {
+    await _repo.upsert(item);
     _load();
   }
 
-  void toggleItem(ShelfItem item) {
-    _repo.upsert(item.copyWith(inStock: !item.inStock));
+  Future<void> toggleItem(ShelfItem item) async {
+    await _repo.upsert(item.copyWith(inStock: !item.inStock));
     _load();
   }
 
-  void removeItem(String id) {
-    _repo.delete(id);
+  Future<void> removeItem(String id) async {
+    await _repo.delete(id);
     _load();
   }
 }

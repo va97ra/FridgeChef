@@ -36,7 +36,7 @@ class _ShelfAddEditScreenState extends ConsumerState<ShelfAddEditScreen> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
 
@@ -47,12 +47,14 @@ class _ShelfAddEditScreenState extends ConsumerState<ShelfAddEditScreen> {
       );
 
       if (widget.itemToEdit != null) {
-        ref.read(shelfListProvider.notifier).updateItem(newItem);
+        await ref.read(shelfListProvider.notifier).updateItem(newItem);
       } else {
-        ref.read(shelfListProvider.notifier).addItem(newItem);
+        await ref.read(shelfListProvider.notifier).addItem(newItem);
       }
 
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -82,7 +84,7 @@ class _ShelfAddEditScreenState extends ConsumerState<ShelfAddEditScreen> {
                       onChanged: (val) {
                         setState(() => _inStock = val);
                       },
-                      activeColor: AppTokens.primary,
+                      activeThumbColor: AppTokens.primary,
                       contentPadding: EdgeInsets.zero,
                     ),
                   ],
@@ -96,10 +98,11 @@ class _ShelfAddEditScreenState extends ConsumerState<ShelfAddEditScreen> {
               if (widget.itemToEdit != null) ...[
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () {
-                    ref
+                  onPressed: () async {
+                    await ref
                         .read(shelfListProvider.notifier)
                         .removeItem(widget.itemToEdit!.id);
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                   },
                   child: const Text('Удалить',

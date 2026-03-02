@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../../domain/fridge_item.dart';
+import '../domain/fridge_item.dart';
 import '../../../core/utils/units.dart';
 
 part 'fridge_hive_dto.g.dart';
@@ -49,7 +49,8 @@ class FridgeHiveDto extends HiveObject {
       id: id,
       name: name,
       amount: amount,
-      unit: Unit.values.firstWhere((e) => e.name == unitStr, orElse: () => Unit.pcs),
+      unit: Unit.values
+          .firstWhere((e) => e.name == unitStr, orElse: () => Unit.pcs),
       expiresAt: expiresAt,
       calories: calories,
     );

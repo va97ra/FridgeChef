@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/tokens.dart';
+import '../theme/tokens.dart';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
@@ -13,11 +13,11 @@ class GlassCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: AppTokens.surface.withOpacity(0.9),
+          color: AppTokens.surface.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(AppTokens.r16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
