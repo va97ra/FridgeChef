@@ -1,33 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/utils/units.dart';
+import '../data/user_recipes_repo.dart';
 import '../domain/recipe.dart';
+import 'providers.dart';
 
-class RecipeDetailScreen extends StatefulWidget {
+class RecipeDetailScreen extends ConsumerStatefulWidget {
   final Recipe recipe;
 
   const RecipeDetailScreen({super.key, required this.recipe});
 
   @override
-  State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
+  ConsumerState<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
 }
 
-class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
+class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   static const _servingOptions = <int>[1, 2, 4, 6];
+  late Recipe _recipe;
   int _targetServings = 2;
   final List<bool> _checkedSteps = [];
 
   @override
   void initState() {
     super.initState();
-    _targetServings = widget.recipe.servingsBase;
+    _recipe = widget.recipe;
+    _targetServings = _recipe.servingsBase;
     _checkedSteps
-        .addAll(List.generate(widget.recipe.steps.length, (_) => false));
+        .addAll(List.generate(_recipe.steps.length, (_) => false));
   }
 
   @override
   Widget build(BuildContext context) {
-    final ratio = _targetServings / widget.recipe.servingsBase;
+    final ratio = _targetServings / _recipe.servingsBase;
 
     return Scaffold(
       backgroundColor: AppTokens.background,
@@ -56,7 +61,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 // Приготовление
                 _buildSectionTitle(context, '👨‍🍳 Приготовление'),
                 const SizedBox(height: 14),
-                ...List.generate(widget.recipe.steps.length, (index) {
+                ...List.generate(_recipe.steps.length, (index) {
                   return _buildStep(context, index);
                 }),
                 const SizedBox(height: 60),
@@ -87,10 +92,47 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               color: Colors.white, size: 16),
         ),
       ),
+      actions: [
+        if (_recipe.source == RecipeSource.aiSaved)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppTokens.r12),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                'AI',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        if (_recipe.isUserEditable)
+          PopupMenuButton<_DetailRecipeAction>(
+            icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
+            onSelected: _handleRecipeAction,
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: _DetailRecipeAction.rename,
+                child: Text('Переименовать'),
+              ),
+              PopupMenuItem(
+                value: _DetailRecipeAction.delete,
+                child: Text('Удалить'),
+              ),
+            ],
+          ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: const EdgeInsets.only(left: 56, right: 20, bottom: 16),
         title: Text(
-          widget.recipe.title,
+          _recipe.title,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
@@ -155,15 +197,23 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       children: [
         _InfoPill(
           icon: Icons.timer_rounded,
-          label: '${widget.recipe.timeMin} мин',
+          label: '${_recipe.timeMin} мин',
           gradient: AppTokens.primaryGradient,
         ),
-        if (widget.recipe.tags.isNotEmpty) ...[
+        if (_recipe.tags.isNotEmpty) ...[
           const SizedBox(width: 10),
           _InfoPill(
             icon: Icons.label_rounded,
-            label: widget.recipe.tags.first,
+            label: _recipe.tags.first,
             gradient: AppTokens.shelfGradient,
+          ),
+        ],
+        if (_recipe.source == RecipeSource.aiSaved) ...[
+          const SizedBox(width: 10),
+          _InfoPill(
+            icon: Icons.smart_toy_rounded,
+            label: 'AI',
+            gradient: AppTokens.primaryGradient,
           ),
         ],
       ],
@@ -237,11 +287,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         boxShadow: AppTokens.cardShadow,
       ),
       child: Column(
-        children: widget.recipe.ingredients.asMap().entries.map((entry) {
+        children: _recipe.ingredients.asMap().entries.map((entry) {
           final idx = entry.key;
           final ing = entry.value;
           final amount = ing.amount * ratio;
-          final isLast = idx == widget.recipe.ingredients.length - 1;
+          final isLast = idx == _recipe.ingredients.length - 1;
 
           return Column(
             children: [
@@ -357,7 +407,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.recipe.steps[index],
+                    _recipe.steps[index],
                     style: TextStyle(
                       fontSize: 14,
                       color: checked ? AppTokens.textLight : AppTokens.text,
@@ -375,6 +425,101 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
+  Future<void> _handleRecipeAction(_DetailRecipeAction action) async {
+    if (action == _DetailRecipeAction.rename) {
+      await _renameCurrentRecipe();
+      return;
+    }
+    if (action == _DetailRecipeAction.delete) {
+      await _deleteCurrentRecipe();
+    }
+  }
+
+  Future<void> _renameCurrentRecipe() async {
+    final controller = TextEditingController(text: _recipe.title);
+    final newTitle = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Переименовать рецепт'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'Новое название'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: const Text('Сохранить'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+
+    if (newTitle == null || newTitle.trim().isEmpty) {
+      return;
+    }
+
+    await ref
+        .read(userRecipesRepoProvider)
+        .renameUserRecipe(_recipe.id, newTitle.trim());
+    ref.invalidate(recipesProvider);
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _recipe = _recipe.copyWith(
+        title: newTitle.trim(),
+        updatedAt: DateTime.now(),
+      );
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Название обновлено')),
+    );
+  }
+
+  Future<void> _deleteCurrentRecipe() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Удалить рецепт?'),
+          content: Text('Рецепт "${_recipe.title}" будет удалён.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Удалить'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await ref.read(userRecipesRepoProvider).deleteUserRecipe(_recipe.id);
+    ref.invalidate(recipesProvider);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Рецепт удалён')),
+      );
+      Navigator.of(context).maybePop();
+    }
+  }
+
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
@@ -388,6 +533,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   static String _fmtNum(double v) =>
       v.truncateToDouble() == v ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
 }
+
+enum _DetailRecipeAction { rename, delete }
 
 // ── Info Pill ────────────────────────────────────────────────────────────────
 

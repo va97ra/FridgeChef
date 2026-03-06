@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens.dart';
@@ -23,39 +24,51 @@ class HomeScreen extends StatelessWidget {
 
           // Декоративный верхний блоб
           Positioned(
-            top: -80,
-            right: -80,
+            top: -120,
+            right: -100,
             child: Container(
-              width: 260,
-              height: 260,
+              width: 400,
+              height: 400,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTokens.primary.withValues(alpha: 0.15),
-                    Colors.transparent,
-                  ],
-                ),
+                color: AppTokens.primary.withValues(alpha: 0.35),
+              ),
+            ),
+          ),
+
+          // Центральный блоб (добавил для глубины)
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.4,
+            left: -150,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppTokens.accent.withValues(alpha: 0.20),
               ),
             ),
           ),
 
           // Мелкий блоб снизу
           Positioned(
-            bottom: 60,
-            left: -60,
+            bottom: -50,
+            left: MediaQuery.of(context).size.width * 0.2,
             child: Container(
-              width: 180,
-              height: 180,
+              width: 350,
+              height: 350,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTokens.secondary.withValues(alpha: 0.12),
-                    Colors.transparent,
-                  ],
-                ),
+                color: AppTokens.secondary.withValues(alpha: 0.25),
               ),
+            ),
+          ),
+
+          // Размытие (Mesh Gradient эффект)
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: const SizedBox(),
             ),
           ),
 
@@ -119,7 +132,7 @@ class HomeScreen extends StatelessWidget {
                           child: HomeActionButton(
                             title: 'AI-Рецепты ✨',
                             subtitle:
-                                'Gemini придумает блюдо из твоих продуктов',
+                                'YandexGPT придумает блюдо из твоих продуктов',
                             icon: Icons.auto_awesome_rounded,
                             gradient: const LinearGradient(
                               colors: [Color(0xFF667EEA), Color(0xFF764BA2)],

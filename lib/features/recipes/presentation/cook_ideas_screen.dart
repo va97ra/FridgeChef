@@ -4,6 +4,8 @@ import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../data/user_recipes_repo.dart';
+import '../domain/recipe.dart';
 import '../domain/recipe_matcher.dart';
 import 'providers.dart';
 import 'recipe_detail_screen.dart';
@@ -133,6 +135,12 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
                                 ),
                               );
                             },
+                            onRename: match.recipe.isUserEditable
+                                ? () => _renameRecipe(match.recipe)
+                                : null,
+                            onDelete: match.recipe.isUserEditable
+                                ? () => _deleteRecipe(match.recipe)
+                                : null,
                           );
                         },
                       ),
@@ -226,6 +234,82 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
       updated.add(filter);
     }
     ref.read(cookFiltersProvider.notifier).state = updated;
+  }
+
+  Future<void> _renameRecipe(Recipe recipe) async {
+    final controller = TextEditingController(text: recipe.title);
+    final newTitle = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Переименовать рецепт'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Новое название',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: const Text('Сохранить'),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+
+    if (newTitle == null || newTitle.trim().isEmpty) {
+      return;
+    }
+
+    await ref.read(userRecipesRepoProvider).renameUserRecipe(recipe.id, newTitle);
+    ref.invalidate(recipesProvider);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Название обновлено')),
+      );
+    }
+  }
+
+  Future<void> _deleteRecipe(Recipe recipe) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Удалить рецепт?'),
+          content: Text('Рецепт "${recipe.title}" будет удалён.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Отмена'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Удалить'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await ref.read(userRecipesRepoProvider).deleteUserRecipe(recipe.id);
+    ref.invalidate(recipesProvider);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Рецепт удалён')),
+      );
+    }
   }
 }
 

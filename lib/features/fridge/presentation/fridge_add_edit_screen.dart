@@ -10,6 +10,8 @@ import '../domain/fridge_item.dart';
 import '../presentation/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import '../domain/photo_source.dart';
+import 'fridge_photo_review_screen.dart';
 
 class FridgeAddEditScreen extends ConsumerStatefulWidget {
   final FridgeItem? itemToEdit;
@@ -41,10 +43,43 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
         text: widget.itemToEdit?.calories?.toString() ?? '');
     _selectedUnit = widget.itemToEdit?.unit ?? Unit.g;
     _expiresAt = widget.itemToEdit?.expiresAt;
+
+    // Умный автовыбор единицы измерения для популярных продуктов
+    _nameController.addListener(_autoSelectUnit);
+  }
+
+  void _autoSelectUnit() {
+    if (widget.itemToEdit != null) return; // Не меняем при редактировании
+
+    final text = _nameController.text.toLowerCase();
+
+    if (text.contains('яйц') ||
+        text.contains('яблок') ||
+        text.contains('банан') ||
+        text.contains('сосис')) {
+      if (_selectedUnit != Unit.pcs) setState(() => _selectedUnit = Unit.pcs);
+    } else if (text.contains('молок') ||
+        text.contains('сок') ||
+        text.contains('вод') ||
+        text.contains('кефир')) {
+      if (_selectedUnit != Unit.l && _selectedUnit != Unit.ml) {
+        setState(() => _selectedUnit = Unit.l);
+      }
+    } else if (text.contains('мяс') ||
+        text.contains('куриц') ||
+        text.contains('говяд') ||
+        text.contains('свинин') ||
+        text.contains('картош') ||
+        text.contains('сыр')) {
+      if (_selectedUnit != Unit.kg && _selectedUnit != Unit.g) {
+        setState(() => _selectedUnit = Unit.kg);
+      }
+    }
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_autoSelectUnit);
     _nameController.dispose();
     _amountController.dispose();
     _caloriesController.dispose();
@@ -54,7 +89,8 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
   Future<void> _save() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text.trim();
-      final amount = double.tryParse(_amountController.text) ?? 0.0;
+      final amount =
+          double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0.0;
       final calories = int.tryParse(_caloriesController.text);
 
       final newItem = FridgeItem(
@@ -78,6 +114,90 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
     }
   }
 
+  Future<void> _startPhotoImport() async {
+    final source = await showModalBottomSheet<PhotoSource>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera_rounded),
+                title: const Text('Сделать фото'),
+                onTap: () => Navigator.pop(context, PhotoSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded),
+                title: const Text('Выбрать из галереи'),
+                onTap: () => Navigator.pop(context, PhotoSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (source == null) {
+      return;
+    }
+
+    _showLoadingDialog();
+    final result = await ref
+        .read(photoImportStateProvider.notifier)
+        .importFromPhoto(source);
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+
+    if (!mounted || result == null) {
+      return;
+    }
+
+    final applyResult = await Navigator.push<FridgePhotoApplyResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FridgePhotoReviewScreen(result: result),
+      ),
+    );
+
+    if (!mounted || applyResult == null) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Добавлено: ${applyResult.addedCount}, объединено: ${applyResult.mergedCount}',
+        ),
+      ),
+    );
+  }
+
+  void _showLoadingDialog() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text('Распознаю продукты по фото...'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -88,6 +208,15 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
           child: Column(
             children: [
               const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _startPhotoImport,
+                  icon: const Icon(Icons.camera_alt_rounded),
+                  label: const Text('Добавить по фото'),
+                ),
+              ),
+              const SizedBox(height: 12),
               GlassCard(
                 child: Column(
                   children: [
@@ -105,10 +234,14 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
                           child: AppTextField(
                             controller: _amountController,
                             label: 'Количество',
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
                             validator: (v) {
-                              if (v == null || v.isEmpty) return 'Обязательно';
-                              final parsed = double.tryParse(v);
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Обязательно';
+                              }
+                              final parsed =
+                                  double.tryParse(v.replaceAll(',', '.'));
                               if (parsed == null) {
                                 return 'Число';
                               }

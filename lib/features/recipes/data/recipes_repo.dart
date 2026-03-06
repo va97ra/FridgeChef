@@ -2,24 +2,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/recipe.dart';
 import 'recipes_loader.dart';
+import 'user_recipes_repo.dart';
 
 final recipesRepoProvider = Provider<RecipesRepo>((ref) {
-  return RecipesRepo(loader: const RecipesLoader());
+  final userRecipesRepo = ref.watch(userRecipesRepoProvider);
+  return RecipesRepo(
+    loader: const RecipesLoader(),
+    userRecipesRepo: userRecipesRepo,
+  );
 });
 
 class RecipesRepo {
   final RecipesLoader loader;
-  List<Recipe>? _cache;
+  final UserRecipesRepo userRecipesRepo;
+  List<Recipe>? _assetCache;
 
-  RecipesRepo({required this.loader});
+  RecipesRepo({
+    required this.loader,
+    required this.userRecipesRepo,
+  });
 
   Future<List<Recipe>> getAll({bool forceRefresh = false}) async {
-    if (!forceRefresh && _cache != null) {
-      return _cache!;
+    if (forceRefresh || _assetCache == null) {
+      _assetCache = await loader.loadRecipes();
     }
 
-    final recipes = await loader.loadRecipes();
-    _cache = recipes;
-    return recipes;
+    final userRecipes = await userRecipesRepo.getAllUserRecipes();
+    return [
+      ...?_assetCache,
+      ...userRecipes,
+    ];
   }
 }

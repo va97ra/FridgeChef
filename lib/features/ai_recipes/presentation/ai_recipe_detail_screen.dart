@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/tokens.dart';
+import '../../recipes/data/user_recipes_repo.dart';
 import '../domain/ai_recipe.dart';
+import 'ai_save_recipe_flow.dart';
 
-class AiRecipeDetailScreen extends StatelessWidget {
+class AiRecipeDetailScreen extends ConsumerWidget {
   final AiRecipe recipe;
 
   const AiRecipeDetailScreen({super.key, required this.recipe});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppTokens.background,
       body: CustomScrollView(
@@ -113,6 +116,33 @@ class AiRecipeDetailScreen extends StatelessWidget {
                 ...recipe.steps.asMap().entries.map(
                       (e) => _StepCard(index: e.key, text: e.value),
                     ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () async {
+                      final result = await saveAiRecipeWithDialog(
+                        context: context,
+                        ref: ref,
+                        aiRecipe: recipe,
+                      );
+                      if (!context.mounted || result == null) {
+                        return;
+                      }
+
+                      final message = switch (result.action) {
+                        SaveAction.updatedExisting => 'Рецепт обновлён в списке',
+                        SaveAction.createdCopy => 'Сохранена копия рецепта',
+                        SaveAction.created => 'Рецепт сохранён',
+                      };
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(message)),
+                      );
+                    },
+                    icon: const Icon(Icons.bookmark_add_rounded),
+                    label: const Text('Сохранить в мои рецепты'),
+                  ),
+                ),
 
                 const SizedBox(height: 32),
               ]),

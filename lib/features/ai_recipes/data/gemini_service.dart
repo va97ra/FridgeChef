@@ -2,41 +2,48 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../domain/ai_recipe.dart';
 
-class GeminiService {
+class YandexGPTService {
   static const _baseUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+      'https://llm.api.cloud.yandex.net/foundationModels/v1/completion';
 
-  final String apiKey;
+  final String iamToken;
+  final String folderId;
 
-  const GeminiService({required this.apiKey});
+  const YandexGPTService({required this.iamToken, required this.folderId});
 
-  /// Генерирует список рецептов на основе доступных продуктов.
-  /// [fridgeItems] — продукты из холодильника ("помидоры 200г", "яйца 3шт")
-  /// [shelfItems] — специи/приправы ("соль", "перец", "масло")
-  /// [count] — сколько рецептов сгенерировать (1–5)
   Future<List<AiRecipe>> generateRecipes({
     required List<String> fridgeItems,
     required List<String> shelfItems,
+    required List<String> priorityItems,
+    required List<String> pairHints,
     int count = 3,
     String? extraWish,
   }) async {
-    if (apiKey.isEmpty) {
-      throw const GeminiException('API-ключ не задан. Зайди в Настройки.');
+    if (iamToken.isEmpty || folderId.isEmpty) {
+      throw const YandexGPTException(
+        'IAM токен или Folder ID не заданы. Зайди в Настройки.',
+      );
     }
 
     final fridgeStr =
         fridgeItems.isEmpty ? 'холодильник пустой' : fridgeItems.join(', ');
     final shelfStr = shelfItems.isEmpty ? 'специй нет' : shelfItems.join(', ');
+    final priorityStr =
+        priorityItems.isEmpty ? 'нет' : priorityItems.join(', ');
+    final pairsStr = pairHints.isEmpty ? 'нет' : pairHints.join('; ');
     final wishStr = extraWish != null && extraWish.trim().isNotEmpty
         ? extraWish.trim()
         : '';
 
     final prompt = '''
 Ты — опытный шеф-повар. Придумай $count вкусных рецепта ТОЛЬКО из тех продуктов, которые есть у пользователя.
-Не включай ингредиенты, которых нет в списке.
+Категорически не добавляй ингредиенты, которых нет в списке.
+Приоритет: сначала используй продукты с высоким приоритетом и удачные сочетания.
 
 Холодильник: $fridgeStr
 Специи и приправы: $shelfStr
+Приоритетные продукты: $priorityStr
+Удачные сочетания: $pairsStr
 ${wishStr.isNotEmpty ? 'Пожелание пользователя: $wishStr' : ''}
 
 Верни ТОЛЬКО валидный JSON-массив без каких-либо пояснений и markdown-блоков.
@@ -47,58 +54,77 @@ ${wishStr.isNotEmpty ? 'Пожелание пользователя: $wishStr' :
 - "ingredients": array of strings (каждый элемент — ингредиент с количеством, например "Яйца — 3 шт")
 - "steps": array of strings (шаги приготовления, каждый — отдельная строка)
 - "tip": string или null (необязательный совет шефа)
-
-Пример формата одного рецепта:
-{"title":"Яичница с помидорами","timeMin":10,"servings":2,"ingredients":["Яйца — 3 шт","Помидоры — 1 шт (150 г)","Соль — по вкусу","Масло растительное — 1 ст.л."],"steps":["Разогрей сковороду на среднем огне и добавь масло.","Нарежь помидоры кубиками и обжаривай 2 минуты.","Разбей яйца, посоли и жарь до готовности 3–4 минуты."],"tip":"Добавь щепотку орегано для аромата."}
 ''';
 
     final body = jsonEncode({
-      'contents': [
-        {
-          'parts': [
-            {'text': prompt},
-          ],
-        },
-      ],
-      'generationConfig': {
-        'temperature': 0.9,
-        'maxOutputTokens': 4096,
+      'modelUri': 'gpt://$folderId/yandexgpt/latest',
+      'completionOptions': {
+        'stream': false,
+        'temperature': 0.8,
+        'maxTokens': '2000',
       },
+      'messages': [
+        {
+          'role': 'system',
+          'content':
+              'Ты кулинарный ассистент. Отвечай только валидным JSON-массивом без текста до и после.',
+        },
+        {'role': 'user', 'content': prompt},
+      ],
     });
 
-    final uri = Uri.parse('$_baseUrl?key=$apiKey');
+    final uri = Uri.parse(_baseUrl);
 
     late final http.Response response;
     try {
       response = await http
-          .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
+          .post(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $iamToken',
+              'x-cloud-folder-id': folderId,
+            },
+            body: body,
+          )
           .timeout(const Duration(seconds: 45));
     } catch (e) {
-      throw GeminiException('Ошибка сети: ${e.toString()}');
+      throw YandexGPTException('Ошибка сети: ${e.toString()}');
     }
 
     if (response.statusCode == 401 || response.statusCode == 403) {
-      throw const GeminiException(
-          'Неверный или просроченный API-ключ. Проверь настройки.');
+      throw const YandexGPTException('Неверный IAM токен. Проверь настройки.');
     }
+
+    if (response.statusCode == 429) {
+      throw const YandexGPTException(
+          'Превышен лимит запросов к YandexGPT API (429). Подожди немного.');
+    }
+
     if (response.statusCode != 200) {
-      throw GeminiException(
-          'Ошибка Gemini API: ${response.statusCode}\n${response.body}');
+      String errorMsg = 'Ошибка ${response.statusCode}';
+      try {
+        final errJson = jsonDecode(response.body);
+        final innerMsg = errJson['error']?['message'] ?? response.body;
+        errorMsg += '\n$innerMsg';
+      } catch (_) {
+        errorMsg += '\n${response.body}';
+      }
+      throw YandexGPTException(errorMsg);
     }
 
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-    final candidates = decoded['candidates'] as List<dynamic>?;
-    if (candidates == null || candidates.isEmpty) {
-      throw const GeminiException('AI не вернул ни одного рецепта.');
+    final result = decoded['result'] as Map<String, dynamic>?;
+    final alternatives = result?['alternatives'] as List<dynamic>?;
+
+    if (alternatives == null || alternatives.isEmpty) {
+      throw const YandexGPTException('AI не вернул ни одного рецепта.');
     }
 
-    final content = candidates[0]['content'] as Map<String, dynamic>?;
-    final parts = content?['parts'] as List<dynamic>?;
-    final text =
-        parts?.isNotEmpty == true ? parts![0]['text'] as String? : null;
+    final text = alternatives[0]['message']?['text'] as String?;
 
     if (text == null || text.isEmpty) {
-      throw const GeminiException('AI вернул пустой ответ.');
+      throw const YandexGPTException('AI вернул пустой ответ.');
     }
 
     return _parseRecipes(text);
@@ -129,15 +155,15 @@ ${wishStr.isNotEmpty ? 'Пожелание пользователя: $wishStr' :
               .toList();
         } catch (_) {}
       }
-      throw const GeminiException(
-          'Не удалось разобрать ответ AI. Попробуй снова.');
+      throw const YandexGPTException(
+          'Не удалось разобрать ответ YandexGPT. Попробуй снова.');
     }
   }
 }
 
-class GeminiException implements Exception {
+class YandexGPTException implements Exception {
   final String message;
-  const GeminiException(this.message);
+  const YandexGPTException(this.message);
 
   @override
   String toString() => message;

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/tokens.dart';
 
@@ -37,39 +38,37 @@ class AppScaffold extends StatelessWidget {
 
           // Декоративный блоб — верхний правый
           Positioned(
-            top: -60,
-            right: -60,
+            top: -100,
+            right: -80,
             child: Container(
-              width: 220,
-              height: 220,
+              width: 350,
+              height: 350,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTokens.primary.withValues(alpha: 0.12),
-                    AppTokens.primary.withValues(alpha: 0.0),
-                  ],
-                ),
+                color: AppTokens.primary.withValues(alpha: 0.35),
               ),
             ),
           ),
 
           // Декоративный блоб — нижний левый
           Positioned(
-            bottom: 40,
-            left: -80,
+            bottom: -50,
+            left: MediaQuery.of(context).size.width * -0.2,
             child: Container(
-              width: 200,
-              height: 200,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTokens.secondary.withValues(alpha: 0.10),
-                    AppTokens.secondary.withValues(alpha: 0.0),
-                  ],
-                ),
+                color: AppTokens.secondary.withValues(alpha: 0.25),
               ),
+            ),
+          ),
+
+          // Размытие (Mesh Gradient)
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: const SizedBox(),
             ),
           ),
 

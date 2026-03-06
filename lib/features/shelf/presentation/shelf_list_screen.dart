@@ -100,31 +100,66 @@ class ShelfListScreen extends ConsumerWidget {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('🧂', style: TextStyle(fontSize: 56)),
-          SizedBox(height: 20),
-          Text(
-            'Полка пуста',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: AppTokens.text,
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppTokens.surface.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(
+              color: Colors.white.withValues(alpha: 0.6), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: AppTokens.secondary.withValues(alpha: 0.05),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Добавь специи и приправы\nчерез кнопку +',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppTokens.textLight,
-              fontSize: 14,
-              height: 1.5,
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppTokens.shelfGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTokens.secondary.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  )
+                ],
+              ),
+              child: const Center(
+                child: Text('🧂', style: TextStyle(fontSize: 48)),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            const Text(
+              'Полка абсолютно пуста',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppTokens.text,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Добавь специи, масла и соусы через +,\nчтобы рецепты получались точнее',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppTokens.textLight,
+                fontSize: 15,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

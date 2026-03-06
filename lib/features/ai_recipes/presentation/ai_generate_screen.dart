@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../fridge/presentation/providers.dart';
+import '../../recipes/data/user_recipes_repo.dart';
 import '../../shelf/presentation/providers.dart';
 import '../data/settings_repo.dart';
+import '../domain/ai_generation_source.dart';
 import '../domain/ai_recipe.dart';
 import '../presentation/providers.dart';
+import 'ai_save_recipe_flow.dart';
 import 'ai_recipe_detail_screen.dart';
 import 'settings_screen.dart';
 
@@ -43,11 +47,14 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
   @override
   Widget build(BuildContext context) {
     final stateAsync = ref.watch(aiRecipesProvider);
-    final apiKeyAsync = ref.watch(geminiApiKeyProvider);
+    final iamTokenAsync = ref.watch(yandexIamTokenProvider);
+    final folderIdAsync = ref.watch(yandexFolderIdProvider);
     final fridgeItems = ref.watch(fridgeListProvider);
     final shelfItems = ref.watch(shelfListProvider);
 
-    final hasApiKey = apiKeyAsync.valueOrNull?.isNotEmpty == true;
+    final hasIamToken = iamTokenAsync.valueOrNull?.isNotEmpty == true;
+    final hasFolderId = folderIdAsync.valueOrNull?.isNotEmpty == true;
+    final hasConfig = hasIamToken && hasFolderId;
     final fridgeCount = fridgeItems.where((i) => i.amount > 0).length;
     final shelfCount = shelfItems.where((i) => i.inStock).length;
 
@@ -64,7 +71,7 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
             ),
             child: Icon(
               Icons.settings_rounded,
-              color: hasApiKey ? const Color(0xFF667EEA) : AppTokens.warn,
+              color: hasConfig ? const Color(0xFF667EEA) : AppTokens.warn,
               size: 18,
             ),
           ),
@@ -79,7 +86,8 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
         loading: () => _buildLoading(),
         error: (e, _) => _buildError(e.toString()),
         data: (state) {
-          if (state.status == AiGenerationStatus.loading) {
+          if (state.status == AiGenerationStatus.loading &&
+              state.recipes.isEmpty) {
             return _buildLoading();
           }
 
@@ -92,19 +100,32 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
               _HeaderSection(
                 fridgeCount: fridgeCount,
                 shelfCount: shelfCount,
-                hasApiKey: hasApiKey,
+                hasApiKey: hasConfig,
               ),
+
+              if (state.lastUpdatedAt != null || state.source != AiGenerationSource.none) ...[
+                const SizedBox(height: 10),
+                _GenerationMeta(
+                  source: state.source,
+                  lastUpdatedAt: state.lastUpdatedAt,
+                ),
+              ],
+
+              if (state.isRefreshing && state.recipes.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                const _RefreshingHint(),
+              ],
 
               const SizedBox(height: 16),
 
               // ── Поле пожелания ──────────────────────────────────────────
-              if (hasApiKey) ...[
+              if (hasConfig) ...[
                 _WishField(controller: _wishController),
                 const SizedBox(height: 16),
               ],
 
               // ── Кнопка генерации ────────────────────────────────────────
-              if (!hasApiKey)
+              if (!hasConfig)
                 _NoKeyBanner(
                   onTap: () => Navigator.push(
                     context,
@@ -115,22 +136,26 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
                 _EmptyFridgeBanner()
               else
                 PrimaryButton(
-                  text: state.status == AiGenerationStatus.success
-                      ? '✨ Придумать ещё'
-                      : '✨ Придумать рецепты',
+                  text: '✨ Обновить сейчас',
                   icon: Icons.auto_awesome_rounded,
-                  onPressed: () => ref
-                      .read(aiRecipesProvider.notifier)
-                      .generate(extraWish: _wishController.text),
+                  onPressed: () {
+                    if (state.isRefreshing) {
+                      return;
+                    }
+                    ref.read(aiRecipesProvider.notifier).generateNow(
+                          isAuto: false,
+                          extraWish: _wishController.text,
+                        );
+                  },
                 ),
 
               const SizedBox(height: 20),
 
               // ── Результаты ──────────────────────────────────────────────
-              if (state.status == AiGenerationStatus.error)
+              if (state.errorMessage != null)
                 _ErrorBanner(message: state.errorMessage ?? 'Ошибка'),
 
-              if (state.status == AiGenerationStatus.success) ...[
+              if (state.recipes.isNotEmpty) ...[
                 Text(
                   'Вот что можно приготовить',
                   style: TextStyle(
@@ -148,6 +173,7 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
                     itemBuilder: (context, i) => _AiRecipeCard(
                       recipe: state.recipes[i],
                       index: i,
+                      onSave: () => _saveAiRecipe(state.recipes[i]),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -158,6 +184,18 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
                     ),
                   ),
                 ),
+              ] else if (state.status == AiGenerationStatus.error) ...[
+                const Spacer(),
+                const Center(
+                  child: Text(
+                    'Не удалось подобрать рецепты',
+                    style: TextStyle(
+                      color: AppTokens.textLight,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const Spacer(),
               ] else
                 const Spacer(),
             ],
@@ -238,10 +276,33 @@ class _AiGenerateScreenState extends ConsumerState<AiGenerateScreen>
           const SizedBox(height: 16),
           PrimaryButton(
             text: 'Повторить',
-            onPressed: () => ref.refresh(aiRecipesProvider),
+            onPressed: () => ref
+                .read(aiRecipesProvider.notifier)
+                .generateNow(isAuto: false),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _saveAiRecipe(AiRecipe recipe) async {
+    final result = await saveAiRecipeWithDialog(
+      context: context,
+      ref: ref,
+      aiRecipe: recipe,
+    );
+    if (!mounted || result == null) {
+      return;
+    }
+
+    final message = switch (result.action) {
+      SaveAction.updatedExisting => 'Рецепт обновлён в списке',
+      SaveAction.createdCopy => 'Сохранена копия рецепта',
+      SaveAction.created => 'Рецепт сохранён',
+    };
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }
@@ -297,13 +358,91 @@ class _HeaderSection extends StatelessWidget {
                 Text(
                   hasApiKey
                       ? 'Найдено: $fridgeCount продуктов, $shelfCount специй'
-                      : 'Подключи Gemini API в настройках',
+                      : 'Подключи YandexGPT в настройках',
                   style: const TextStyle(
                     color: AppTokens.textLight,
                     fontSize: 13,
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GenerationMeta extends StatelessWidget {
+  final AiGenerationSource source;
+  final DateTime? lastUpdatedAt;
+
+  const _GenerationMeta({
+    required this.source,
+    required this.lastUpdatedAt,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ts = lastUpdatedAt == null
+        ? '—'
+        : DateFormat('dd.MM HH:mm').format(lastUpdatedAt!);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTokens.surfaceVariant,
+        borderRadius: BorderRadius.circular(AppTokens.r12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.history_rounded, size: 16, color: AppTokens.textLight),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Источник: ${source.label} · Автообновлено: $ts',
+              style: const TextStyle(
+                color: AppTokens.textLight,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RefreshingHint extends StatelessWidget {
+  const _RefreshingHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF667EEA).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppTokens.r12),
+        border: Border.all(color: const Color(0xFF667EEA).withValues(alpha: 0.2)),
+      ),
+      child: const Row(
+        children: [
+          SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFF667EEA),
+            ),
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Фоновое обновление рецептов...',
+            style: TextStyle(
+              color: AppTokens.textLight,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -358,7 +497,7 @@ class _NoKeyBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Нужен API-ключ Gemini',
+                    'Нужен IAM токен YandexGPT',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: AppTokens.warn,
@@ -366,7 +505,7 @@ class _NoKeyBanner extends StatelessWidget {
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'Нажми, чтобы настроить — это бесплатно!',
+                    'Нажми, чтобы настроить — работает в РФ!',
                     style: TextStyle(
                       color: AppTokens.textLight,
                       fontSize: 13,
@@ -428,6 +567,7 @@ class _ErrorBanner extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(14),
+      constraints: const BoxConstraints(maxHeight: 200), // Ограничиваем высоту
       decoration: BoxDecoration(
         color: AppTokens.warn.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppTokens.r16),
@@ -439,12 +579,15 @@ class _ErrorBanner extends StatelessWidget {
           const Text('⚠️', style: TextStyle(fontSize: 20)),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: AppTokens.warn,
-                fontSize: 13,
-                height: 1.4,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: AppTokens.warn,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
               ),
             ),
           ),
@@ -460,11 +603,13 @@ class _AiRecipeCard extends StatefulWidget {
   final AiRecipe recipe;
   final int index;
   final VoidCallback onTap;
+  final VoidCallback? onSave;
 
   const _AiRecipeCard({
     required this.recipe,
     required this.index,
     required this.onTap,
+    this.onSave,
   });
 
   @override
@@ -565,6 +710,22 @@ class _AiRecipeCardState extends State<_AiRecipeCard>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (widget.onSave != null) ...[
+                        const SizedBox(width: 8),
+                        Material(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: const CircleBorder(),
+                          child: IconButton(
+                            onPressed: widget.onSave,
+                            icon: const Icon(
+                              Icons.bookmark_add_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            tooltip: 'Сохранить в мои рецепты',
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

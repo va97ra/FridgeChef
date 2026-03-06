@@ -31,4 +31,15 @@ class AiRecipe {
       tip: json['tip'] as String?,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'timeMin': timeMin,
+      'servings': servings,
+      'ingredients': ingredients,
+      'steps': steps,
+      'tip': tip,
+    };
+  }
 }

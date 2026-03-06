@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/tokens.dart';
 import '../../../../core/utils/units.dart';
+import '../../domain/recipe.dart';
 import '../../domain/recipe_match.dart';
 import 'match_bar.dart';
 
 class RecipeCard extends StatelessWidget {
   final RecipeMatch match;
   final VoidCallback onTap;
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
 
   const RecipeCard({
     super.key,
     required this.match,
     required this.onTap,
+    this.onRename,
+    this.onDelete,
   });
 
   @override
@@ -72,13 +77,52 @@ class RecipeCard extends StatelessWidget {
                                 color: AppTokens.secondary,
                               ),
                             ],
+                            if (match.recipe.source == RecipeSource.aiSaved) ...[
+                              const SizedBox(width: 8),
+                              _MiniTag(
+                                icon: Icons.smart_toy_rounded,
+                                label: 'AI',
+                                color: AppTokens.accent,
+                              ),
+                            ],
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  MatchBar(score: match.score),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (match.recipe.isUserEditable &&
+                          (onRename != null || onDelete != null))
+                        PopupMenuButton<_RecipeAction>(
+                          icon: const Icon(Icons.more_vert_rounded, size: 18),
+                          itemBuilder: (context) => [
+                            if (onRename != null)
+                              const PopupMenuItem(
+                                value: _RecipeAction.rename,
+                                child: Text('Переименовать'),
+                              ),
+                            if (onDelete != null)
+                              const PopupMenuItem(
+                                value: _RecipeAction.delete,
+                                child: Text('Удалить'),
+                              ),
+                          ],
+                          onSelected: (value) {
+                            if (value == _RecipeAction.rename) {
+                              onRename?.call();
+                            } else if (value == _RecipeAction.delete) {
+                              onDelete?.call();
+                            }
+                          },
+                        )
+                      else
+                        const SizedBox(height: 8),
+                      MatchBar(score: match.score),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -192,6 +236,8 @@ class RecipeCard extends StatelessWidget {
           ? v.toStringAsFixed(0)
           : v.toStringAsFixed(1);
 }
+
+enum _RecipeAction { rename, delete }
 
 // ── Мини-тег для времени / тега ─────────────────────────────────────────────
 

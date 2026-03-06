@@ -22,4 +22,13 @@ class RecipeIngredient {
       required: json['required'] as bool? ?? true,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'amount': amount,
+      'unit': unit.name,
+      'required': required,
+    };
+  }
 }
