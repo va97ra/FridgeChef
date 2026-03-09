@@ -20,19 +20,34 @@ class ShelfHiveDtoAdapter extends TypeAdapter<ShelfHiveDto> {
       id: fields[0] as String,
       name: fields[1] as String,
       inStock: fields[2] as bool,
+      catalogId: fields[3] as String?,
+      canonicalName: (fields[4] as String?) ?? (fields[1] as String),
+      category: (fields[5] as String?) ?? 'other',
+      supportCanonicals: (fields[6] as List?)?.cast<String>() ?? const [],
+      isBlend: (fields[7] as bool?) ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, ShelfHiveDto obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.inStock);
+      ..write(obj.inStock)
+      ..writeByte(3)
+      ..write(obj.catalogId)
+      ..writeByte(4)
+      ..write(obj.canonicalName)
+      ..writeByte(5)
+      ..write(obj.category)
+      ..writeByte(6)
+      ..write(obj.supportCanonicals)
+      ..writeByte(7)
+      ..write(obj.isBlend);
   }
 
   @override

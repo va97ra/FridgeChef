@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../theme/tokens.dart';
 
-/// Большая градиентная кнопка с scale-анимацией и glow.
+enum PrimaryButtonVariant { primary, secondary, ghost }
+
 class PrimaryButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
   final IconData? icon;
+  final PrimaryButtonVariant variant;
+  final double height;
 
   const PrimaryButton({
     super.key,
     required this.text,
     required this.onPressed,
     this.icon,
+    this.variant = PrimaryButtonVariant.primary,
+    this.height = 52,
   });
 
   @override
@@ -29,9 +35,9 @@ class _PrimaryButtonState extends State<PrimaryButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 140),
+      duration: const Duration(milliseconds: 120),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.98).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
   }
@@ -54,6 +60,8 @@ class _PrimaryButtonState extends State<PrimaryButton>
 
   @override
   Widget build(BuildContext context) {
+    final palette = _paletteFor(widget.variant);
+
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
@@ -61,27 +69,28 @@ class _PrimaryButtonState extends State<PrimaryButton>
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Container(
-          height: 56,
+          height: widget.height,
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: AppTokens.primaryGradient,
-            borderRadius: BorderRadius.circular(AppTokens.r20),
-            boxShadow: AppTokens.primaryGlowShadow,
+            gradient: palette.$1,
+            color: palette.$1 == null ? palette.$2 : null,
+            borderRadius: BorderRadius.circular(AppTokens.radius.xl),
+            border: Border.all(color: palette.$3),
+            boxShadow: palette.$4 ? AppTokens.primaryGlowShadow : const [],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.icon != null) ...[
-                Icon(widget.icon, color: Colors.white, size: 22),
+                Icon(widget.icon, color: palette.$5, size: 20),
                 const SizedBox(width: 8),
               ],
               Text(
                 widget.text,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+                style: TextStyle(
+                  color: palette.$5,
+                  fontSize: 15,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.3,
                 ),
               ),
             ],
@@ -89,5 +98,36 @@ class _PrimaryButtonState extends State<PrimaryButton>
         ),
       ),
     );
+  }
+
+  (Gradient?, Color, Color, bool, Color) _paletteFor(
+    PrimaryButtonVariant variant,
+  ) {
+    switch (variant) {
+      case PrimaryButtonVariant.secondary:
+        return (
+          null,
+          AppTokens.colors.surface,
+          AppTokens.colors.border,
+          false,
+          AppTokens.colors.text,
+        );
+      case PrimaryButtonVariant.ghost:
+        return (
+          null,
+          Colors.transparent,
+          Colors.transparent,
+          false,
+          AppTokens.colors.primary,
+        );
+      case PrimaryButtonVariant.primary:
+        return (
+          AppTokens.primaryGradient,
+          AppTokens.colors.primary,
+          Colors.transparent,
+          true,
+          Colors.white,
+        );
+    }
   }
 }

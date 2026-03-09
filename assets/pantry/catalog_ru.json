@@ -1,0 +1,591 @@
+[
+  {
+    "id": "salt",
+    "name": "Соль",
+    "canonicalName": "соль",
+    "aliases": ["соль", "поваренная соль", "морская соль"],
+    "category": "basic",
+    "supportCanonicals": [],
+    "isStarter": true
+  },
+  {
+    "id": "sugar",
+    "name": "Сахар",
+    "canonicalName": "сахар",
+    "aliases": ["сахар", "белый сахар", "сахар песок"],
+    "category": "basic",
+    "supportCanonicals": ["сладкий акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "black_pepper",
+    "name": "Черный перец",
+    "canonicalName": "перец",
+    "aliases": ["черный перец", "чёрный перец", "перец", "перец черный", "перец молотый"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя"],
+    "isStarter": true
+  },
+  {
+    "id": "paprika",
+    "name": "Паприка",
+    "canonicalName": "паприка",
+    "aliases": ["паприка", "сладкая паприка", "kamis паприка", "kotanyi паприка"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя"],
+    "isStarter": true
+  },
+  {
+    "id": "smoked_paprika",
+    "name": "Копченая паприка",
+    "canonicalName": "копченая паприка",
+    "aliases": ["копченая паприка", "копчёная паприка", "smoked paprika"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя", "умами акцент"]
+  },
+  {
+    "id": "garlic_dried",
+    "name": "Чеснок сушеный",
+    "canonicalName": "чеснок",
+    "aliases": ["чеснок сушеный", "чеснок сухой", "сухой чеснок", "чесночный порошок", "granulated garlic"],
+    "category": "spice",
+    "supportCanonicals": ["умами акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "turmeric",
+    "name": "Куркума",
+    "canonicalName": "куркума",
+    "aliases": ["куркума", "turmeric", "kamis куркума", "kotanyi куркума"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя"]
+  },
+  {
+    "id": "cumin",
+    "name": "Зира",
+    "canonicalName": "зира",
+    "aliases": ["зира", "кумин", "cumin", "kamis зира", "kotanyi зира"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя", "умами акцент"]
+  },
+  {
+    "id": "chili_flakes",
+    "name": "Хлопья чили",
+    "canonicalName": "чили",
+    "aliases": ["чили", "хлопья чили", "перец чили", "red pepper flakes"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя"]
+  },
+  {
+    "id": "cinnamon",
+    "name": "Корица",
+    "canonicalName": "корица",
+    "aliases": ["корица", "молотая корица", "kotanyi корица", "kamis корица"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя", "сладкий акцент"]
+  },
+  {
+    "id": "bay_leaf",
+    "name": "Лавровый лист",
+    "canonicalName": "лавровый лист",
+    "aliases": ["лавровый лист", "лаврушка", "bay leaf"],
+    "category": "spice",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "dill_dried",
+    "name": "Укроп",
+    "canonicalName": "укроп",
+    "aliases": ["укроп", "сушеный укроп", "сухой укроп"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "greens",
+    "name": "Зелень",
+    "canonicalName": "зелень",
+    "aliases": ["зелень", "сухая зелень", "смесь зелени"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "parsley",
+    "name": "Петрушка",
+    "canonicalName": "петрушка",
+    "aliases": ["петрушка", "сушеная петрушка", "сухая петрушка"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "basil",
+    "name": "Базилик",
+    "canonicalName": "базилик",
+    "aliases": ["базилик", "сушеный базилик", "kamis базилик", "kotanyi базилик"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "oregano",
+    "name": "Орегано",
+    "canonicalName": "орегано",
+    "aliases": ["орегано", "душица", "kamis орегано", "kotanyi орегано"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "rosemary",
+    "name": "Розмарин",
+    "canonicalName": "розмарин",
+    "aliases": ["розмарин", "сушеный розмарин", "kotanyi розмарин"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "thyme",
+    "name": "Тимьян",
+    "canonicalName": "тимьян",
+    "aliases": ["тимьян", "чабрец", "kotanyi тимьян"],
+    "category": "herb",
+    "supportCanonicals": ["травяной акцент"]
+  },
+  {
+    "id": "italian_herbs",
+    "name": "Итальянские травы",
+    "canonicalName": "итальянские травы",
+    "aliases": ["итальянские травы", "смесь итальянских трав", "kamis итальянские травы", "kotanyi итальянские травы"],
+    "category": "blend",
+    "supportCanonicals": ["травяной акцент", "зелень"],
+    "isBlend": true
+  },
+  {
+    "id": "provencal_herbs",
+    "name": "Прованские травы",
+    "canonicalName": "прованские травы",
+    "aliases": ["прованские травы", "смесь прованских трав", "kamis прованские травы", "kotanyi прованские травы"],
+    "category": "blend",
+    "supportCanonicals": ["травяной акцент", "зелень"],
+    "isBlend": true
+  },
+  {
+    "id": "khmeli_suneli",
+    "name": "Хмели-сунели",
+    "canonicalName": "хмели сунели",
+    "aliases": ["хмели-сунели", "хмели сунели", "приправыч хмели сунели", "kamis хмели сунели"],
+    "category": "blend",
+    "supportCanonicals": ["тёплая специя", "травяной акцент", "умами акцент"],
+    "isBlend": true
+  },
+  {
+    "id": "curry",
+    "name": "Карри",
+    "canonicalName": "карри",
+    "aliases": ["карри", "приправа карри", "kamis карри", "kotanyi карри"],
+    "category": "blend",
+    "supportCanonicals": ["тёплая специя", "умами акцент"],
+    "isBlend": true
+  },
+  {
+    "id": "chicken_seasoning",
+    "name": "Приправа для курицы",
+    "canonicalName": "приправа для курицы",
+    "aliases": [
+      "приправа для курицы",
+      "специи для курицы",
+      "магги для курицы",
+      "maggi для курицы",
+      "магги на второе для курицы",
+      "maggi на второе для курицы",
+      "магги на второе сочная курица",
+      "приправа maggi для курицы",
+      "магги курица",
+      "kamis для курицы",
+      "kotanyi для курицы",
+      "приправыч для курицы"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["тёплая специя", "умами акцент"],
+    "isBlend": true,
+    "isStarter": true
+  },
+  {
+    "id": "meat_seasoning",
+    "name": "Приправа для мяса",
+    "canonicalName": "приправа для мяса",
+    "aliases": [
+      "приправа для мяса",
+      "специи для мяса",
+      "магги для мяса",
+      "maggi для мяса",
+      "магги на второе для мяса",
+      "maggi на второе для мяса",
+      "магги для свинины",
+      "специи для свинины",
+      "специи для говядины",
+      "kamis для мяса",
+      "kamis для свинины",
+      "kotanyi для мяса",
+      "kotanyi для говядины",
+      "приправыч для мяса"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["тёплая специя", "умами акцент"],
+    "isBlend": true
+  },
+  {
+    "id": "fish_seasoning",
+    "name": "Приправа для рыбы",
+    "canonicalName": "приправа для рыбы",
+    "aliases": [
+      "приправа для рыбы",
+      "специи для рыбы",
+      "магги для рыбы",
+      "maggi для рыбы",
+      "магги на второе для рыбы",
+      "maggi на второе для рыбы",
+      "приправа maggi для рыбы",
+      "kamis для рыбы",
+      "kotanyi для рыбы",
+      "приправыч для рыбы"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["травяной акцент", "кислотный акцент", "умами акцент"],
+    "isBlend": true
+  },
+  {
+    "id": "potato_seasoning",
+    "name": "Приправа для картофеля",
+    "canonicalName": "приправа для картофеля",
+    "aliases": [
+      "приправа для картофеля",
+      "специи для картофеля",
+      "приправа для картошки",
+      "специи для картошки",
+      "магги для картошки",
+      "maggi для картошки",
+      "магги на второе для картошки",
+      "maggi на второе для картошки",
+      "магги картошка",
+      "kamis для картофеля",
+      "kotanyi для картофеля",
+      "приправыч для картофеля"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["тёплая специя", "умами акцент"],
+    "isBlend": true
+  },
+  {
+    "id": "soup_seasoning",
+    "name": "Приправа для супа",
+    "canonicalName": "приправа для супа",
+    "aliases": [
+      "приправа для супа",
+      "специи для супа",
+      "магги 10 овощей",
+      "maggi 10 овощей",
+      "магги для супа",
+      "магги на первое",
+      "maggi soup",
+      "kamis для супа",
+      "kotanyi для супа"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["травяной акцент", "умами акцент", "томатная глубина"],
+    "isBlend": true
+  },
+  {
+    "id": "universal_seasoning",
+    "name": "Универсальная приправа",
+    "canonicalName": "универсальная приправа",
+    "aliases": ["универсальная приправа", "приправа универсальная", "магги универсальная", "приправыч универсальная"],
+    "category": "blend",
+    "supportCanonicals": ["умами акцент", "тёплая специя"],
+    "isBlend": true
+  },
+  {
+    "id": "salad_dressing_mix",
+    "name": "Смесь для салата",
+    "canonicalName": "смесь для салата",
+    "aliases": [
+      "смесь для салата",
+      "приправа для салата",
+      "заправка для салата",
+      "магги для салата",
+      "maggi для салата",
+      "kamis для салата",
+      "kotanyi для салата"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["кислотный акцент", "травяной акцент", "мягкая связка"],
+    "isBlend": true
+  },
+  {
+    "id": "sunflower_oil",
+    "name": "Подсолнечное масло",
+    "canonicalName": "масло",
+    "aliases": ["подсолнечное масло", "масло", "растительное масло", "рафинированное масло"],
+    "category": "oil",
+    "supportCanonicals": ["жирная связка"],
+    "isStarter": true
+  },
+  {
+    "id": "olive_oil",
+    "name": "Оливковое масло",
+    "canonicalName": "оливковое масло",
+    "aliases": ["оливковое масло", "масло оливковое"],
+    "category": "oil",
+    "supportCanonicals": ["жирная связка"],
+    "isStarter": true
+  },
+  {
+    "id": "butter",
+    "name": "Сливочное масло",
+    "canonicalName": "масло сливочное",
+    "aliases": ["сливочное масло", "масло сливочное"],
+    "category": "oil",
+    "supportCanonicals": ["жирная связка", "мягкая связка"]
+  },
+  {
+    "id": "tomato_paste",
+    "name": "Томатная паста",
+    "canonicalName": "томатная паста",
+    "aliases": ["томатная паста", "паста томатная", "помидорка томатная паста"],
+    "category": "sauce",
+    "supportCanonicals": ["томатная глубина", "умами акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "ketchup",
+    "name": "Кетчуп",
+    "canonicalName": "кетчуп",
+    "aliases": ["кетчуп", "томатный кетчуп"],
+    "category": "sauce",
+    "supportCanonicals": ["томатная глубина", "сладкий акцент"]
+  },
+  {
+    "id": "adjika",
+    "name": "Аджика",
+    "canonicalName": "аджика",
+    "aliases": ["аджика", "острая аджика"],
+    "category": "sauce",
+    "supportCanonicals": ["тёплая специя", "томатная глубина", "умами акцент"]
+  },
+  {
+    "id": "mustard",
+    "name": "Горчица",
+    "canonicalName": "горчица",
+    "aliases": ["горчица", "столовая горчица", "дижонская горчица"],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент", "умами акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "soy_sauce",
+    "name": "Соевый соус",
+    "canonicalName": "соевый соус",
+    "aliases": ["соевый соус", "соус соевый", "kikkoman", "киккоман"],
+    "category": "sauce",
+    "supportCanonicals": ["умами акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "teriyaki",
+    "name": "Соус терияки",
+    "canonicalName": "терияки",
+    "aliases": ["соус терияки", "терияки", "teriyaki"],
+    "category": "sauce",
+    "supportCanonicals": ["умами акцент", "сладкий акцент"]
+  },
+  {
+    "id": "bbq_sauce",
+    "name": "Соус барбекю",
+    "canonicalName": "соус барбекю",
+    "aliases": ["соус барбекю", "барбекю", "bbq sauce"],
+    "category": "sauce",
+    "supportCanonicals": ["умами акцент", "сладкий акцент", "тёплая специя"]
+  },
+  {
+    "id": "lemon_juice",
+    "name": "Лимонный сок",
+    "canonicalName": "лимон",
+    "aliases": ["лимонный сок", "сок лимона"],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "vinegar",
+    "name": "Уксус",
+    "canonicalName": "уксус",
+    "aliases": ["уксус", "винный уксус", "яблочный уксус", "рисовый уксус"],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент"]
+  },
+  {
+    "id": "mayonnaise",
+    "name": "Майонез",
+    "canonicalName": "майонез",
+    "aliases": ["майонез", "провансаль"],
+    "category": "sauce",
+    "supportCanonicals": ["жирная связка", "мягкая связка"],
+    "isStarter": true
+  },
+  {
+    "id": "chicken_bouillon_cube",
+    "name": "Куриный бульонный кубик",
+    "canonicalName": "бульонный кубик",
+    "aliases": [
+      "куриный бульонный кубик",
+      "бульонный кубик куриный",
+      "куриный кубик",
+      "maggi золотой бульон",
+      "knorr куриный бульон",
+      "gallina blanca куриный бульон"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["умами акцент", "тёплая специя"],
+    "isBlend": true
+  },
+  {
+    "id": "mushroom_bouillon_cube",
+    "name": "Грибной бульонный кубик",
+    "canonicalName": "грибной бульонный кубик",
+    "aliases": [
+      "грибной бульонный кубик",
+      "бульонный кубик грибной",
+      "грибной кубик",
+      "knorr грибной бульон",
+      "maggi грибной бульон"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["умами акцент", "тёплая специя"],
+    "isBlend": true
+  },
+  {
+    "id": "mushroom_seasoning",
+    "name": "Грибная приправа",
+    "canonicalName": "грибная приправа",
+    "aliases": [
+      "грибная приправа",
+      "приправа с грибами",
+      "грибная смесь",
+      "knorr грибная приправа",
+      "maggi грибная приправа"
+    ],
+    "category": "blend",
+    "supportCanonicals": ["умами акцент", "тёплая специя"],
+    "isBlend": true
+  },
+  {
+    "id": "chicken_marinade",
+    "name": "Маринад для курицы",
+    "canonicalName": "маринад для курицы",
+    "aliases": [
+      "маринад для курицы",
+      "маринад куриный",
+      "маринад для шашлыка из курицы",
+      "maggi маринад для курицы",
+      "kamis маринад для курицы"
+    ],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент", "умами акцент", "тёплая специя"]
+  },
+  {
+    "id": "meat_marinade",
+    "name": "Маринад для мяса",
+    "canonicalName": "маринад для мяса",
+    "aliases": [
+      "маринад для мяса",
+      "маринад мясной",
+      "маринад для шашлыка",
+      "маринад для свинины",
+      "маринад для говядины",
+      "maggi маринад для мяса",
+      "kamis маринад для мяса"
+    ],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент", "умами акцент", "тёплая специя"]
+  },
+  {
+    "id": "fish_marinade",
+    "name": "Маринад для рыбы",
+    "canonicalName": "маринад для рыбы",
+    "aliases": [
+      "маринад для рыбы",
+      "маринад рыбный",
+      "маринад для морепродуктов",
+      "maggi маринад для рыбы",
+      "kamis маринад для рыбы"
+    ],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент", "травяной акцент", "умами акцент"]
+  },
+  {
+    "id": "caesar_dressing",
+    "name": "Заправка Цезарь",
+    "canonicalName": "заправка цезарь",
+    "aliases": [
+      "заправка цезарь",
+      "соус цезарь",
+      "заправка для салата цезарь",
+      "caesar dressing"
+    ],
+    "category": "sauce",
+    "supportCanonicals": ["мягкая связка", "умами акцент", "кислотный акцент"]
+  },
+  {
+    "id": "italian_dressing",
+    "name": "Итальянская заправка",
+    "canonicalName": "итальянская заправка",
+    "aliases": [
+      "итальянская заправка",
+      "заправка для салата итальянская",
+      "italian dressing",
+      "салатная заправка"
+    ],
+    "category": "sauce",
+    "supportCanonicals": ["кислотный акцент", "травяной акцент", "жирная связка"]
+  },
+  {
+    "id": "sour_cream",
+    "name": "Сметана",
+    "canonicalName": "сметана",
+    "aliases": ["сметана"],
+    "category": "dairy",
+    "supportCanonicals": ["мягкая связка", "кислотный акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "yogurt",
+    "name": "Йогурт",
+    "canonicalName": "йогурт",
+    "aliases": ["йогурт", "натуральный йогурт", "греческий йогурт"],
+    "category": "dairy",
+    "supportCanonicals": ["мягкая связка", "кислотный акцент"],
+    "isStarter": true
+  },
+  {
+    "id": "kefir",
+    "name": "Кефир",
+    "canonicalName": "кефир",
+    "aliases": ["кефир"],
+    "category": "dairy",
+    "supportCanonicals": ["мягкая связка", "кислотный акцент"]
+  },
+  {
+    "id": "milk",
+    "name": "Молоко",
+    "canonicalName": "молоко",
+    "aliases": ["молоко"],
+    "category": "dairy",
+    "supportCanonicals": ["мягкая связка"]
+  },
+  {
+    "id": "honey",
+    "name": "Мёд",
+    "canonicalName": "мед",
+    "aliases": ["мёд", "мед", "цветочный мед"],
+    "category": "basic",
+    "supportCanonicals": ["сладкий акцент"]
+  }
+]

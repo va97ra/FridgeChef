@@ -1,5 +1,7 @@
 import '../../../core/utils/units.dart';
 import '../../fridge/domain/fridge_item.dart';
+import '../../fridge/domain/product_catalog_entry.dart';
+import '../../recipes/domain/ingredient_knowledge.dart';
 import '../../recipes/domain/recipe.dart';
 import '../../recipes/domain/recipe_match.dart';
 import '../../recipes/domain/recipe_matcher.dart';
@@ -145,21 +147,19 @@ PrioritySignals derivePrioritySignals({
     for (final item in ranked) item.normalizedName: item.priorityScore,
   };
   final pairCandidates = <_PairCandidate>[];
-  for (final name in availableNames) {
-    final partners = _pairDictionary[name];
-    if (partners == null) {
-      continue;
-    }
-    for (final partner in partners) {
-      if (!availableNames.contains(partner)) {
+  final availableList = availableNames.toList()..sort();
+  for (var i = 0; i < availableList.length; i++) {
+    for (var j = i + 1; j < availableList.length; j++) {
+      final a = availableList[i];
+      final b = availableList[j];
+      final paired = pairedIngredientsFor(a).contains(toPairingKey(b)) ||
+          pairedIngredientsFor(b).contains(toPairingKey(a));
+      if (!paired) {
         continue;
       }
-      if (name.compareTo(partner) >= 0) {
-        continue;
-      }
-      final score = (scoreByName[name] ?? 1.0) + (scoreByName[partner] ?? 1.0);
+      final score = (scoreByName[a] ?? 1.0) + (scoreByName[b] ?? 1.0);
       final title =
-          '${displayByNormalized[name] ?? name} + ${displayByNormalized[partner] ?? partner}';
+          '${displayByNormalized[a] ?? a} + ${displayByNormalized[b] ?? b}';
       pairCandidates.add(_PairCandidate(title: title, score: score));
     }
   }
@@ -212,11 +212,13 @@ List<AiRecipe> buildLocalFallbackRecipes({
   required List<FridgeItem> fridgeItems,
   required List<ShelfItem> shelfItems,
   required int count,
+  List<ProductCatalogEntry> catalog = const [],
 }) {
   final matches = matchRecipes(
     recipes: recipes,
     fridgeItems: fridgeItems,
     shelfItems: shelfItems,
+    catalog: catalog,
   );
 
   if (matches.isEmpty) {
@@ -312,18 +314,7 @@ int expiryScoreFor(DateTime? expiresAt, {DateTime? now}) {
 }
 
 String normalizeFoodText(String raw) {
-  var text = raw.toLowerCase().replaceAll('ё', 'е');
-  text = text.replaceAll(RegExp(r'[^a-zа-я0-9\s]'), ' ');
-  text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
-  if (text.isEmpty) {
-    return text;
-  }
-  final tokens = text
-      .split(' ')
-      .where((token) => token.isNotEmpty)
-      .map((token) => _tokenSynonyms[token] ?? token)
-      .toList();
-  return tokens.join(' ');
+  return normalizeIngredientText(raw);
 }
 
 bool _isIngredientAllowed(String normalizedLine, Set<String> allowedNames) {
@@ -344,11 +335,7 @@ bool _isIngredientAllowed(String normalizedLine, Set<String> allowedNames) {
 }
 
 int _pairScoreFor(String normalizedName, Set<String> availableNames) {
-  final pairs = _pairDictionary[normalizedName];
-  if (pairs == null || pairs.isEmpty) {
-    return 0;
-  }
-  return pairs.where(availableNames.contains).length;
+  return countKnownPairings(normalizedName, availableNames);
 }
 
 String _formatNumber(double value) {
@@ -377,67 +364,3 @@ class _PairCandidate {
     required this.score,
   });
 }
-
-const Map<String, String> _tokenSynonyms = {
-  'яйца': 'яйцо',
-  'томаты': 'помидор',
-  'помидоры': 'помидор',
-  'огурцы': 'огурец',
-  'картошка': 'картофель',
-  'луковица': 'лук',
-  'маслица': 'масло',
-  'курица': 'курица',
-  'курицу': 'курица',
-  'куриное': 'курица',
-  'риса': 'рис',
-  'гречи': 'гречка',
-  'макарон': 'макароны',
-  'спагетти': 'макароны',
-  'чеснока': 'чеснок',
-  'перца': 'перец',
-  'моркови': 'морковь',
-  'капусты': 'капуста',
-  'кабачки': 'кабачок',
-  'творога': 'творог',
-  'сметаны': 'сметана',
-  'укропа': 'укроп',
-  'молока': 'молоко',
-  'сыра': 'сыр',
-  'фасоли': 'фасоль',
-  'чечевицы': 'чечевица',
-  'сосисок': 'сосиски',
-  'фарша': 'фарш',
-};
-
-const Map<String, Set<String>> _pairDictionary = {
-  'яйцо': {'сыр', 'помидор', 'лук', 'хлеб', 'молоко'},
-  'молоко': {'яйцо', 'мука', 'овсяные хлопья', 'рис', 'сахар'},
-  'сыр': {'яйцо', 'макароны', 'помидор', 'хлеб', 'курица'},
-  'помидор': {'огурец', 'яйцо', 'сыр', 'лук', 'перец сладкий'},
-  'огурец': {'помидор', 'творог', 'сметана', 'укроп'},
-  'лук': {'морковь', 'картофель', 'курица', 'рис', 'помидор'},
-  'морковь': {'лук', 'рис', 'курица', 'картофель', 'капуста'},
-  'картофель': {'лук', 'грибы', 'сметана', 'сосиски', 'фарш'},
-  'грибы': {'картофель', 'лук', 'сметана', 'гречка'},
-  'рис': {'курица', 'морковь', 'лук', 'молоко', 'яйцо'},
-  'курица': {'рис', 'морковь', 'лук', 'чеснок', 'сыр'},
-  'чеснок': {'помидор', 'курица', 'масло', 'хлеб', 'укроп'},
-  'масло': {'чеснок', 'хлеб', 'картофель', 'макароны', 'рис'},
-  'хлеб': {'сыр', 'яйцо', 'чеснок', 'масло', 'огурец'},
-  'макароны': {'сыр', 'помидор', 'масло', 'тунец'},
-  'овсяные хлопья': {'молоко', 'яблоко', 'сахар', 'корица'},
-  'яблоко': {'овсяные хлопья', 'корица', 'сахар', 'капуста'},
-  'капуста': {'морковь', 'яблоко', 'сосиски', 'лук'},
-  'кабачок': {'сметана', 'чеснок', 'укроп', 'яйцо'},
-  'творог': {'огурец', 'сметана', 'укроп', 'чеснок'},
-  'сметана': {'творог', 'огурец', 'кабачок', 'картофель', 'грибы'},
-  'фасоль': {'кукуруза', 'огурец', 'лук', 'помидор'},
-  'кукуруза': {'фасоль', 'огурец', 'помидор'},
-  'чечевица': {'морковь', 'лук', 'чеснок', 'помидор'},
-  'сосиски': {'картофель', 'капуста', 'лук'},
-  'фарш': {'лук', 'картофель', 'морковь', 'рис'},
-  'тунец': {'макароны', 'помидор', 'лук'},
-  'гречка': {'грибы', 'лук', 'масло'},
-  'мука': {'молоко', 'яйцо', 'сахар'},
-  'сахар': {'молоко', 'яблоко', 'овсяные хлопья', 'мука'},
-};

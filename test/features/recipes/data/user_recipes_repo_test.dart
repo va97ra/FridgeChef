@@ -5,6 +5,9 @@ import 'package:help_to_cook/features/ai_recipes/domain/ai_recipe.dart';
 import 'package:help_to_cook/features/recipes/data/ai_to_recipe_parser.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipe_hive_dto.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
+import 'package:help_to_cook/core/utils/units.dart';
 import 'package:hive/hive.dart';
 
 void main() {
@@ -116,6 +119,44 @@ void main() {
         all.any((recipe) => recipe.title.contains('(копия')),
         isTrue,
       );
+    } finally {
+      await _closeAndDeleteBox(boxName);
+    }
+  });
+
+  test('saveGeneratedRecipe persists generated source and chef metadata', () async {
+    const boxName = 'userRecipesBox_generated_recipe';
+    final repo = await _openRepo(boxName);
+    try {
+      const generatedRecipe = Recipe(
+        id: 'draft',
+        title: 'Шеф-омлет',
+        timeMin: 12,
+        tags: ['generated_local', 'breakfast'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сыр', amount: 120, unit: Unit.g),
+        ],
+        steps: ['Шаг 1', 'Шаг 2'],
+        source: RecipeSource.generatedDraft,
+        anchorIngredients: ['Яйца'],
+        implicitPantryItems: ['Соль'],
+        chefProfile: 'skillet',
+      );
+
+      final result = await repo.saveGeneratedRecipe(
+        recipe: generatedRecipe,
+        mode: SaveMode.createCopy,
+      );
+      final all = await repo.getAllUserRecipes();
+
+      expect(result.recipe.source, RecipeSource.generatedSaved);
+      expect(all.single.source, RecipeSource.generatedSaved);
+      expect(all.single.isUserEditable, isTrue);
+      expect(all.single.anchorIngredients, ['Яйца']);
+      expect(all.single.implicitPantryItems, ['Соль']);
+      expect(all.single.chefProfile, 'skillet');
     } finally {
       await _closeAndDeleteBox(boxName);
     }

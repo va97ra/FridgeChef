@@ -1,6 +1,7 @@
 import '../../../core/utils/units.dart';
+import 'product_search_suggestion.dart';
 
-enum DetectionSource { local, cloudRefined }
+enum DetectionSource { local }
 
 class DetectedProductDraft {
   final String id;
@@ -10,6 +11,8 @@ class DetectedProductDraft {
   final double confidence;
   final List<String> rawTokens;
   final DetectionSource source;
+  final String? matchedProductId;
+  final List<ProductSearchSuggestion> candidateMatches;
   final String? mergeTargetFridgeItemId;
   final bool selected;
 
@@ -21,6 +24,8 @@ class DetectedProductDraft {
     required this.confidence,
     required this.rawTokens,
     required this.source,
+    this.matchedProductId,
+    this.candidateMatches = const [],
     this.mergeTargetFridgeItemId,
     this.selected = true,
   });
@@ -33,6 +38,8 @@ class DetectedProductDraft {
     double? confidence,
     List<String>? rawTokens,
     DetectionSource? source,
+    String? matchedProductId,
+    List<ProductSearchSuggestion>? candidateMatches,
     String? mergeTargetFridgeItemId,
     bool clearMergeTarget = false,
     bool? selected,
@@ -45,6 +52,8 @@ class DetectedProductDraft {
       confidence: confidence ?? this.confidence,
       rawTokens: rawTokens ?? this.rawTokens,
       source: source ?? this.source,
+      matchedProductId: matchedProductId ?? this.matchedProductId,
+      candidateMatches: candidateMatches ?? this.candidateMatches,
       mergeTargetFridgeItemId: clearMergeTarget
           ? null
           : (mergeTargetFridgeItemId ?? this.mergeTargetFridgeItemId),

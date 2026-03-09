@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/tokens.dart';
+
+import 'section_surface.dart';
 
 class GlassCard extends StatelessWidget {
   final Widget child;
@@ -9,23 +10,18 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final content = SectionSurface(
+      tone: SectionSurfaceTone.base,
+      child: child,
+    );
+
+    if (onTap == null) {
+      return content;
+    }
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppTokens.surface.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(AppTokens.r16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(AppTokens.p16),
-        child: child,
-      ),
+      child: content,
     );
   }
 }

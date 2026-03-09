@@ -1,10 +1,11 @@
 import '../../../core/utils/units.dart';
 import '../domain/recipe.dart';
 import '../domain/recipe_ingredient.dart';
-import '../../ai_recipes/domain/ai_recipe.dart';
+import '../domain/generated_recipe_draft.dart';
 
 class ParsedRecipeDraft {
   final String title;
+  final String? description;
   final int timeMin;
   final int servingsBase;
   final List<RecipeIngredient> ingredients;
@@ -12,6 +13,7 @@ class ParsedRecipeDraft {
 
   const ParsedRecipeDraft({
     required this.title,
+    this.description,
     required this.timeMin,
     required this.servingsBase,
     required this.ingredients,
@@ -31,8 +33,9 @@ class ParsedRecipeDraft {
       title: titleOverride?.trim().isNotEmpty == true
           ? titleOverride!.trim()
           : title,
+      description: description,
       timeMin: timeMin,
-      tags: const ['ai_saved'],
+      tags: const ['generated_local'],
       servingsBase: servingsBase,
       ingredients: ingredients,
       steps: steps,
@@ -44,24 +47,27 @@ class ParsedRecipeDraft {
   }
 }
 
-class AiToRecipeParser {
-  const AiToRecipeParser();
+class GeneratedRecipeDraftParser {
+  const GeneratedRecipeDraftParser();
 
-  ParsedRecipeDraft parse(AiRecipe aiRecipe) {
-    final parsedIngredients = aiRecipe.ingredients
+  ParsedRecipeDraft parse(GeneratedRecipeDraft draft) {
+    final parsedIngredients = draft.ingredients
         .where((e) => e.trim().isNotEmpty)
         .map(_parseIngredientLine)
         .toList();
 
-    final steps = aiRecipe.steps
+    final steps = draft.steps
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
 
     return ParsedRecipeDraft(
-      title: aiRecipe.title.trim().isEmpty ? 'AI Рецепт' : aiRecipe.title.trim(),
-      timeMin: aiRecipe.timeMin > 0 ? aiRecipe.timeMin : 20,
-      servingsBase: aiRecipe.servings > 0 ? aiRecipe.servings : 2,
+      title: draft.title.trim().isEmpty
+          ? 'Сохранённый рецепт'
+          : draft.title.trim(),
+      description: _sanitizeDescription(draft.tip),
+      timeMin: draft.timeMin > 0 ? draft.timeMin : 20,
+      servingsBase: draft.servings > 0 ? draft.servings : 2,
       ingredients: parsedIngredients.isEmpty
           ? const [
               RecipeIngredient(
@@ -152,6 +158,18 @@ class AiToRecipeParser {
         .trim();
     return cleaned.isEmpty ? 'Ингредиент' : cleaned;
   }
+
+  String? _sanitizeDescription(String? raw) {
+    final cleaned = raw?.replaceAll(RegExp(r'\s+'), ' ').trim();
+    if (cleaned == null || cleaned.isEmpty) {
+      return null;
+    }
+    return cleaned;
+  }
+}
+
+class AiToRecipeParser extends GeneratedRecipeDraftParser {
+  const AiToRecipeParser();
 }
 
 String buildRecipeSignature({

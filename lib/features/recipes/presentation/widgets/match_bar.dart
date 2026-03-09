@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/theme/tokens.dart';
 
 class MatchBar extends StatelessWidget {
@@ -10,64 +11,38 @@ class MatchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final clamped = score.clamp(0.0, 1.0);
     final percent = (clamped * 100).round();
-
-    final Gradient gradient;
-    if (percent >= 80) {
-      gradient =
-          const LinearGradient(colors: [Color(0xFF06D6A0), Color(0xFF00B383)]);
-    } else if (percent >= 50) {
-      gradient =
-          const LinearGradient(colors: [Color(0xFFFFB703), Color(0xFFFF8500)]);
-    } else {
-      gradient =
-          const LinearGradient(colors: [Color(0xFFFF5A5A), Color(0xFFFF8A8A)]);
-    }
+    final color = switch (percent) {
+      >= 75 => AppTokens.accent,
+      >= 45 => AppTokens.secondaryDark,
+      _ => AppTokens.primary,
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Процент крупно
-        ShaderMask(
-          shaderCallback: (bounds) => gradient.createShader(bounds),
-          blendMode: BlendMode.srcIn,
-          child: Text(
-            '$percent%',
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
-              height: 1,
-            ),
-          ),
+        Text(
+          '$percent%',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
         ),
         const SizedBox(height: 2),
         Text(
           'совпадение',
-          style: TextStyle(
-            color: AppTokens.textLight,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 6),
-        // Прогресс-бар
+        const SizedBox(height: 8),
         SizedBox(
-          width: 80,
+          width: 84,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppTokens.r12),
-            child: Container(
-              height: 6,
-              color: AppTokens.textLight.withValues(alpha: 0.15),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: clamped,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: gradient,
-                    borderRadius: BorderRadius.circular(AppTokens.r12),
-                  ),
-                ),
-              ),
+            borderRadius: BorderRadius.circular(AppTokens.pill),
+            child: LinearProgressIndicator(
+              value: clamped,
+              minHeight: 7,
+              backgroundColor: AppTokens.surfaceVariant,
+              valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
         ),

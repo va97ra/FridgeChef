@@ -1,6 +1,8 @@
 enum Unit { g, kg, ml, l, pcs }
 
 extension UnitExtension on Unit {
+  String get storageValue => name;
+
   UnitFamily get family {
     switch (this) {
       case Unit.g:
@@ -27,6 +29,13 @@ extension UnitExtension on Unit {
       case Unit.pcs:
         return 'шт';
     }
+  }
+
+  static Unit fromStorage(String raw) {
+    return Unit.values.firstWhere(
+      (unit) => unit.name == raw,
+      orElse: () => Unit.g,
+    );
   }
 }
 

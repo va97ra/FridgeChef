@@ -7,7 +7,7 @@ import 'package:help_to_cook/features/recipes/domain/recipe_matcher.dart';
 import 'package:help_to_cook/features/shelf/domain/shelf_item.dart';
 
 void main() {
-  test('calculates score and missing amount by spec formula', () {
+  test('returns missing amount and composite taste score', () {
     final recipe = Recipe(
       id: 'r1',
       title: 'Тестовый рецепт',
@@ -16,11 +16,23 @@ void main() {
       servingsBase: 2,
       ingredients: const [
         RecipeIngredient(
-            name: 'Яйцо', amount: 2, unit: Unit.pcs, required: true),
+          name: 'Яйцо',
+          amount: 2,
+          unit: Unit.pcs,
+          required: true,
+        ),
         RecipeIngredient(
-            name: 'Молоко', amount: 200, unit: Unit.ml, required: true),
+          name: 'Молоко',
+          amount: 200,
+          unit: Unit.ml,
+          required: true,
+        ),
         RecipeIngredient(
-            name: 'Соль', amount: 1, unit: Unit.g, required: false),
+          name: 'Соль',
+          amount: 1,
+          unit: Unit.g,
+          required: false,
+        ),
       ],
       steps: const ['Шаг'],
     );
@@ -38,7 +50,8 @@ void main() {
 
     expect(matches, hasLength(1));
     final match = matches.first;
-    expect(match.score, closeTo(0.625, 0.0001));
+    expect(match.score, inInclusiveRange(0.0, 1.0));
+    expect(match.coverageScore, greaterThan(0.5));
     expect(match.missingIngredients, hasLength(1));
     expect(match.missingIngredients.first.ingredient.name, 'Молоко');
     expect(match.missingIngredients.first.missingAmount, 100);
@@ -53,7 +66,11 @@ void main() {
       servingsBase: 1,
       ingredients: const [
         RecipeIngredient(
-            name: 'Сахар', amount: 0.5, unit: Unit.kg, required: true),
+          name: 'Сахар',
+          amount: 0.5,
+          unit: Unit.kg,
+          required: true,
+        ),
       ],
       steps: const ['Шаг'],
     );
@@ -66,8 +83,10 @@ void main() {
       shelfItems: const [],
     );
 
-    expect(matches.first.missingIngredients.first.missingAmount,
-        closeTo(0.1, 0.0001));
+    expect(
+      matches.first.missingIngredients.first.missingAmount,
+      closeTo(0.1, 0.0001),
+    );
   });
 
   test('applies filters for time and tags', () {

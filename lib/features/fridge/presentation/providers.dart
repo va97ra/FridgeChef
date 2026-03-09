@@ -4,11 +4,14 @@ import '../domain/photo_import_result.dart';
 import '../domain/photo_source.dart';
 import '../data/fridge_repo.dart';
 import '../data/fridge_photo_import_coordinator.dart';
+import '../data/photo_input_service.dart';
+import '../data/user_product_memory_repo.dart';
 
 class FridgeListNotifier extends StateNotifier<List<FridgeItem>> {
   final FridgeRepo _repo;
+  final UserProductMemoryRepo _memoryRepo;
 
-  FridgeListNotifier(this._repo) : super([]) {
+  FridgeListNotifier(this._repo, this._memoryRepo) : super([]) {
     _load();
   }
 
@@ -16,13 +19,25 @@ class FridgeListNotifier extends StateNotifier<List<FridgeItem>> {
     state = _repo.getAll();
   }
 
-  Future<void> addItem(FridgeItem item) async {
+  Future<void> addItem(FridgeItem item, {String? productId}) async {
     await _repo.upsert(item);
+    await _memoryRepo.recordProduct(
+      name: item.name,
+      unit: item.unit,
+      amount: item.amount,
+      productId: productId,
+    );
     _load();
   }
 
-  Future<void> updateItem(FridgeItem item) async {
+  Future<void> updateItem(FridgeItem item, {String? productId}) async {
     await _repo.upsert(item);
+    await _memoryRepo.recordProduct(
+      name: item.name,
+      unit: item.unit,
+      amount: item.amount,
+      productId: productId,
+    );
     _load();
   }
 
@@ -35,7 +50,8 @@ class FridgeListNotifier extends StateNotifier<List<FridgeItem>> {
 final fridgeListProvider =
     StateNotifierProvider<FridgeListNotifier, List<FridgeItem>>((ref) {
   final repo = ref.watch(fridgeRepoProvider);
-  return FridgeListNotifier(repo);
+  final memoryRepo = ref.watch(userProductMemoryRepoProvider);
+  return FridgeListNotifier(repo, memoryRepo);
 });
 
 enum PhotoImportStatus { idle, loading, success, error }
@@ -44,24 +60,39 @@ class PhotoImportState {
   final PhotoImportStatus status;
   final PhotoImportResult? result;
   final String? errorMessage;
+  final PhotoPermissionState? permissionState;
+  final PhotoSource? source;
+  final bool cancelled;
 
   const PhotoImportState({
     this.status = PhotoImportStatus.idle,
     this.result,
     this.errorMessage,
+    this.permissionState,
+    this.source,
+    this.cancelled = false,
   });
 
   PhotoImportState copyWith({
     PhotoImportStatus? status,
     PhotoImportResult? result,
     String? errorMessage,
+    PhotoPermissionState? permissionState,
+    PhotoSource? source,
+    bool? cancelled,
     bool clearError = false,
     bool clearResult = false,
+    bool clearPermission = false,
   }) {
     return PhotoImportState(
       status: status ?? this.status,
       result: clearResult ? null : (result ?? this.result),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      permissionState: clearPermission
+          ? null
+          : (permissionState ?? this.permissionState),
+      source: source ?? this.source,
+      cancelled: cancelled ?? this.cancelled,
     );
   }
 }
@@ -71,38 +102,62 @@ class PhotoImportNotifier extends StateNotifier<PhotoImportState> {
 
   PhotoImportNotifier(this._ref) : super(const PhotoImportState());
 
-  Future<PhotoImportResult?> importFromPhoto(PhotoSource source) async {
+  Future<PhotoImportAttempt> importFromPhoto(PhotoSource source) async {
     state = state.copyWith(
       status: PhotoImportStatus.loading,
       clearError: true,
       clearResult: true,
+      clearPermission: true,
+      source: source,
+      cancelled: false,
     );
 
     try {
-      final result = await _ref
+      final attempt = await _ref
           .read(fridgePhotoImportCoordinatorProvider)
           .importFromPhoto(source: source);
-      if (result == null) {
+      if (!attempt.hasResult) {
+        if (attempt.cancelled) {
+          state = state.copyWith(
+            status: PhotoImportStatus.idle,
+            clearResult: true,
+            clearError: true,
+            clearPermission: true,
+            cancelled: true,
+          );
+          return attempt;
+        }
+
         state = state.copyWith(
-          status: PhotoImportStatus.idle,
+          status: PhotoImportStatus.error,
           clearResult: true,
           clearError: true,
+          permissionState: attempt.permissionState,
+          source: attempt.source,
+          cancelled: false,
         );
-        return null;
+        return attempt;
       }
 
       state = state.copyWith(
         status: PhotoImportStatus.success,
-        result: result,
+        result: attempt.result,
         clearError: true,
+        permissionState: attempt.permissionState,
+        source: attempt.source,
+        cancelled: false,
       );
-      return result;
+      return attempt;
     } catch (e) {
       state = state.copyWith(
         status: PhotoImportStatus.error,
         errorMessage: e.toString(),
+        cancelled: false,
       );
-      return null;
+      return PhotoImportAttempt(
+        source: source,
+        permissionState: PhotoPermissionState.granted,
+      );
     }
   }
 

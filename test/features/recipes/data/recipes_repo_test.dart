@@ -22,15 +22,15 @@ void main() {
     );
     final userRecipe = Recipe(
       id: 'user_1',
-      title: 'AI Омлет',
+      title: 'Шеф Омлет',
       timeMin: 10,
-      tags: const ['ai_saved'],
+      tags: const ['generated_local'],
       servingsBase: 2,
       ingredients: const [
         RecipeIngredient(name: 'Яйцо', amount: 2, unit: Unit.pcs),
       ],
       steps: const ['Пожарить'],
-      source: RecipeSource.aiSaved,
+      source: RecipeSource.generatedSaved,
       isUserEditable: true,
     );
 
@@ -43,7 +43,7 @@ void main() {
     expect(all.length, 2);
     expect(all.first.id, 'asset_1');
     expect(all.last.id, 'user_1');
-    expect(all.last.source, RecipeSource.aiSaved);
+    expect(all.last.source, RecipeSource.generatedSaved);
   });
 }
 

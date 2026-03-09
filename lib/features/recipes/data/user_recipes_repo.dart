@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../ai_recipes/domain/ai_recipe.dart';
+import '../domain/generated_recipe_draft.dart';
 import '../domain/recipe.dart';
 import 'ai_to_recipe_parser.dart';
 import 'user_recipe_hive_dto.dart';
@@ -12,7 +12,7 @@ import 'user_recipe_hive_dto.dart';
 final userRecipesRepoProvider = Provider<UserRecipesRepo>((ref) {
   return UserRecipesRepo(
     boxName: 'userRecipesBox',
-    parser: const AiToRecipeParser(),
+    parser: const GeneratedRecipeDraftParser(),
   );
 });
 
@@ -36,7 +36,7 @@ class SaveResult {
 
 class UserRecipesRepo {
   final String boxName;
-  final AiToRecipeParser parser;
+  final GeneratedRecipeDraftParser parser;
   final Uuid _uuid;
 
   UserRecipesRepo({
@@ -59,14 +59,24 @@ class UserRecipesRepo {
     return list;
   }
 
-  Future<List<Recipe>> findPotentialDuplicates(AiRecipe aiRecipe) async {
-    final draft = parser.parse(aiRecipe);
-    final signature = buildRecipeSignature(
-      title: draft.title,
-      ingredients: draft.ingredients,
-      steps: draft.steps,
-    );
+  Future<List<Recipe>> findPotentialDuplicatesForRecipe(Recipe recipe) async {
+    final signature = buildRecipeSignatureFromRecipe(recipe);
+    return _findPotentialDuplicatesBySignature(signature);
+  }
 
+  Future<List<Recipe>> findPotentialDuplicatesForDraft(
+    GeneratedRecipeDraft draft,
+  ) async {
+    final parsed = parser.parse(draft);
+    final signature = buildRecipeSignature(
+      title: parsed.title,
+      ingredients: parsed.ingredients,
+      steps: parsed.steps,
+    );
+    return _findPotentialDuplicatesBySignature(signature);
+  }
+
+  Future<List<Recipe>> _findPotentialDuplicatesBySignature(String signature) async {
     final duplicates = _getBox().values
         .where((dto) => dto.signature == signature)
         .map(_dtoToRecipe)
@@ -81,21 +91,19 @@ class UserRecipesRepo {
     return duplicates;
   }
 
-  Future<SaveResult> saveFromAi({
-    required AiRecipe aiRecipe,
+  Future<SaveResult> saveGeneratedRecipe({
+    required Recipe recipe,
     required SaveMode mode,
   }) async {
     final now = DateTime.now();
-    final draft = parser.parse(aiRecipe);
-    final duplicates = await findPotentialDuplicates(aiRecipe);
+    final duplicates = await findPotentialDuplicatesForRecipe(recipe);
     final box = _getBox();
 
     if (mode == SaveMode.updateExisting && duplicates.isNotEmpty) {
       final target = duplicates.first;
-      final updated = draft.toRecipe(
+      final updated = _prepareGeneratedRecipeForSave(
+        recipe,
         id: target.id,
-        source: RecipeSource.aiSaved,
-        isUserEditable: true,
         createdAt: target.createdAt ?? now,
         updatedAt: now,
       );
@@ -110,14 +118,16 @@ class UserRecipesRepo {
 
     final existingTitles =
         box.values.map((dto) => _dtoToRecipe(dto).title.trim()).toSet();
+    final baseTitle = recipe.title.trim().isEmpty
+        ? 'Сохранённый рецепт'
+        : recipe.title.trim();
     final titleForSave = duplicates.isEmpty
-        ? draft.title
-        : _nextCopyTitle(draft.title, existingTitles);
+        ? baseTitle
+        : _nextCopyTitle(baseTitle, existingTitles);
 
-    final created = draft.toRecipe(
+    final created = _prepareGeneratedRecipeForSave(
+      recipe,
       id: _uuid.v4(),
-      source: RecipeSource.aiSaved,
-      isUserEditable: true,
       createdAt: now,
       updatedAt: now,
       titleOverride: titleForSave,
@@ -130,6 +140,36 @@ class UserRecipesRepo {
       action: duplicates.isEmpty ? SaveAction.created : SaveAction.createdCopy,
       duplicates: duplicates,
     );
+  }
+
+  Future<SaveResult> saveFromGeneratedDraft({
+    required GeneratedRecipeDraft draft,
+    required SaveMode mode,
+  }) async {
+    final now = DateTime.now();
+    final parsed = parser.parse(draft);
+    final recipe = parsed.toRecipe(
+      id: 'generated_draft',
+      source: RecipeSource.generatedDraft,
+      isUserEditable: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+    return saveGeneratedRecipe(
+      recipe: recipe,
+      mode: mode,
+    );
+  }
+
+  Future<List<Recipe>> findPotentialDuplicates(GeneratedRecipeDraft draft) {
+    return findPotentialDuplicatesForDraft(draft);
+  }
+
+  Future<SaveResult> saveFromAi({
+    required GeneratedRecipeDraft aiRecipe,
+    required SaveMode mode,
+  }) {
+    return saveFromGeneratedDraft(draft: aiRecipe, mode: mode);
   }
 
   Future<void> renameUserRecipe(String id, String newTitle) async {
@@ -156,6 +196,21 @@ class UserRecipesRepo {
     await _getBox().delete(id);
   }
 
+  Future<void> clearAll() async {
+    await _getBox().clear();
+  }
+
+  Future<void> replaceAllUserRecipes(List<Recipe> recipes) async {
+    final box = _getBox();
+    await box.clear();
+    if (recipes.isEmpty) {
+      return;
+    }
+    await box.putAll({
+      for (final recipe in recipes) recipe.id: _recipeToDto(recipe),
+    });
+  }
+
   Recipe _dtoToRecipe(UserRecipeHiveDto dto) {
     final jsonMap = jsonDecode(dto.recipeJson) as Map<String, dynamic>;
     return Recipe.fromJson(jsonMap);
@@ -173,8 +228,35 @@ class UserRecipesRepo {
     );
   }
 
+  Recipe _prepareGeneratedRecipeForSave(
+    Recipe recipe, {
+    required String id,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    String? titleOverride,
+  }) {
+    final tags = <String>{
+      ...recipe.tags.where((tag) => tag.trim().isNotEmpty),
+      'generated_local',
+    }.toList();
+
+    return recipe.copyWith(
+      id: id,
+      title: titleOverride?.trim().isNotEmpty == true
+          ? titleOverride!.trim()
+          : recipe.title,
+      tags: tags,
+      source: RecipeSource.generatedSaved,
+      isUserEditable: true,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+
   String _nextCopyTitle(String baseTitle, Set<String> existingTitles) {
-    final trimmed = baseTitle.trim().isEmpty ? 'AI Рецепт' : baseTitle.trim();
+    final trimmed = baseTitle.trim().isEmpty
+        ? 'Сохранённый рецепт'
+        : baseTitle.trim();
     var candidate = '$trimmed (копия)';
     if (!existingTitles.contains(candidate)) {
       return candidate;

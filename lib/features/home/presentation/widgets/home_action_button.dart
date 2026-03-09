@@ -2,23 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/tokens.dart';
+import '../../../../core/widgets/section_surface.dart';
 
 class HomeActionButton extends StatefulWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  final Gradient gradient;
+  final Color accentColor;
   final VoidCallback onTap;
   final bool isPrimary;
+  final String? metaLabel;
 
   const HomeActionButton({
     super.key,
     required this.title,
     required this.subtitle,
     required this.icon,
-    required this.gradient,
+    required this.accentColor,
     required this.onTap,
     this.isPrimary = false,
+    this.metaLabel,
   });
 
   @override
@@ -35,9 +38,9 @@ class _HomeActionButtonState extends State<HomeActionButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 130),
+      duration: const Duration(milliseconds: 120),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.985).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
   }
@@ -66,139 +69,86 @@ class _HomeActionButtonState extends State<HomeActionButton>
       onTapCancel: _handleTapCancel,
       child: ScaleTransition(
         scale: _scaleAnimation,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: widget.isPrimary ? widget.gradient : null,
-            color: widget.isPrimary ? null : AppTokens.surface,
-            borderRadius: BorderRadius.circular(AppTokens.r24),
-            boxShadow: widget.isPrimary
-                ? [
-                    BoxShadow(
-                      color: AppTokens.primary.withValues(alpha: 0.38),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
-                    ),
-                  ]
-                : AppTokens.cardShadow,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppTokens.r24),
-            child: Stack(
-              children: [
-                // Декоративный кружок в правом нижнем углу только для primary
-                if (widget.isPrimary)
-                  Positioned(
-                    right: -20,
-                    bottom: -30,
-                    child: Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.12),
-                      ),
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTokens.p20,
-                    vertical: AppTokens.p20,
-                  ),
-                  child: Row(
-                    children: [
-                      // Иконка-кружок
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: widget.isPrimary ? null : widget.gradient,
-                          color: widget.isPrimary
-                              ? Colors.white.withValues(alpha: 0.22)
-                              : null,
-                          borderRadius: BorderRadius.circular(AppTokens.r16),
-                          boxShadow: widget.isPrimary
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: _gradientFirstColor(widget.gradient)
-                                        .withValues(alpha: 0.30),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                        ),
-                        child: Icon(
-                          widget.icon,
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: AppTokens.p16),
-                      // Тексты
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: widget.isPrimary
-                                        ? Colors.white
-                                        : AppTokens.text,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              widget.subtitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: widget.isPrimary
-                                        ? Colors.white.withValues(alpha: 0.78)
-                                        : AppTokens.textLight,
-                                    fontSize: 13,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Стрелочка
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: widget.isPrimary
-                              ? Colors.white.withValues(alpha: 0.20)
-                              : AppTokens.background,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: widget.isPrimary
-                              ? Colors.white
-                              : AppTokens.textLight,
-                        ),
-                      ),
-                    ],
-                  ),
+        child: SectionSurface(
+          tone: widget.isPrimary
+              ? SectionSurfaceTone.primarySoft
+              : SectionSurfaceTone.base,
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: widget.accentColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(AppTokens.r16),
                 ),
-              ],
-            ),
+                child: Icon(widget.icon, color: widget.accentColor, size: 24),
+              ),
+              const SizedBox(width: AppTokens.p16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.title,
+                            style:
+                                Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                          ),
+                        ),
+                        if ((widget.metaLabel ?? '').isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTokens.p8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.accentColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(AppTokens.pill),
+                            ),
+                            child: Text(
+                              widget.metaLabel!,
+                              style: TextStyle(
+                                color: widget.accentColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.subtitle,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppTokens.p12),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppTokens.surface,
+                  borderRadius: BorderRadius.circular(AppTokens.r12),
+                  border: Border.all(color: AppTokens.border),
+                ),
+                child: const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: AppTokens.textLight,
+                  size: 18,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
-  }
-
-  static Color _gradientFirstColor(Gradient g) {
-    if (g is LinearGradient && g.colors.isNotEmpty) return g.colors.first;
-    return Colors.grey;
   }
 }

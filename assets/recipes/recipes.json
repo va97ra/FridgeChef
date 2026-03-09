@@ -3,570 +3,5759 @@
     "id": "1",
     "title": "Омлет с сыром",
     "timeMin": 10,
-    "tags": ["quick", "one_pan", "breakfast"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "breakfast"
+    ],
     "servingsBase": 1,
     "ingredients": [
-      {"name": "Яйцо", "amount": 2, "unit": "pcs", "required": true},
-      {"name": "Молоко", "amount": 50, "unit": "ml", "required": true},
-      {"name": "Сыр", "amount": 30, "unit": "g", "required": true},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false},
-      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 50,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 30,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Перец",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Взбейте яйца с молоком, солью и перцем.",
       "Разогрейте сковороду и влейте смесь.",
       "Добавьте сыр, сложите омлет пополам и подайте."
-    ]
+    ],
+    "description": "Нежный омлет с расплавленным сыром для быстрого завтрака или лёгкого ужина, который получается мягким и сытным."
   },
   {
     "id": "2",
     "title": "Салат из помидоров и огурцов",
     "timeMin": 8,
-    "tags": ["quick", "no_oven", "healthy"],
+    "tags": [
+      "quick",
+      "no_oven",
+      "healthy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Помидор", "amount": 250, "unit": "g", "required": true},
-      {"name": "Огурец", "amount": 200, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 60, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 20, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Помидор",
+        "amount": 250,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 200,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Нарежьте помидоры и огурцы крупными кусками.",
       "Тонко нарежьте лук и смешайте с овощами.",
       "Заправьте маслом и добавьте соль по вкусу."
-    ]
+    ],
+    "description": "Свежий овощной салат с понятным вкусом и лёгкой заправкой, который хорошо подходит как гарнир или самостоятельная закуска."
   },
   {
     "id": "3",
     "title": "Гречка с грибами",
     "timeMin": 30,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Гречка", "amount": 180, "unit": "g", "required": true},
-      {"name": "Грибы", "amount": 200, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 80, "unit": "g", "required": true},
-      {"name": "Масло", "amount": 15, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Гречка",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 200,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте лук и грибы до мягкости.",
       "Добавьте промытую гречку и воду в пропорции 1:2.",
       "Томите под крышкой 20 минут до готовности."
-    ]
+    ],
+    "description": "Домашняя гречка с грибным ароматом и сладостью лука, удобная для спокойного сытного обеда без сложной техники."
   },
   {
     "id": "4",
     "title": "Паста с чесноком и томатами",
     "timeMin": 18,
-    "tags": ["quick", "one_pan", "pasta"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "pasta"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Макароны", "amount": 180, "unit": "g", "required": true},
-      {"name": "Помидор", "amount": 200, "unit": "g", "required": true},
-      {"name": "Чеснок", "amount": 8, "unit": "g", "required": true},
-      {"name": "Масло", "amount": 20, "unit": "ml", "required": false},
-      {"name": "Сыр", "amount": 30, "unit": "g", "required": false}
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 200,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Отварите макароны до состояния al dente.",
       "Обжарьте чеснок, добавьте нарезанные томаты.",
       "Смешайте соус с пастой и посыпьте сыром."
-    ]
+    ],
+    "description": "Быстрая паста с ярким чесночно-томатным вкусом, которую легко собрать в будний день из простых продуктов."
   },
   {
     "id": "5",
     "title": "Овсяная каша с яблоком",
     "timeMin": 12,
-    "tags": ["quick", "one_pan", "breakfast"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "breakfast"
+    ],
     "servingsBase": 1,
     "ingredients": [
-      {"name": "Овсяные хлопья", "amount": 60, "unit": "g", "required": true},
-      {"name": "Молоко", "amount": 250, "unit": "ml", "required": true},
-      {"name": "Яблоко", "amount": 120, "unit": "g", "required": true},
-      {"name": "Сахар", "amount": 8, "unit": "g", "required": false},
-      {"name": "Корица", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Овсяные хлопья",
+        "amount": 60,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 250,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сахар",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Доведите молоко до кипения, добавьте хлопья.",
       "Варите 5-7 минут, помешивая.",
       "Добавьте тёртое яблоко, сахар и корицу."
-    ]
+    ],
+    "description": "Тёплая овсянка с яблоком для мягкого завтрака: сливочная, ароматная и комфортная по вкусу."
   },
   {
     "id": "6",
     "title": "Картофель жареный с луком",
     "timeMin": 25,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Картофель", "amount": 500, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 100, "unit": "g", "required": true},
-      {"name": "Масло", "amount": 25, "unit": "ml", "required": true},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false},
-      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Картофель",
+        "amount": 500,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 25,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Перец",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Нарежьте картофель брусками, лук полукольцами.",
       "Обжаривайте картофель на среднем огне 15 минут.",
       "Добавьте лук, специи и доведите до румяной корочки."
-    ]
+    ],
+    "description": "Классический жареный картофель с луком, где важны румяная корочка, мягкая середина и понятный домашний вкус."
   },
   {
     "id": "7",
     "title": "Курица с рисом на сковороде",
     "timeMin": 35,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 3,
     "ingredients": [
-      {"name": "Курица", "amount": 350, "unit": "g", "required": true},
-      {"name": "Рис", "amount": 220, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 120, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 80, "unit": "g", "required": true},
-      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+      {
+        "name": "Курица",
+        "amount": 350,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Соль",
+        "amount": 3,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте кусочки курицы до лёгкой корочки.",
       "Добавьте лук и морковь, готовьте 5 минут.",
       "Всыпьте рис, залейте водой и тушите до готовности."
-    ]
+    ],
+    "description": "Полноценное блюдо на одной сковороде: рис впитывает соки курицы и овощей, поэтому вкус получается насыщенным без лишней сложности."
   },
   {
     "id": "8",
     "title": "Творожный дип с зеленью",
     "timeMin": 7,
-    "tags": ["quick", "no_oven", "garnish"],
+    "tags": [
+      "quick",
+      "no_oven",
+      "garnish"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Творог", "amount": 180, "unit": "g", "required": true},
-      {"name": "Сметана", "amount": 60, "unit": "g", "required": true},
-      {"name": "Укроп", "amount": 15, "unit": "g", "required": false},
-      {"name": "Чеснок", "amount": 5, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Творог",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 60,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 15,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Чеснок",
+        "amount": 5,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Разомните творог вилкой до однородности.",
       "Добавьте сметану и мелко нарезанную зелень.",
       "Приправьте солью и чесноком."
-    ]
+    ],
+    "description": "Нежный творожный дип с зеленью и чесноком, который хорошо идёт к овощам, хлебу и горячему картофелю."
   },
   {
     "id": "9",
     "title": "Сэндвич с яйцом и сыром",
     "timeMin": 10,
-    "tags": ["quick", "no_oven", "breakfast"],
+    "tags": [
+      "quick",
+      "no_oven",
+      "breakfast"
+    ],
     "servingsBase": 1,
     "ingredients": [
-      {"name": "Хлеб", "amount": 2, "unit": "pcs", "required": true},
-      {"name": "Яйцо", "amount": 1, "unit": "pcs", "required": true},
-      {"name": "Сыр", "amount": 25, "unit": "g", "required": true},
-      {"name": "Майонез", "amount": 10, "unit": "g", "required": false},
-      {"name": "Огурец", "amount": 40, "unit": "g", "required": false}
+      {
+        "name": "Хлеб",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 25,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Майонез",
+        "amount": 10,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Огурец",
+        "amount": 40,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Сварите яйцо вкрутую и нарежьте.",
       "Соберите сэндвич: хлеб, сыр, яйцо, овощи.",
       "При желании добавьте соус и разрежьте пополам."
-    ]
+    ],
+    "description": "Быстрый сэндвич с яйцом и сыром для завтрака или перекуса, когда нужен сытный результат за несколько минут."
   },
   {
     "id": "10",
     "title": "Суп из чечевицы",
     "timeMin": 35,
-    "tags": ["one_pan", "healthy"],
+    "tags": [
+      "one_pan",
+      "healthy"
+    ],
     "servingsBase": 3,
     "ingredients": [
-      {"name": "Чечевица", "amount": 220, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 120, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 90, "unit": "g", "required": true},
-      {"name": "Чеснок", "amount": 8, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+      {
+        "name": "Чечевица",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 3,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Промойте чечевицу и залейте водой.",
       "Добавьте лук и морковь, варите 25 минут.",
       "Посолите и пробейте часть супа блендером для густоты."
-    ]
+    ],
+    "description": "Густой чечевичный суп с мягкой овощной основой, который хорошо согревает и остаётся достаточно лёгким."
   },
   {
     "id": "11",
     "title": "Рис с овощами",
     "timeMin": 28,
-    "tags": ["one_pan", "vegan_option"],
+    "tags": [
+      "one_pan",
+      "vegan_option"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Рис", "amount": 180, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 100, "unit": "g", "required": true},
-      {"name": "Перец сладкий", "amount": 120, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 80, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 15, "unit": "ml", "required": false}
+      {
+        "name": "Рис",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте овощи 5 минут.",
       "Добавьте рис и воду в пропорции 1:2.",
       "Готовьте под крышкой до мягкости риса."
-    ]
+    ],
+    "description": "Простой рис с овощами, где сладкий перец и морковь делают вкус ярче и свежее без тяжёлых соусов."
   },
   {
     "id": "12",
     "title": "Салат с фасолью и кукурузой",
     "timeMin": 9,
-    "tags": ["quick", "no_oven", "healthy"],
+    "tags": [
+      "quick",
+      "no_oven",
+      "healthy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Фасоль", "amount": 180, "unit": "g", "required": true},
-      {"name": "Кукуруза", "amount": 150, "unit": "g", "required": true},
-      {"name": "Огурец", "amount": 120, "unit": "g", "required": true},
-      {"name": "Масло", "amount": 15, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Фасоль",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Кукуруза",
+        "amount": 150,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Слейте жидкость с фасоли и кукурузы.",
       "Нарежьте огурец и смешайте всё в миске.",
       "Добавьте масло и соль, аккуратно перемешайте."
-    ]
+    ],
+    "description": "Салат с фасолью и кукурузой получается сытным, но лёгким по сборке, поэтому хорошо работает как быстрый обед."
   },
   {
     "id": "13",
     "title": "Кабачки в сметане",
     "timeMin": 20,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Кабачок", "amount": 450, "unit": "g", "required": true},
-      {"name": "Сметана", "amount": 120, "unit": "g", "required": true},
-      {"name": "Чеснок", "amount": 6, "unit": "g", "required": false},
-      {"name": "Укроп", "amount": 12, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Кабачок",
+        "amount": 450,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 12,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Нарежьте кабачки полукружьями и обжарьте 7 минут.",
       "Добавьте сметану, соль и чеснок.",
       "Потушите ещё 5 минут и посыпьте зеленью."
-    ]
+    ],
+    "description": "Мягкие кабачки в сметанном соусе с чесноком и зеленью — спокойное домашнее блюдо с нежной текстурой."
   },
   {
     "id": "14",
     "title": "Картофельное пюре",
     "timeMin": 30,
-    "tags": ["one_pan", "kids"],
+    "tags": [
+      "one_pan",
+      "kids"
+    ],
     "servingsBase": 3,
     "ingredients": [
-      {"name": "Картофель", "amount": 800, "unit": "g", "required": true},
-      {"name": "Молоко", "amount": 220, "unit": "ml", "required": true},
-      {"name": "Масло сливочное", "amount": 40, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 3, "unit": "g", "required": false},
-      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Картофель",
+        "amount": 800,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 220,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Масло сливочное",
+        "amount": 40,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 3,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Перец",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Отварите очищенный картофель до мягкости.",
       "Слейте воду, добавьте тёплое молоко и масло.",
       "Разомните до пышной консистенции и приправьте."
-    ]
+    ],
+    "description": "Классическое картофельное пюре с молочной нежностью, которое легко подстроить под мясо, овощи или подать отдельно."
   },
   {
     "id": "15",
     "title": "Блины на молоке",
     "timeMin": 25,
-    "tags": ["breakfast", "one_pan", "kids"],
+    "tags": [
+      "breakfast",
+      "one_pan",
+      "kids"
+    ],
     "servingsBase": 3,
     "ingredients": [
-      {"name": "Мука", "amount": 220, "unit": "g", "required": true},
-      {"name": "Молоко", "amount": 450, "unit": "ml", "required": true},
-      {"name": "Яйцо", "amount": 2, "unit": "pcs", "required": true},
-      {"name": "Сахар", "amount": 20, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 20, "unit": "ml", "required": false}
+      {
+        "name": "Мука",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 450,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Сахар",
+        "amount": 20,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      }
     ],
     "steps": [
       "Смешайте яйца, сахар и молоко.",
       "Постепенно добавьте муку, чтобы не было комков.",
       "Жарьте тонкие блины на смазанной сковороде."
-    ]
+    ],
+    "description": "Тонкие домашние блины на молоке для завтрака или семейного чаепития, когда хочется чего-то простого и тёплого."
   },
   {
     "id": "16",
     "title": "Томатный суп-пюре",
     "timeMin": 22,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Помидор", "amount": 500, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 70, "unit": "g", "required": true},
-      {"name": "Чеснок", "amount": 6, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 10, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Помидор",
+        "amount": 500,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 10,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте лук и чеснок до мягкости.",
       "Добавьте томаты и тушите 12 минут.",
       "Пробейте блендером, доведите до вкуса солью."
-    ]
+    ],
+    "description": "Насыщенный томатный суп-пюре с мягкой кислотностью и приятной кремовой текстурой без сложных ингредиентов."
   },
   {
     "id": "17",
     "title": "Макароны с тунцом",
     "timeMin": 17,
-    "tags": ["quick", "one_pan", "pasta"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "pasta"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Макароны", "amount": 200, "unit": "g", "required": true},
-      {"name": "Тунец", "amount": 160, "unit": "g", "required": true},
-      {"name": "Помидор", "amount": 150, "unit": "g", "required": false},
-      {"name": "Лук", "amount": 60, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Макароны",
+        "amount": 200,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Тунец",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 150,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лук",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Отварите макароны до готовности.",
       "Слегка прогрейте тунец с луком и томатами.",
       "Смешайте всё вместе и подавайте горячим."
-    ]
+    ],
+    "description": "Практичная паста с тунцом для быстрого ужина: сытная, собранная и достаточно яркая по вкусу даже без длинной готовки."
   },
   {
     "id": "18",
     "title": "Шакшука",
     "timeMin": 20,
-    "tags": ["one_pan", "breakfast"],
+    "tags": [
+      "one_pan",
+      "breakfast"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Яйцо", "amount": 4, "unit": "pcs", "required": true},
-      {"name": "Помидор", "amount": 300, "unit": "g", "required": true},
-      {"name": "Перец сладкий", "amount": 120, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 80, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Яйцо",
+        "amount": 4,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте лук и перец до мягкости.",
       "Добавьте томаты и тушите до густоты.",
       "Сделайте углубления, вбейте яйца и готовьте под крышкой."
-    ]
+    ],
+    "description": "Шакшука — выразительный завтрак или лёгкий ужин, где яйца готовятся прямо в густом томатно-овощном соусе."
   },
   {
     "id": "19",
     "title": "Ленивый плов с курицей",
     "timeMin": 40,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 4,
     "ingredients": [
-      {"name": "Курица", "amount": 450, "unit": "g", "required": true},
-      {"name": "Рис", "amount": 260, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 150, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 120, "unit": "g", "required": true},
-      {"name": "Чеснок", "amount": 10, "unit": "g", "required": false}
+      {
+        "name": "Курица",
+        "amount": 450,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 150,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 10,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте курицу до золотистой корочки.",
       "Добавьте лук и морковь, готовьте 6 минут.",
       "Всыпьте рис, залейте водой и томите до готовности."
-    ]
+    ],
+    "description": "Упрощённый домашний плов, в котором курица, рис и овощи собираются в одно цельное и удобное блюдо."
   },
   {
     "id": "20",
     "title": "Салат с капустой и яблоком",
     "timeMin": 10,
-    "tags": ["quick", "no_oven", "healthy"],
+    "tags": [
+      "quick",
+      "no_oven",
+      "healthy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Капуста", "amount": 250, "unit": "g", "required": true},
-      {"name": "Яблоко", "amount": 120, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 80, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 15, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Капуста",
+        "amount": 250,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Тонко нашинкуйте капусту и слегка помните руками.",
       "Добавьте тёртое яблоко и морковь.",
       "Заправьте маслом и солью."
-    ]
+    ],
+    "description": "Хрустящий салат из капусты и яблока с хорошим балансом свежести, сладости и лёгкой кислинки."
   },
   {
     "id": "21",
     "title": "Гренки с чесноком",
     "timeMin": 9,
-    "tags": ["quick", "one_pan", "garnish"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "garnish"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Хлеб", "amount": 4, "unit": "pcs", "required": true},
-      {"name": "Чеснок", "amount": 6, "unit": "g", "required": true},
-      {"name": "Масло", "amount": 15, "unit": "ml", "required": true},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false},
-      {"name": "Паприка", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Хлеб",
+        "amount": 4,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Паприка",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Нарежьте хлеб полосками.",
       "Обжарьте на масле до хруста.",
       "Натрите чесноком и посыпьте специями."
-    ]
+    ],
+    "description": "Румяные чесночные гренки — быстрый вариант закуски или дополнения к супу, салату и тёплым соусам."
   },
   {
     "id": "22",
     "title": "Суп с фрикадельками",
     "timeMin": 35,
-    "tags": ["one_pan", "kids"],
+    "tags": [
+      "one_pan",
+      "kids"
+    ],
     "servingsBase": 3,
     "ingredients": [
-      {"name": "Фарш", "amount": 300, "unit": "g", "required": true},
-      {"name": "Картофель", "amount": 350, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 100, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 70, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+      {
+        "name": "Фарш",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 350,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 3,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Сформируйте небольшие фрикадельки из фарша.",
       "Добавьте их в кипящую воду вместе с овощами.",
       "Варите 20 минут и доведите до вкуса."
-    ]
+    ],
+    "description": "Простой суп с фрикадельками для повседневного обеда: понятный, сытный и достаточно мягкий по вкусу для всей семьи."
   },
   {
     "id": "23",
     "title": "Паста с сырным соусом",
     "timeMin": 20,
-    "tags": ["one_pan", "pasta", "kids"],
+    "tags": [
+      "one_pan",
+      "pasta",
+      "kids"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Макароны", "amount": 190, "unit": "g", "required": true},
-      {"name": "Сыр", "amount": 120, "unit": "g", "required": true},
-      {"name": "Молоко", "amount": 220, "unit": "ml", "required": true},
-      {"name": "Масло сливочное", "amount": 20, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Макароны",
+        "amount": 190,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 220,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Масло сливочное",
+        "amount": 20,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Отварите макароны до готовности.",
       "Нагрейте молоко с маслом и добавьте сыр.",
       "Смешайте соус с пастой и подавайте."
-    ]
+    ],
+    "description": "Кремовая паста с сырным соусом, когда хочется комфортной еды без перегруженного состава и длинного списка действий."
   },
   {
     "id": "24",
     "title": "Оладьи из кабачков",
     "timeMin": 18,
-    "tags": ["quick", "one_pan", "kids"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "kids"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Кабачок", "amount": 350, "unit": "g", "required": true},
-      {"name": "Яйцо", "amount": 1, "unit": "pcs", "required": true},
-      {"name": "Мука", "amount": 70, "unit": "g", "required": true},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 20, "unit": "ml", "required": false}
+      {
+        "name": "Кабачок",
+        "amount": 350,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Мука",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      }
     ],
     "steps": [
       "Натрите кабачок и отожмите лишний сок.",
       "Смешайте с яйцом, мукой и солью.",
       "Жарьте оладьи до золотистой корочки с двух сторон."
-    ]
+    ],
+    "description": "Нежные оладьи из кабачков с румяной корочкой, которые удобно подавать со сметаной или лёгким творожным соусом."
   },
   {
     "id": "25",
     "title": "Кускус с овощами",
     "timeMin": 14,
-    "tags": ["quick", "one_pan", "vegan_option"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "vegan_option"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Кускус", "amount": 170, "unit": "g", "required": true},
-      {"name": "Перец сладкий", "amount": 120, "unit": "g", "required": true},
-      {"name": "Огурец", "amount": 100, "unit": "g", "required": false},
-      {"name": "Масло", "amount": 12, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Кускус",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 100,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 12,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Залейте кускус горячей водой и накройте на 5 минут.",
       "Нарежьте овощи мелкими кубиками.",
       "Смешайте кускус с овощами, добавьте масло и соль."
-    ]
+    ],
+    "description": "Быстрый кускус с овощами, где крупа впитывает соки и остаётся рассыпчатой, а вкус получается свежим и лёгким."
   },
   {
     "id": "26",
     "title": "Яичница с помидорами",
     "timeMin": 9,
-    "tags": ["quick", "one_pan", "breakfast"],
+    "tags": [
+      "quick",
+      "one_pan",
+      "breakfast"
+    ],
     "servingsBase": 1,
     "ingredients": [
-      {"name": "Яйцо", "amount": 2, "unit": "pcs", "required": true},
-      {"name": "Помидор", "amount": 120, "unit": "g", "required": true},
-      {"name": "Масло", "amount": 8, "unit": "ml", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false},
-      {"name": "Перец", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 8,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Перец",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте ломтики помидора 2 минуты.",
       "Вбейте яйца на сковороду.",
       "Готовьте до желаемой степени прожарки."
-    ]
+    ],
+    "description": "Очень быстрый вариант яичницы с помидорами, когда нужен тёплый и сочный завтрак без лишних шагов."
   },
   {
     "id": "27",
     "title": "Тушеная капуста с сосисками",
     "timeMin": 32,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 3,
     "ingredients": [
-      {"name": "Капуста", "amount": 600, "unit": "g", "required": true},
-      {"name": "Сосиски", "amount": 240, "unit": "g", "required": true},
-      {"name": "Морковь", "amount": 100, "unit": "g", "required": false},
-      {"name": "Лук", "amount": 80, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 3, "unit": "g", "required": false}
+      {
+        "name": "Капуста",
+        "amount": 600,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сосиски",
+        "amount": 240,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 100,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 3,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Нашинкуйте капусту, нарежьте сосиски кружками.",
       "Обжарьте лук с морковью, добавьте капусту.",
       "Добавьте сосиски и тушите до мягкости капусты."
-    ]
+    ],
+    "description": "Тушёная капуста с сосисками — простой домашний ужин с насыщенным вкусом и хорошей сытностью."
   },
   {
     "id": "28",
     "title": "Картофель с грибами и сметаной",
     "timeMin": 30,
-    "tags": ["one_pan", "easy"],
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Картофель", "amount": 450, "unit": "g", "required": true},
-      {"name": "Грибы", "amount": 220, "unit": "g", "required": true},
-      {"name": "Сметана", "amount": 120, "unit": "g", "required": true},
-      {"name": "Лук", "amount": 70, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 2, "unit": "g", "required": false}
+      {
+        "name": "Картофель",
+        "amount": 450,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Обжарьте картофель до полуготовности.",
       "Добавьте грибы и лук, готовьте ещё 10 минут.",
       "Вмешайте сметану и потушите 5 минут."
-    ]
+    ],
+    "description": "Картофель с грибами и сметаной — уютное сковородочное блюдо с мягким сливочным оттенком и понятной домашней подачей."
   },
   {
     "id": "29",
     "title": "Салат с творогом и огурцом",
     "timeMin": 8,
-    "tags": ["quick", "no_oven", "healthy"],
+    "tags": [
+      "quick",
+      "no_oven",
+      "healthy"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Творог", "amount": 180, "unit": "g", "required": true},
-      {"name": "Огурец", "amount": 200, "unit": "g", "required": true},
-      {"name": "Укроп", "amount": 12, "unit": "g", "required": false},
-      {"name": "Сметана", "amount": 40, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Творог",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 200,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 12,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сметана",
+        "amount": 40,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Нарежьте огурец мелким кубиком.",
       "Смешайте с творогом и зеленью.",
       "Добавьте сметану и соль по вкусу."
-    ]
+    ],
+    "description": "Лёгкий салат с творогом и огурцом, который хорошо подходит как свежая закуска или быстрый белковый перекус."
   },
   {
     "id": "30",
     "title": "Рисовая каша на молоке",
     "timeMin": 28,
-    "tags": ["one_pan", "breakfast", "kids"],
+    "tags": [
+      "one_pan",
+      "breakfast",
+      "kids"
+    ],
     "servingsBase": 2,
     "ingredients": [
-      {"name": "Рис", "amount": 120, "unit": "g", "required": true},
-      {"name": "Молоко", "amount": 600, "unit": "ml", "required": true},
-      {"name": "Сахар", "amount": 20, "unit": "g", "required": false},
-      {"name": "Масло сливочное", "amount": 20, "unit": "g", "required": false},
-      {"name": "Соль", "amount": 1, "unit": "g", "required": false}
+      {
+        "name": "Рис",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 600,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Сахар",
+        "amount": 20,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло сливочное",
+        "amount": 20,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Соль",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
     ],
     "steps": [
       "Промойте рис и залейте молоком.",
       "Варите на слабом огне до мягкости риса.",
       "Добавьте сахар, масло и щепотку соли перед подачей."
-    ]
+    ],
+    "description": "Рисовая каша на молоке — спокойный классический завтрак с мягкой текстурой и деликатным сливочным вкусом."
+  },
+  {
+    "id": "31",
+    "title": "Картофельная тортилья с луком",
+    "timeMin": 28,
+    "tags": [
+      "one_pan",
+      "breakfast",
+      "kids"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Картофель",
+        "amount": 450,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 4,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 40,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Нарежьте картофель тонкими ломтиками, лук полукольцами.",
+      "Обжарьте картофель с луком на среднем огне до мягкости, но не пересушивайте.",
+      "Взбейте яйца, при желании добавьте тёртый сыр и залейте ими сковороду.",
+      "Готовьте под крышкой до схватывания верха, затем аккуратно переверните или доведите до готовности на слабом огне."
+    ],
+    "description": "Сытная картофельная тортилья с луком и яйцами, в которой мягкая середина сочетается с поджаренной корочкой."
+  },
+  {
+    "id": "32",
+    "title": "Курица в сметанно-чесночном соусе",
+    "timeMin": 25,
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 400,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Нарежьте курицу крупными кусочками и быстро обжарьте до лёгкой золотистой корочки.",
+      "Добавьте лук и готовьте ещё 3-4 минуты, чтобы он стал мягче и слаще.",
+      "Смешайте сметану с рубленым чесноком и парой ложек горячей воды, затем влейте соус в сковороду.",
+      "Тушите под крышкой 8-10 минут, пока курица полностью не приготовится, а соус не станет шелковистым."
+    ],
+    "description": "Курица в сметанно-чесночном соусе получается сочной и мягкой, а соус хорошо собирает всё блюдо в один вкус."
+  },
+  {
+    "id": "33",
+    "title": "Рис с грибами и сыром",
+    "timeMin": 30,
+    "tags": [
+      "one_pan",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рис",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 50,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте лук и грибы до испарения лишней влаги и появления яркого грибного аромата.",
+      "Всыпьте рис и прогрейте его 1 минуту вместе с грибами, чтобы он впитал часть вкуса.",
+      "Добавьте воду в пропорции 1:2, уменьшите огонь и готовьте под крышкой до мягкости риса.",
+      "Снимите с огня, вмешайте тёртый сыр и дайте блюду постоять 2-3 минуты перед подачей."
+    ],
+    "description": "Рис с грибами и сыром — удобный вариант тёплого ужина, где грибной аромат становится глубже за счёт сыра."
+  },
+  {
+    "id": "34",
+    "title": "Салат с тунцом, яйцом и огурцом",
+    "timeMin": 12,
+    "tags": [
+      "quick",
+      "no_oven",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Тунец",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лук",
+        "amount": 40,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Сварите яйца вкрутую и охладите, затем нарежьте их крупными кусочками.",
+      "Огурец нарежьте полукружьями, тунец разберите вилкой на небольшие хлопья.",
+      "Если используете лук, нарежьте его тонко и на минуту залейте холодной водой, чтобы смягчить вкус.",
+      "Смешайте все ингредиенты и заправьте йогуртом, слегка разминая тунец, чтобы салат стал более сочным."
+    ],
+    "description": "Свежий салат с тунцом, яйцом и огурцом для быстрого белкового обеда без тяжёлой заправки и долгой готовки."
+  },
+  {
+    "id": "35",
+    "title": "Сырники из творога",
+    "timeMin": 20,
+    "tags": [
+      "breakfast",
+      "one_pan",
+      "kids"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Творог",
+        "amount": 250,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Мука",
+        "amount": 60,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сахар",
+        "amount": 15,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Разомните творог вилкой, добавьте яйцо, сахар и большую часть муки.",
+      "Замесите мягкую массу, которая держит форму, но остаётся нежной и не забитой мукой.",
+      "Сформируйте небольшие шайбы, обваляйте в оставшейся муке и выложите на разогретую сковороду.",
+      "Жарьте на умеренном огне до румяной корочки с обеих сторон, затем дайте сырникам постоять минуту под крышкой."
+    ],
+    "description": "Домашние сырники из творога с нежной серединой и румяной поверхностью, которые особенно хороши на завтрак."
+  },
+  {
+    "id": "36",
+    "title": "Паста с курицей и сладким перцем",
+    "timeMin": 22,
+    "tags": [
+      "quick",
+      "one_pan",
+      "pasta"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 200,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Курица",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 150,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны до состояния al dente и оставьте немного воды после варки.",
+      "Курицу быстро обжарьте до светлой корочки, затем добавьте полоски сладкого перца.",
+      "Добавьте чеснок, прогрейте ещё минуту и вмешайте готовые макароны.",
+      "Если нужно, плесните немного воды от пасты для сочности, а перед подачей посыпьте блюдо сыром."
+    ],
+    "description": "Паста с курицей и сладким перцем — быстрый ужин с понятным вкусом, где мясо, паста и овощи хорошо держат баланс."
+  },
+  {
+    "id": "37",
+    "title": "Томатно-чечевичная сковорода",
+    "timeMin": 32,
+    "tags": [
+      "one_pan",
+      "healthy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Чечевица",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Вода",
+        "amount": 500,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте лук до мягкости, затем добавьте нарезанные помидоры и дайте им пустить сок.",
+      "Всыпьте промытую чечевицу и, если есть, паприку для более тёплого вкуса.",
+      "Влейте воду, доведите до кипения и готовьте под крышкой до мягкости чечевицы.",
+      "В конце дайте жидкости слегка выпариться, чтобы блюдо получилось густым и насыщенным, как тёплое рагу."
+    ],
+    "description": "Густая томатно-чечевичная сковорода ближе к тёплому рагу: сытная, ароматная и удобная для одного общего сотейника."
+  },
+  {
+    "id": "38",
+    "title": "Грибы в сметане с чесноком",
+    "timeMin": 18,
+    "tags": [
+      "one_pan",
+      "garnish",
+      "quick"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Грибы",
+        "amount": 250,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте грибы на сильном огне, чтобы они подрумянились, а не тушились в собственном соке.",
+      "Добавьте лук и доведите его до мягкости, сохранив грибной аромат концентрированным.",
+      "Уменьшите огонь, вмешайте сметану и чеснок, прогрейте соус до лёгкого загустения.",
+      "Если хочется более насыщенного вкуса, в самом конце добавьте немного сыра и дайте ему расплавиться."
+    ],
+    "description": "Грибы в сметане с чесноком дают насыщенный соус и хорошо работают как самостоятельное блюдо или тёплый гарнир."
+  },
+  {
+    "id": "39",
+    "title": "Драники со сметаной",
+    "timeMin": 25,
+    "tags": [
+      "one_pan",
+      "kids"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Картофель",
+        "amount": 500,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Мука",
+        "amount": 40,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Натрите картофель и лук на мелкой тёрке, затем слегка отожмите лишний сок.",
+      "Добавьте яйцо и муку, быстро перемешайте, чтобы масса осталась сочной и не потемнела.",
+      "Выкладывайте небольшие порции на горячую сковороду и жарьте до золотистого края.",
+      "Переверните драники, доведите до готовности и подавайте со сметаной, пока корочка ещё хрустящая."
+    ],
+    "description": "Драники со сметаной — хрустящие снаружи и мягкие внутри картофельные оладьи для понятного домашнего ужина."
+  },
+  {
+    "id": "40",
+    "title": "Кускус с тунцом и овощами",
+    "timeMin": 15,
+    "tags": [
+      "quick",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Кускус",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Тунец",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 150,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Вода",
+        "amount": 220,
+        "unit": "ml",
+        "required": true
+      }
+    ],
+    "steps": [
+      "Залейте кускус горячей водой, накройте и оставьте на 5 минут, затем разрыхлите вилкой.",
+      "Нарежьте помидоры и огурцы небольшими кубиками, чтобы они равномерно распределились в крупе.",
+      "Тунец разберите на кусочки и аккуратно смешайте с подготовленным кускусом и овощами.",
+      "Дайте блюду постоять 2-3 минуты, чтобы вкусы объединились, и подавайте как тёплый или комнатный салат."
+    ],
+    "description": "Кускус с тунцом и овощами — быстрый тёплый салат или лёгкий ужин, когда нужно собрать сытное блюдо почти без плиты."
+  },
+  {
+    "id": "41",
+    "title": "Запеченная рыба с картофелем и лимоном",
+    "timeMin": 40,
+    "tags": [
+      "bake",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 350,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 450,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Нарежьте картофель и лук, смешайте с маслом и выложите в форму ровным слоем.",
+      "Рыбу приправьте, сбрызните лимоном и уложите поверх овощей, чтобы сок стекал вниз и не давал блюду пересохнуть.",
+      "Накройте форму фольгой и запекайте до мягкости картофеля, затем снимите фольгу и дайте рыбе слегка подрумяниться.",
+      "Дайте блюду постоять 3-4 минуты и подавайте, пока рыба остаётся сочной."
+    ],
+    "description": "Рыба с картофелем и лимоном в духовке даёт спокойный домашний ужин, где кислота и мягкая запеканка держат вкус собранным."
+  },
+  {
+    "id": "42",
+    "title": "Куриный суп с рисом и морковью",
+    "timeMin": 45,
+    "tags": [
+      "soup",
+      "family"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Вода",
+        "amount": 900,
+        "unit": "ml",
+        "required": true
+      }
+    ],
+    "steps": [
+      "Нарежьте лук и морковь, затем слегка прогрейте их, чтобы ароматическая база раскрылась до варки.",
+      "Добавьте курицу, влейте воду и варите до мягкости, снимая лишнюю пену и не давая бульону кипеть слишком резко.",
+      "Промойте рис, всыпьте в суп и доведите до готовности на умеренном огне.",
+      "Дайте супу постоять несколько минут после выключения, чтобы вкус собрался спокойнее."
+    ],
+    "description": "Куриный суп с рисом и морковью — базовый домашний суп с понятной ароматической основой и мягким, насыщенным вкусом."
+  },
+  {
+    "id": "43",
+    "title": "Индейка с брокколи и рисом",
+    "timeMin": 25,
+    "tags": [
+      "one_pan",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Индейка",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите рис заранее, чтобы он остался рассыпчатым и не забирал лишнюю влагу у индейки.",
+      "Быстро обжарьте индейку до готовности, затем добавьте чеснок и брокколи.",
+      "Когда брокколи станет яркой и чуть мягкой, вмешайте рис и немного масла, чтобы собрать вкус в одно блюдо.",
+      "Подавайте сразу, пока индейка остаётся сочной, а брокколи не потеряла свежий цвет."
+    ],
+    "description": "Индейка с брокколи и рисом — чистое, собранное блюдо на каждый день, где важны мягкая сочность белка и свежий овощной акцент."
+  },
+  {
+    "id": "44",
+    "title": "Говядина тушеная с морковью и картофелем",
+    "timeMin": 65,
+    "tags": [
+      "stew",
+      "family"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 380,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 350,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 25,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Вода",
+        "amount": 260,
+        "unit": "ml",
+        "required": true
+      }
+    ],
+    "steps": [
+      "Обжарьте лук и морковь, затем добавьте говядину и дайте ей слегка схватиться, чтобы вкус стал глубже.",
+      "Вмешайте томатную пасту, влейте воду, накройте и тушите на слабом огне, пока мясо не станет мягче.",
+      "Добавьте картофель и продолжайте тушить под крышкой до полной готовности и спокойной густоты соуса.",
+      "Дайте рагу постоять 5 минут перед подачей, чтобы мясо и овощи обменялись вкусом."
+    ],
+    "description": "Тушёная говядина с морковью и картофелем — плотное домашнее рагу, где мягкая доводка важнее, чем быстрый сильный жар."
+  },
+  {
+    "id": "45",
+    "title": "Лаваш с творогом и огурцом",
+    "timeMin": 10,
+    "tags": [
+      "quick",
+      "no_oven",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Лаваш",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Творог",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 10,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Смешайте творог со сметаной до мягкой, но не жидкой начинки.",
+      "Огурец нарежьте мелкими кубиками, добавьте его и укроп в творожную основу.",
+      "Разложите начинку по лавашу, сверните плотным рулетом и дайте ему полежать 2-3 минуты.",
+      "Нарежьте рулет порциями и подавайте как лёгкий завтрак или быстрый перекус."
+    ],
+    "description": "Лаваш с творогом и огурцом — быстрый холодный вариант, где кремовая основа и свежий огурец дают понятный баланс без плиты."
+  },
+  {
+    "id": "46",
+    "title": "Овсянка с бананом и кефиром",
+    "timeMin": 10,
+    "tags": [
+      "quick",
+      "breakfast",
+      "healthy"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Овсяные хлопья",
+        "amount": 60,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Кефир",
+        "amount": 250,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Банан",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Доведите кефир почти до горячего состояния, не давая ему резко кипеть.",
+      "Добавьте овсяные хлопья и готовьте на слабом огне, помешивая до мягкой текстуры.",
+      "В конце вмешайте половину банана, чтобы он дал естественную сладость и сливочность.",
+      "Сверху выложите оставшийся банан и немного корицы перед подачей."
+    ],
+    "description": "Овсянка с бананом и кефиром — мягкий кисломолочный завтрак с естественной сладостью, который получается спокойным и не тяжёлым."
+  },
+  {
+    "id": "47",
+    "title": "Свинина с картофелем и паприкой в духовке",
+    "timeMin": 55,
+    "tags": [
+      "bake",
+      "family"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Свинина",
+        "amount": 360,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 500,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 20,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Смешайте свинину с паприкой, чесноком и маслом, затем дайте ей постоять несколько минут для мягкого маринования.",
+      "Картофель и лук выложите в форму, сверху распределите мясо вместе с ароматным маслом.",
+      "Накройте форму, запекайте до мягкости картофеля и сочности мяса, затем откройте и дайте поверхности слегка подрумяниться.",
+      "Перед подачей дайте блюду коротко отдохнуть, чтобы мясной сок не ушёл сразу на тарелку."
+    ],
+    "description": "Свинина с картофелем и паприкой в духовке — тёплое семейное блюдо, где мясо и гарнир готовятся вместе и обмениваются вкусом."
+  },
+  {
+    "id": "48",
+    "title": "Брокколи с сыром и яйцом в духовке",
+    "timeMin": 30,
+    "tags": [
+      "bake",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Брокколи",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Разберите брокколи на небольшие соцветия и быстро ошпарьте, чтобы она осталась яркой и не пересохла в духовке.",
+      "Смешайте яйца со сметаной и половиной сыра — это станет мягкой связкой для запекания.",
+      "Выложите брокколи в форму, залейте смесью, присыпьте оставшимся сыром и запекайте до румяной корочки.",
+      "Дайте запеканке схватиться пару минут и только потом подавайте."
+    ],
+    "description": "Брокколи с сыром и яйцом в духовке — простая овощная запеканка, где сыр и яичная связка делают вкус плотнее и мягче."
+  },
+  {
+    "id": "49",
+    "title": "Салат из капусты с яблоком и йогуртом",
+    "timeMin": 12,
+    "tags": [
+      "quick",
+      "healthy",
+      "no_oven"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Капуста",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 12,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Тонко нашинкуйте капусту и слегка помните её руками, чтобы она осталась хрустящей, но стала удобнее для салата.",
+      "Яблоко нарежьте тонкой соломкой и сразу смешайте с капустой, чтобы сохранить свежесть и контраст текстур.",
+      "Йогурт соедините с укропом и аккуратно заправьте салат перед самой подачей.",
+      "Дайте салату постоять 2 минуты, чтобы заправка обняла капусту, но хруст не пропал."
+    ],
+    "description": "Капуста с яблоком и йогуртом даёт редкое для простого салата сочетание хруста, свежести и мягкой кисломолочной связки."
+  },
+  {
+    "id": "50",
+    "title": "Рыба в сметанно-укропном соусе",
+    "timeMin": 22,
+    "tags": [
+      "one_pan",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 12,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Если используете лук, сначала прогрейте его до мягкости, чтобы соус получил спокойную ароматическую основу.",
+      "Рыбу быстро доведите до полуготовности, не пересушивая поверхность.",
+      "Сметану соедините с укропом и несколькими каплями лимона, затем мягко прогрейте вместе с рыбой до полной готовности.",
+      "Снимите блюдо с огня сразу, как соус обнимет рыбу, и подавайте без долгого ожидания."
+    ],
+    "description": "Рыба в сметанно-укропном соусе работает на чистом балансе: мягкая сливочность, травяной акцент и лёгкая кислота держат вкус собранным."
+  },
+  {
+    "id": "51",
+    "title": "Паста с грибами в сметанном соусе",
+    "timeMin": 20,
+    "tags": [
+      "quick",
+      "pasta",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 35,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны до состояния al dente, оставив немного горячей воды от варки.",
+      "Грибы обжарьте до румяного запаха, затем добавьте чеснок, если он есть.",
+      "Вмешайте сметану и немного воды от пасты, чтобы получился мягкий соус, а не густой комок.",
+      "Соедините соус с макаронами, при желании добавьте сыр и сразу подавайте, пока паста остаётся сочной."
+    ],
+    "description": "Грибная паста со сметаной держится не только на умами, но и на правильной сливочной связке, которая не даёт блюду стать сухим."
+  },
+  {
+    "id": "52",
+    "title": "Творог с бананом и йогуртом",
+    "timeMin": 8,
+    "tags": [
+      "breakfast",
+      "quick",
+      "healthy"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Творог",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Банан",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Разомните половину банана и смешайте его с творогом, чтобы сладость распределилась мягко, а не лежала кусками.",
+      "Добавьте йогурт и доведите массу до кремовой, но ещё плотной текстуры.",
+      "Сверху выложите оставшийся банан и немного корицы перед самой подачей."
+    ],
+    "description": "Творог с бананом и йогуртом — простой завтрак, где сливочность и естественная сладость работают тоньше, чем просто сахар."
+  },
+  {
+    "id": "53",
+    "title": "Запеканка из творога с яблоком и корицей",
+    "timeMin": 40,
+    "tags": [
+      "bake",
+      "breakfast"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Творог",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Мука",
+        "amount": 35,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Корица",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Йогурт",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Смешайте творог с яйцами и небольшим количеством муки, чтобы масса держала форму, но не стала плотной.",
+      "Яблоко нарежьте мелко и вмешайте вместе с корицей, чтобы сладость и аромат распределились равномерно.",
+      "Если есть йогурт, добавьте его для более мягкой и кремовой текстуры.",
+      "Выложите массу в форму и запекайте до схватывания центра и лёгкого румянца по краям."
+    ],
+    "description": "Творожная запеканка с яблоком работает на мягкой сладости и кремовой структуре, а корица не даёт вкусу стать плоским."
+  },
+  {
+    "id": "54",
+    "title": "Говядина с томатами и чесноком",
+    "timeMin": 35,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "stew"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук прогрейте до мягкости, чтобы получить спокойную ароматическую базу для мяса.",
+      "Добавьте говядину и обжарьте до смены цвета, не пересушивая поверхность.",
+      "Вмешайте помидоры, чеснок и паприку, затем тушите на умеренном огне до мягкости мяса и собранного соуса.",
+      "Перед подачей дайте блюду постоять пару минут, чтобы мясной сок не ушёл сразу."
+    ],
+    "description": "Говядина с томатами и чесноком — домашнее мясное блюдо, где томатная кислота собирает жирность, а мягкое тушение не даёт мясу стать жёстким."
+  },
+  {
+    "id": "55",
+    "title": "Рыбный суп с картофелем и укропом",
+    "timeMin": 28,
+    "tags": [
+      "soup",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 10,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и морковь при желании слегка прогрейте, чтобы бульон получил более тёплый ароматический старт.",
+      "Добавьте картофель и варите до полуготовности.",
+      "Выложите рыбу и доведите суп до мягкого кипения, не переваривая кусочки.",
+      "В конце добавьте укроп и несколько капель лимона, чтобы суп остался чистым и свежим по вкусу."
+    ],
+    "description": "Рыбный суп держится на чистом вкусе рыбы, мягкой картофельной основе и обязательном свежем акценте из укропа и лимона."
+  },
+  {
+    "id": "56",
+    "title": "Тёплый салат с брокколи и яйцом",
+    "timeMin": 15,
+    "tags": [
+      "quick",
+      "healthy",
+      "no_oven"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Брокколи быстро отварите или прогрейте до яркого цвета, сохранив лёгкий хруст.",
+      "Яйца сварите или обжарьте так, чтобы желток дал салату мягкость.",
+      "Соберите всё тёплым и при желании добавьте немного йогурта с укропом прямо перед подачей.",
+      "Не держите салат долго, чтобы брокколи не потеряла текстуру."
+    ],
+    "description": "Тёплый салат с брокколи и яйцом сочетает сытность яйца, свежесть зелени и живую текстуру овоща без тяжёлой заправки."
+  },
+  {
+    "id": "57",
+    "title": "Индейка с кабачком и сметаной",
+    "timeMin": 22,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Индейка",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Кабачок",
+        "amount": 240,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Индейку быстро обжарьте до уверенного изменения цвета, чтобы она осталась сочной внутри.",
+      "Добавьте кабачок и дайте ему чуть смягчиться, но не превратиться в воду.",
+      "Вмешайте сметану и чеснок, затем прогрейте всё вместе на спокойном огне до полной готовности индейки.",
+      "Подавайте сразу, пока сметанный соус остаётся мягким и собранным."
+    ],
+    "description": "Индейка с кабачком и сметаной — хороший пример блюда, где постный белок держится за счёт мягкой связки и спокойной ароматической базы."
+  },
+  {
+    "id": "58",
+    "title": "Овсянка с апельсином и корицей",
+    "timeMin": 10,
+    "tags": [
+      "breakfast",
+      "quick"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Овсяные хлопья",
+        "amount": 60,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 220,
+        "unit": "ml",
+        "required": true
+      },
+      {
+        "name": "Апельсин",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Овсяные хлопья сварите на молоке до мягкой, но не тяжёлой кремовой текстуры.",
+      "С апельсина снимите немного сока и мякоти, чтобы добавить свежесть без лишней воды.",
+      "Вмешайте апельсин в готовую кашу уже вне сильного кипения и при желании добавьте корицу.",
+      "Подавайте сразу, пока цитрусовый аромат остаётся живым."
+    ],
+    "description": "Овсянка с апельсином работает лучше обычной сладкой каши: сливочность молока получает свежий цитрусовый контраст и не кажется тяжёлой."
+  },
+  {
+    "id": "59",
+    "title": "Курица с грибами и гречкой",
+    "timeMin": 28,
+    "tags": [
+      "one_pan",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Гречка",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу и лук обжарьте до появления уверенного аромата и лёгкой корочки.",
+      "Добавьте грибы и дайте им выпустить влагу и собрать вкус сковороды.",
+      "Всыпьте гречку, прогрейте её минуту и доведите до готовности привычным способом.",
+      "Дайте блюду постоять под крышкой пару минут, чтобы гречка добрала соки и аромат."
+    ],
+    "description": "Курица с грибами и гречкой — сильная домашняя база: умами от грибов и спокойная крупяная основа делают блюдо сытым, но не грубым."
+  },
+  {
+    "id": "60",
+    "title": "Лаваш с яйцом и сыром на сковороде",
+    "timeMin": 12,
+    "tags": [
+      "breakfast",
+      "quick",
+      "one_pan"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Лаваш",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 60,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лаваш уложите на сковороду так, чтобы он мог удержать начинку и слегка подрумяниться.",
+      "Яйцо быстро взбейте и распределите вместе с сыром, а при желании добавьте немного помидора.",
+      "Готовьте на умеренном огне, пока яйцо схватится, а лаваш станет золотистым по краям.",
+      "Сверните или сложите лаваш и подавайте сразу, пока сыр ещё мягкий."
+    ],
+    "description": "Лаваш с яйцом и сыром — быстрый завтрак, где хрустящая основа и мягкая начинка дают ощущение полноценного блюда, а не перекуса на бегу."
+  },
+  {
+    "id": "61",
+    "title": "Фасоль с томатной пастой и луком",
+    "timeMin": 18,
+    "tags": [
+      "one_pan",
+      "healthy",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Фасоль",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 45,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук прогрейте до сладковатого аромата, не делая его тёмным и горьким.",
+      "Добавьте томатную пасту и коротко прогрейте её, чтобы ушла сырая кислотность.",
+      "Вмешайте фасоль и при желании чеснок, затем доведите всё вместе до собранного густого вкуса.",
+      "Подавайте сразу или как тёплую основу для другого блюда."
+    ],
+    "description": "Фасоль с томатной пастой хороша тем, что томатный акцент собирает бобовую плотность и делает блюдо цельным без мяса."
+  },
+  {
+    "id": "62",
+    "title": "Картофельный суп с грибами",
+    "timeMin": 26,
+    "tags": [
+      "soup",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Картофель",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и грибы слегка обжарьте, чтобы вкус супа сразу получил глубину, а не только варёную мягкость.",
+      "Добавьте картофель и варите до полной мягкости.",
+      "Часть картофеля слегка разомните прямо в кастрюле, чтобы суп стал плотнее без муки.",
+      "Перед подачей при желании вмешайте сметану, но не переваривайте её."
+    ],
+    "description": "Картофельный суп с грибами — это простой способ получить тёплый насыщенный вкус даже из очень домашнего набора продуктов."
+  },
+  {
+    "id": "63",
+    "title": "Рис с тунцом и кукурузой",
+    "timeMin": 16,
+    "tags": [
+      "quick",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рис",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Тунец",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Кукуруза",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 120,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Рис доведите до готовности и дайте ему чуть отпустить лишний пар, чтобы блюдо не стало липким.",
+      "Вмешайте тунец и кукурузу, прогревая очень мягко, чтобы рыба не потеряла текстуру.",
+      "Если есть огурец, добавьте его перед самой подачей для свежего контраста.",
+      "Подавайте сразу, пока контраст между тёплой основой и свежим акцентом сохраняется."
+    ],
+    "description": "Рис с тунцом и кукурузой работает лучше, когда получает свежий контраст и не превращается просто в сухую рыбную кашу."
+  },
+  {
+    "id": "64",
+    "title": "Рыба с помидорами и сладким перцем в духовке",
+    "timeMin": 30,
+    "tags": [
+      "bake",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Овощи уложите в форму как мягкую сочную подушку для рыбы.",
+      "Рыбу при желании слегка сбрызните лимоном и накройте формой или фольгой на первую часть запекания.",
+      "Ближе к концу откройте форму, чтобы лишняя влага ушла, а вкус стал ярче, но рыба не пересохла.",
+      "Подавайте сразу, пока сок овощей ещё работает как естественный соус."
+    ],
+    "description": "Рыба с помидорами и сладким перцем в духовке держится на правильной сочности: овощи работают как естественный соус, а лимон очищает вкус."
+  },
+  {
+    "id": "65",
+    "title": "Омлет с брокколи и сыром",
+    "timeMin": 12,
+    "tags": [
+      "breakfast",
+      "quick",
+      "one_pan"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 45,
+        "unit": "g",
+        "required": true
+      }
+    ],
+    "steps": [
+      "Брокколи быстро прогрейте до яркого цвета, чтобы она осталась живой по текстуре.",
+      "Яйца взбейте и влейте к брокколи, затем мягко доведите до схватывания.",
+      "Добавьте сыр ближе к концу, чтобы он связал омлет, а не пересох на сковороде."
+    ],
+    "description": "Омлет с брокколи и сыром даёт хороший завтрак: яйцо даёт мягкость, брокколи — структуру, а сыр собирает вкус."
+  },
+  {
+    "id": "66",
+    "title": "Гречка с индейкой и морковью",
+    "timeMin": 24,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Гречка",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Индейка",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Индейку и лук сначала обжарьте, чтобы постный белок получил ароматическую опору.",
+      "Добавьте морковь и дайте ей чуть смягчиться, не забивая вкус индейки.",
+      "Всыпьте гречку и доведите её до готовности вместе с мясом, чтобы крупа добрала соки блюда.",
+      "Дайте блюду постоять под крышкой пару минут перед подачей."
+    ],
+    "description": "Гречка с индейкой и морковью хороша тем, что крупа впитывает соки мяса, а морковь даёт спокойную сладость без тяжести."
+  },
+  {
+    "id": "67",
+    "title": "Суп с рисом и фрикадельками",
+    "timeMin": 30,
+    "tags": [
+      "soup",
+      "dinner"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Фарш",
+        "amount": 250,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и морковь прогрейте, чтобы бульон получил ароматическую базу до варки.",
+      "Сформируйте небольшие фрикадельки и опустите их в кипящую основу.",
+      "Добавьте рис и варите на умеренном огне до мягкости, не разбивая фрикадельки бурным кипением.",
+      "Подавайте сразу, пока суп остаётся чистым и собранным по вкусу."
+    ],
+    "description": "Суп с рисом и фрикадельками — понятное домашнее блюдо, где мясо даёт глубину, а рис делает суп сытым без перегруза."
+  },
+  {
+    "id": "68",
+    "title": "Паста с тунцом и томатной пастой",
+    "timeMin": 18,
+    "tags": [
+      "quick",
+      "pasta",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Тунец",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 45,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны, оставив немного воды, чтобы потом собрать соус, а не получить сухую пасту.",
+      "Лук коротко прогрейте, затем вмешайте томатную пасту и уберите её сырую кислотность.",
+      "Добавьте тунец и немного воды от пасты, а затем соедините всё с макаронами до единой текстуры.",
+      "Подавайте сразу, пока рыба не стала сухой."
+    ],
+    "description": "Тунец и томатная паста хорошо работают в пасте, когда есть мягкая соусная сборка, а не просто разрозненные компоненты."
+  },
+  {
+    "id": "69",
+    "title": "Картофельная запеканка с фаршем",
+    "timeMin": 45,
+    "tags": [
+      "bake",
+      "dinner"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Картофель",
+        "amount": 500,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Фарш",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 90,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и фарш сначала обжарьте, чтобы мясной слой получил аромат и не остался варёным по вкусу.",
+      "Картофель нарежьте тонко и уложите слоями, чтобы он успел приготовиться равномерно.",
+      "Если есть сметана, распределите её между слоями для мягкости; сыр добавьте ближе к финалу для румяной корочки.",
+      "Запекайте до полной мягкости картофеля и коротко дайте блюду стабилизироваться перед нарезкой."
+    ],
+    "description": "Картофельная запеканка с фаршем хороша, когда у неё есть мясной аромат снизу и мягкая связка между слоями, а не сухая масса."
+  },
+  {
+    "id": "70",
+    "title": "Кабачки с чесноком и йогуртом",
+    "timeMin": 14,
+    "tags": [
+      "quick",
+      "healthy",
+      "no_oven"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Кабачок",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Кабачок быстро прогрейте до мягкости, но не доводите до водянистой каши.",
+      "Йогурт соедините с чесноком и при желании с укропом, чтобы заправка была свежей и не тяжёлой.",
+      "Смешайте всё перед подачей, чтобы кабачок остался тёплым, а соус — живым."
+    ],
+    "description": "Кабачки с йогуртом работают на контрасте мягкой овощной основы и свежей кисломолочной заправки."
+  },
+  {
+    "id": "71",
+    "title": "Салат с капустой, огурцом и укропом",
+    "timeMin": 10,
+    "tags": [
+      "quick",
+      "healthy",
+      "no_oven"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Капуста",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 10,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Капусту нашинкуйте тонко и слегка помните руками, чтобы она стала удобнее в салате, но не потеряла хруст.",
+      "Огурец добавьте в самом конце, чтобы салат не ушёл в воду.",
+      "Заправьте всё йогуртом и укропом прямо перед подачей."
+    ],
+    "description": "Капуста, огурец и укроп — один из самых надёжных свежих салатных профилей: хруст, травяной акцент и лёгкость без лишней тяжести."
+  },
+  {
+    "id": "72",
+    "title": "Курица с брокколи в сметане",
+    "timeMin": 20,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу быстро обжарьте до уверенного прогрева, чтобы сок остался внутри.",
+      "Добавьте брокколи и доведите её до мягкости с лёгкой упругостью.",
+      "Сметану и чеснок вмешайте в конце и мягко прогрейте без долгого кипения, чтобы соус не расслоился.",
+      "Подавайте сразу, пока соус ещё держит блюдо собранным."
+    ],
+    "description": "Курица с брокколи в сметане работает на балансе: постный белок получает мягкость, а брокколи не теряет характер."
+  },
+  {
+    "id": "73",
+    "title": "Свинина с капустой и луком",
+    "timeMin": 28,
+    "tags": [
+      "stew",
+      "dinner",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Свинина",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Капуста",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и свинину прогрейте до появления хорошего мясного аромата.",
+      "Добавьте капусту и дайте ей осесть, чтобы она впитала жир и соки мяса.",
+      "Если есть паприка, вмешайте её в середине приготовления для тёплого акцента.",
+      "Тушите мягко до спокойной сочности, а не до сухого жаркого."
+    ],
+    "description": "Свинина с капустой — сильное домашнее сочетание, где капуста собирает жирность мяса и делает вкус глубже."
+  },
+  {
+    "id": "74",
+    "title": "Рис с яйцом и овощами",
+    "timeMin": 15,
+    "tags": [
+      "quick",
+      "one_pan",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рис",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 120,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Рис заранее доведите до готовности, чтобы затем только быстро собрать блюдо.",
+      "Яйцо приготовьте на сковороде так, чтобы оно осталось мягким и распределилось по рису, а не пересохло кусками.",
+      "Добавьте овощи и коротко прогрейте всё вместе, сохраняя их живую текстуру.",
+      "Подавайте сразу, пока блюдо остаётся лёгким, а не тяжёлым."
+    ],
+    "description": "Рис с яйцом и овощами хорош своей простотой: если не пересушить яйцо и не убить овощи, получается цельный быстрый ужин."
+  },
+  {
+    "id": "75",
+    "title": "Творожная намазка с чесноком и огурцом",
+    "timeMin": 8,
+    "tags": [
+      "quick",
+      "breakfast",
+      "no_oven"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Творог",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Огурец",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 4,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Хлеб",
+        "amount": 4,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Творог разомните до более пластичной текстуры, чтобы намазка не была зернистой и сухой.",
+      "Огурец нарежьте мелко и смешайте с творогом, чесноком и укропом.",
+      "Если есть хлеб, подавайте сразу на поджаренных ломтиках, чтобы получить текстурный контраст."
+    ],
+    "description": "Творожная намазка с огурцом и чесноком — полезный вариант завтрака или перекуса, где свежесть и молочная база звучат чисто и собранно."
+  },
+  {
+    "id": "76",
+    "title": "Овсяные оладьи с бананом",
+    "timeMin": 15,
+    "tags": [
+      "breakfast",
+      "quick"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Овсяные хлопья",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Банан",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Банан разомните, чтобы сладость распределилась по тесту без добавленного сахара.",
+      "Смешайте его с яйцом и овсяными хлопьями, а корицу добавьте только как ароматический акцент.",
+      "Жарьте небольшие оладьи на умеренном огне, чтобы они пропеклись внутри и не потемнели снаружи."
+    ],
+    "description": "Овсяные оладьи с бананом хороши, когда банан работает не как доминирующий вкус, а как мягкая сладкая связка."
+  },
+  {
+    "id": "77",
+    "title": "Рыба с рисом и укропом",
+    "timeMin": 22,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 10,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Рис приготовьте отдельно до мягкости, чтобы потом не перегреть рыбу в одной сковороде лишнее время.",
+      "Рыбу доведите до готовности на умеренном огне, не пересушивая поверхность.",
+      "Соедините с рисом и добавьте укроп, а при желании несколько капель лимона — прямо перед подачей."
+    ],
+    "description": "Рыба с рисом держится на чистоте вкуса: нейтральная основа риса, травяной финиш и лёгкая кислота работают лучше тяжёлого соуса."
+  },
+  {
+    "id": "78",
+    "title": "Кабачок с сыром и чесноком в духовке",
+    "timeMin": 26,
+    "tags": [
+      "bake",
+      "easy",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Кабачок",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сметана",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Кабачок нарежьте так, чтобы он успел пропечься, но не потерял форму.",
+      "Сметану и чеснок при наличии распределите тонким слоем, чтобы овощ не ушёл в сухость.",
+      "Сыр добавьте ближе к финалу, чтобы получить румяный верх без пересушивания кабачка."
+    ],
+    "description": "Кабачок с сыром и чесноком в духовке — хороший пример овощного блюда, которому нужна мягкая связка, а не только жар."
+  },
+  {
+    "id": "79",
+    "title": "Лаваш с курицей и сыром",
+    "timeMin": 14,
+    "tags": [
+      "quick",
+      "one_pan",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Лаваш",
+        "amount": 2,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Курица",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 100,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу сначала доведите до полной готовности, а не пытайтесь доготовить её уже внутри лаваша.",
+      "Соберите начинку с сыром и при желании с помидором, чтобы получить не только жирность, но и свежесть.",
+      "Подрумяньте лаваш на сковороде до хруста по краям и мягкой середины."
+    ],
+    "description": "Лаваш с курицей и сыром даёт быстрый ужин, если внутри есть не только белок и жир, но и хотя бы небольшой свежий акцент."
+  },
+  {
+    "id": "80",
+    "title": "Суп с брокколи и картофелем",
+    "timeMin": 24,
+    "tags": [
+      "soup",
+      "healthy",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 240,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сметана",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук прогрейте до мягкости, чтобы суп стартовал не только с воды и овощей, а с ароматики.",
+      "Картофель варите до почти полной готовности, затем добавьте брокколи, чтобы не убить её вкус долгой варкой.",
+      "Если есть сметана, вмешайте её в самом конце для мягкости и более округлого вкуса."
+    ],
+    "description": "Суп с брокколи и картофелем работает на балансе плотной основы и свежего овощного профиля без тяжёлого бульона."
+  },
+  {
+    "id": "81",
+    "title": "Говядина с гречкой и луком",
+    "timeMin": 30,
+    "tags": [
+      "dinner",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Гречка",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и говядину обжарьте до уверенного мясного аромата и лёгкой карамелизации лука.",
+      "Добавьте морковь, если используете, чтобы смягчить жёсткость мясного профиля.",
+      "Всыпьте гречку и доведите всё вместе до готовности, чтобы крупа набрала мясной вкус."
+    ],
+    "description": "Говядина с гречкой и луком — очень надёжное сочетание, где крупа не спорит с мясом, а работает как его спокойная основа."
+  },
+  {
+    "id": "82",
+    "title": "Кускус с курицей и сладким перцем",
+    "timeMin": 16,
+    "tags": [
+      "quick",
+      "healthy",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Кускус",
+        "amount": 150,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Курица",
+        "amount": 240,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу и чеснок быстро прогрейте, чтобы кускус получил ароматическую опору, а не просто сухой белок.",
+      "Сладкий перец добавьте так, чтобы он остался слегка упругим и дал свежесть.",
+      "Кускус доведите до готовности отдельно или привычным для вас способом, затем соедините всё перед подачей."
+    ],
+    "description": "Кускус с курицей и сладким перцем хорош тогда, когда перец не переварен и действительно даёт контраст к нейтральной основе."
+  },
+  {
+    "id": "83",
+    "title": "Творожный завтрак с яблоком и корицей",
+    "timeMin": 7,
+    "tags": [
+      "breakfast",
+      "quick",
+      "healthy"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Творог",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Творог доведите до более мягкой текстуры, добавив немного йогурта, если он есть.",
+      "Яблоко нарежьте непосредственно перед подачей, чтобы сохранить свежий хруст.",
+      "Корица должна только поддержать аромат, а не делать блюдо приторным."
+    ],
+    "description": "Творожный завтрак с яблоком хорош тем, что в нём есть и молочная мягкость, и свежий контраст, а не только сладость."
+  },
+  {
+    "id": "84",
+    "title": "Рыба с картофелем в сметане",
+    "timeMin": 34,
+    "tags": [
+      "bake",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 360,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Картофель уложите как нижний слой, чтобы он забрал часть рыбного сока и не остался сухим гарниром сам по себе.",
+      "Рыбу при желании сбрызните лимоном, затем распределите сметану, чтобы защитить её от пересушивания.",
+      "Запекайте под укрытием до мягкости, а в конце откройте форму и дайте верху слегка схватиться.",
+      "Если есть укроп, добавьте его уже перед подачей."
+    ],
+    "description": "Рыба с картофелем в сметане — сильный домашний вариант, где сметана даёт и защиту от сухости, и мягкий связующий вкус."
+  },
+  {
+    "id": "85",
+    "title": "Чечевичный суп с томатной пастой",
+    "timeMin": 28,
+    "tags": [
+      "soup",
+      "healthy",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Чечевица",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 35,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Сначала прогрейте лук и морковь, чтобы суп начался с ароматики, а не с пустой воды.",
+      "Добавьте томатную пасту, затем чечевицу и варите до мягкости на умеренном огне.",
+      "Если есть укроп, добавьте его уже перед подачей, чтобы бобовый вкус не остался тяжёлым."
+    ],
+    "description": "Чечевичный суп с томатной пастой хорош тем, что томат и укроп вытягивают бобовую основу из тяжёлой зоны в более живой и домашний вкус."
+  },
+  {
+    "id": "86",
+    "title": "Фасоль с курицей и сладким перцем",
+    "timeMin": 24,
+    "tags": [
+      "dinner",
+      "one_pan",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Фасоль",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Курица",
+        "amount": 240,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу и лук сначала обжарьте до явного мясного аромата.",
+      "Добавьте сладкий перец и фасоль так, чтобы перец остался живым, а не превратился в кашу.",
+      "Если есть паприка, дайте ей прогреться коротко, чтобы она собрала вкус блюда."
+    ],
+    "description": "Фасоль с курицей и сладким перцем работает лучше обычной фасолевой сковороды, потому что в ней есть и белок, и сладкий овощной контраст, и место для тёплой специи."
+  },
+  {
+    "id": "87",
+    "title": "Рыба с брокколи и лимоном",
+    "timeMin": 22,
+    "tags": [
+      "dinner",
+      "bake",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лимон",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 12,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Рыбу слегка сбрызните лимоном и маслом, чтобы вкус был чище, а поверхность не пересохла.",
+      "Брокколи готовьте рядом, но не слишком долго, чтобы сохранить её цвет и лёгкую упругость.",
+      "Если есть укроп, добавьте его в конце как свежий травяной финиш."
+    ],
+    "description": "Рыба с брокколи и лимоном — это чистый и лёгкий вариант, в котором лимон и зелень не дают рыбному вкусу стать тяжёлым."
+  },
+  {
+    "id": "88",
+    "title": "Говядина с грибами и сметаной",
+    "timeMin": 34,
+    "tags": [
+      "dinner",
+      "stew",
+      "hearty"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и грибы сначала обжарьте, чтобы получить не только влагу, но и глубокий аромат.",
+      "Говядину доводите мягко, а не на грубом сильном огне, чтобы она успела стать мягче.",
+      "Сметану вмешайте в конце, а паприку прогрейте коротко, чтобы собрать мясной вкус."
+    ],
+    "description": "Говядина с грибами и сметаной даёт домашний плотный вкус, если у мяса есть ароматика, а сметана не превращается в лишний жир, а именно собирает соус."
+  },
+  {
+    "id": "89",
+    "title": "Курица с капустой и томатной пастой",
+    "timeMin": 26,
+    "tags": [
+      "dinner",
+      "one_pan",
+      "stew"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Капуста",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 35,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу, лук и при желании чеснок прогрейте до нормальной ароматической базы.",
+      "Капусту тушите так, чтобы она стала мягче, но не потеряла структуру полностью.",
+      "Томатную пасту добавьте в середине, чтобы она дала контраст и не оставила блюдо плоским."
+    ],
+    "description": "Курица с капустой и томатной пастой работает за счёт простого, но очень полезного баланса: мясо, мягкая овощная основа и томатный акцент."
+  },
+  {
+    "id": "90",
+    "title": "Рисовый суп с рыбой и укропом",
+    "timeMin": 27,
+    "tags": [
+      "soup",
+      "healthy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Рис",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рыба",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Если есть лук и морковь, сначала слегка прогрейте их для более собранного вкуса.",
+      "Рис варите до почти готового состояния, а рыбу добавляйте позже, чтобы не переварить её.",
+      "Укроп вмешайте в самом конце, чтобы суп остался свежим и лёгким."
+    ],
+    "description": "Рисовый суп с рыбой и укропом хорош именно своей мягкостью: рис округляет основу, а укроп и позднее добавление рыбы не дают блюду стать мутным по вкусу."
+  },
+  {
+    "id": "91",
+    "title": "Гречка с грибами и сметаной",
+    "timeMin": 22,
+    "tags": [
+      "dinner",
+      "easy",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Гречка",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Грибы и лук сначала обжарьте, чтобы гречка получила не только нейтральную основу, но и аромат.",
+      "Гречку доведите до готовности привычным способом, затем соедините с грибами.",
+      "Если есть сметана, добавьте её в конце для мягкости и более собранной текстуры."
+    ],
+    "description": "Гречка с грибами и сметаной — спокойное, но сильное блюдо, если грибы действительно раскрыты на огне, а не просто добавлены ради галочки."
+  },
+  {
+    "id": "92",
+    "title": "Паста с курицей и брокколи",
+    "timeMin": 20,
+    "tags": [
+      "dinner",
+      "pasta",
+      "quick"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Курица",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Макароны отварите отдельно, а курицу доведите до готовности до соединения с пастой.",
+      "Брокколи добавьте ближе к концу, чтобы она осталась чуть упругой.",
+      "Сметану и чеснок используйте как мягкую связку, чтобы паста не осталась сухой."
+    ],
+    "description": "Паста с курицей и брокколи работает тогда, когда есть чем собрать основу: немного мягкого соуса и овощ, который не переварен."
+  },
+  {
+    "id": "93",
+    "title": "Овсянка с яблоком, йогуртом и корицей",
+    "timeMin": 8,
+    "tags": [
+      "breakfast",
+      "quick",
+      "healthy"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Овсяные хлопья",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 130,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Овсянку доведите до мягкости, но не переварите до полного исчезновения текстуры.",
+      "Яблоко нарежьте непосредственно перед подачей, чтобы сохранить хруст и свежесть.",
+      "Йогурт и корицу добавляйте уже вне сильного кипения."
+    ],
+    "description": "Овсянка с яблоком, йогуртом и корицей даёт правильный сладкий завтрак: мягкость есть, но её держат свежесть и живой фруктовый контраст."
+  },
+  {
+    "id": "94",
+    "title": "Творог с апельсином и йогуртом",
+    "timeMin": 5,
+    "tags": [
+      "breakfast",
+      "quick",
+      "light"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Творог",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Апельсин",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      }
+    ],
+    "steps": [
+      "Творог сначала смягчите йогуртом, чтобы блюдо не было сухим.",
+      "Апельсин добавляйте уже перед подачей, чтобы сохранить его сок и свежесть.",
+      "Не мешайте всё слишком долго, иначе текстура станет вялой."
+    ],
+    "description": "Творог с апельсином и йогуртом хорош тем, что молочная мягкость здесь поддержана не сахаром, а чистой цитрусовой свежестью."
+  },
+  {
+    "id": "95",
+    "title": "Запеканка из картофеля, брокколи и сыра",
+    "timeMin": 36,
+    "tags": [
+      "bake",
+      "dinner",
+      "vegetarian"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Картофель",
+        "amount": 360,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Яйцо",
+        "amount": 2,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Картофель подготовьте так, чтобы он не остался сырым основанием под готовой верхушкой.",
+      "Брокколи кладите не в самом начале, чтобы она не потеряла вкус и цвет.",
+      "Сыр и при наличии сметану или яйцо используйте как связку и защиту от сухости."
+    ],
+    "description": "Запеканка из картофеля, брокколи и сыра получается сильной не за счёт сложности, а за счёт правильной связки и защиты овощей от пересушивания."
+  },
+  {
+    "id": "96",
+    "title": "Фасоль с рисом и томатной пастой",
+    "timeMin": 20,
+    "tags": [
+      "one_pan",
+      "healthy",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Фасоль",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 150,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 35,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук сначала прогрейте, чтобы у риса и фасоли была ароматическая опора.",
+      "Томатную пасту добавьте так, чтобы она успела раскрыться, а не осталась сырым кислым пятном.",
+      "Паприку используйте коротко и аккуратно, чтобы дать тёплый акцент без горечи."
+    ],
+    "description": "Фасоль с рисом и томатной пастой — хороший офлайн-вариант, если бобовая основа получает томатную глубину и не остаётся просто тяжёлой массой."
+  },
+  {
+    "id": "97",
+    "title": "Свинина с грибами и сметаной",
+    "timeMin": 30,
+    "tags": [
+      "dinner",
+      "stew",
+      "hearty"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Свинина",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Паприка",
+        "amount": 2,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Лук и грибы доведите до аромата до того, как соединять всё со свининой.",
+      "Свинину готовьте без спешки, чтобы жирность не была грубой и тяжёлой.",
+      "Сметану и паприку добавляйте ближе к концу, чтобы получить мягкий, но не глухой вкус."
+    ],
+    "description": "Свинина с грибами и сметаной хороша тогда, когда жирность собрана ароматикой и мягкой связкой, а не давит сама по себе."
+  },
+  {
+    "id": "98",
+    "title": "Куриный суп с капустой и укропом",
+    "timeMin": 29,
+    "tags": [
+      "soup",
+      "healthy",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Капуста",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Если есть лук и морковь, прогрейте их первыми, чтобы суп не был пустым по аромату.",
+      "Капусту кладите позже, чтобы она сохранила вкус и не растворилась полностью.",
+      "Укроп добавьте уже в тарелке или почти перед выключением."
+    ],
+    "description": "Куриный суп с капустой и укропом — это лёгкий домашний суп, где укроп и правильная очередь овощей делают вкус чище и живее."
+  },
+  {
+    "id": "99",
+    "title": "Рыба с кабачком и йогуртом",
+    "timeMin": 20,
+    "tags": [
+      "dinner",
+      "healthy",
+      "quick"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Кабачок",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 5,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Рыбу доведите до готовности аккуратно, не пересушивая её ради лишней корочки.",
+      "Кабачок готовьте быстро, чтобы он оставался мягким, но не водянистым.",
+      "Йогурт, чеснок и укроп используйте как холодный или тёплый мягкий финиш."
+    ],
+    "description": "Рыба с кабачком и йогуртом — лёгкое блюдо, где йогурт и укроп дают чистый финиш, а кабачок поддерживает рыбу, а не перегружает её."
+  },
+  {
+    "id": "100",
+    "title": "Лаваш с творогом и яблоком",
+    "timeMin": 10,
+    "tags": [
+      "breakfast",
+      "quick",
+      "light"
+    ],
+    "servingsBase": 1,
+    "ingredients": [
+      {
+        "name": "Лаваш",
+        "amount": 1,
+        "unit": "pcs",
+        "required": true
+      },
+      {
+        "name": "Творог",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яблоко",
+        "amount": 120,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Йогурт",
+        "amount": 50,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Корица",
+        "amount": 1,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Творог при необходимости смягчите йогуртом, чтобы начинка не была сухой.",
+      "Яблоко добавляйте в начинку ближе к сборке, чтобы сохранить свежесть и лёгкий хруст.",
+      "Лаваш прогрейте коротко, только чтобы он стал собранным и приятным по текстуре."
+    ],
+    "description": "Лаваш с творогом и яблоком — хороший сладкий завтрак без тяжести, если оставить яблоку живой хруст и не перебить всё одной сладостью."
+  },
+  {
+    "id": "101",
+    "title": "Паста с грибами и томатной пастой",
+    "timeMin": 22,
+    "tags": [
+      "pasta",
+      "one_pan",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 35,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 15,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны до состояния al dente, сохранив немного горячей воды от варки.",
+      "На масле прогрейте лук и грибы, затем вмешайте томатную пасту и дайте ей коротко раскрыться.",
+      "Соедините макароны с соусной частью, при необходимости добавьте немного воды от варки и доведите до собранного вкуса.",
+      "Перед подачей добавьте сыр, чтобы паста стала мягче и насыщеннее."
+    ],
+    "description": "Паста с грибами и томатной пастой — это домашняя красная паста с понятным соусом, где грибы добавляют глубину, а томатная паста даёт опору и контраст."
+  },
+  {
+    "id": "102",
+    "title": "Паста с курицей и сметаной",
+    "timeMin": 24,
+    "tags": [
+      "pasta",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Курица",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Сыр",
+        "amount": 35,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны до готовности, а курицу нарежьте небольшими кусочками.",
+      "Обжарьте курицу с луком до готовности, добавьте чеснок и только затем вмешайте сметану.",
+      "Соедините макароны с соусом и прогрейте всё вместе, чтобы сметана связала блюдо, а не осталась отдельным слоем.",
+      "Если есть сыр, добавьте его в самом конце для мягкого финиша."
+    ],
+    "description": "Паста с курицей и сметаной — это мягкая домашняя паста, где сметанный соус собирает курицу и основу в одно цельное блюдо."
+  },
+  {
+    "id": "103",
+    "title": "Паста с тунцом и помидорами",
+    "timeMin": 18,
+    "tags": [
+      "pasta",
+      "quick",
+      "dinner"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Тунец",
+        "amount": 140,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Масло",
+        "amount": 12,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны до готовности и подготовьте тунца с помидорами.",
+      "На небольшом количестве масла прогрейте лук и помидоры, чтобы они стали основой лёгкого соуса.",
+      "Добавьте тунца, быстро соедините с макаронами и не держите на огне слишком долго, чтобы рыба не потеряла чистый вкус.",
+      "Подавайте сразу, пока соус остаётся свежим и ярким."
+    ],
+    "description": "Паста с тунцом и помидорами — это быстрый вариант, где томаты дают рыбе нужную кислотность, а сама паста не уходит в сухость."
+  },
+  {
+    "id": "104",
+    "title": "Паста с брокколи и сыром",
+    "timeMin": 20,
+    "tags": [
+      "pasta",
+      "easy",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Молоко",
+        "amount": 100,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Масло сливочное",
+        "amount": 12,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны и отдельно быстро доведите брокколи до мягкости без переваривания.",
+      "На сливочном масле соедините брокколи с молоком и сыром, чтобы получилась мягкая связывающая часть.",
+      "Вмешайте макароны в сырную основу и прогрейте до единого вкуса.",
+      "Подавайте сразу, пока брокколи сохраняет свежесть, а сыр остаётся тягучим."
+    ],
+    "description": "Паста с брокколи и сыром — это мягкое, но не тяжёлое блюдо, где сыр связывает основу, а брокколи даёт свежий и зелёный акцент."
+  },
+  {
+    "id": "105",
+    "title": "Рыбный суп с рисом и лимоном",
+    "timeMin": 30,
+    "tags": [
+      "soup",
+      "healthy",
+      "no_oven"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лимон",
+        "amount": 0.5,
+        "unit": "pcs",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Прогрейте лук и морковь, чтобы суп получил базовую ароматику ещё до варки.",
+      "Добавьте рис, затем влейте воду и варите на слабом огне до почти полной готовности основы.",
+      "Рыбу закладывайте ближе к концу и не доводите суп до агрессивного кипения.",
+      "Лимон и укроп добавьте перед подачей, чтобы вкус остался чистым и живым."
+    ],
+    "description": "Рыбный суп с рисом и лимоном — лёгкий домашний суп, в котором лимон и укроп не дают рыбе уйти в тяжесть, а рис делает блюдо спокойным и собранным."
+  },
+  {
+    "id": "106",
+    "title": "Рыбный суп с картофелем и укропом",
+    "timeMin": 32,
+    "tags": [
+      "soup",
+      "no_oven",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 0.5,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Сначала прогрейте лук и морковь, затем добавьте картофель и влейте воду.",
+      "Варите основу на спокойном огне до мягкости картофеля.",
+      "Рыбу добавьте позже, чтобы она дошла мягко и не развалилась от лишнего кипения.",
+      "Укроп и лимон используйте уже в самом конце или прямо в тарелке."
+    ],
+    "description": "Рыбный суп с картофелем и укропом — это понятный домашний суп, где укроп и лимон освежают рыбу, а картофель делает подачу более сытной."
+  },
+  {
+    "id": "107",
+    "title": "Рыба с картофелем и укропом в духовке",
+    "timeMin": 38,
+    "tags": [
+      "oven",
+      "dinner",
+      "healthy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 380,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 0.5,
+        "unit": "pcs",
+        "required": false
+      },
+      {
+        "name": "Укроп",
+        "amount": 8,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лук",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Подготовьте рыбу и картофель, а если есть лук, разложите его тонким слоем под основу.",
+      "Сбрызните рыбу лимоном, при желании добавьте немного сметаны, накройте форму и запекайте до мягкости.",
+      "В конце откройте форму, дайте поверхности слегка схватиться и не пересушите рыбу.",
+      "Перед подачей добавьте укроп для чистого травяного финиша."
+    ],
+    "description": "Рыба с картофелем и укропом в духовке — это мягкое запечённое блюдо, где лимон и укроп держат вкус чистым, а картофель забирает соки и становится насыщеннее."
+  },
+  {
+    "id": "108",
+    "title": "Рыба с брокколи и сметаной в духовке",
+    "timeMin": 30,
+    "tags": [
+      "oven",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Брокколи",
+        "amount": 220,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 100,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Чеснок",
+        "amount": 6,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Лимон",
+        "amount": 0.5,
+        "unit": "pcs",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Разложите рыбу и брокколи в форме так, чтобы куски лежали свободно и пропекались равномерно.",
+      "Сметану смешайте с чесноком и лимоном, затем распределите по блюду как мягкую защиту от сухости.",
+      "Накройте форму и запекайте до готовности, а в конце откройте на пару минут для лёгкой корочки.",
+      "Подавайте сразу, пока соус остаётся мягким, а брокколи не потеряла свежий вкус."
+    ],
+    "description": "Рыба с брокколи и сметаной в духовке — это лёгкое, но собранное блюдо, где сметана удерживает сочность, а брокколи добавляет свежий зелёный контраст."
+  },
+  {
+    "id": "109",
+    "title": "Рыба с помидорами и луком на сковороде",
+    "timeMin": 18,
+    "tags": [
+      "quick",
+      "dinner",
+      "one_pan"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Рыба",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Масло",
+        "amount": 12,
+        "unit": "ml",
+        "required": false
+      },
+      {
+        "name": "Чеснок",
+        "amount": 5,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "На сковороде прогрейте лук и чеснок, чтобы сначала получить ароматику, а не голый томатный вкус.",
+      "Добавьте помидоры и дайте им стать мягкой сочной основой.",
+      "Рыбу готовьте в этом соусе коротко и аккуратно, чтобы она дошла до готовности без лишней сухости.",
+      "Подавайте сразу, пока помидорный сок остаётся ярким и поддерживает рыбу."
+    ],
+    "description": "Рыба с помидорами и луком на сковороде — быстрый вариант, где томаты дают кислоту и сочность, а лук собирает основу в понятный домашний вкус."
+  },
+  {
+    "id": "110",
+    "title": "Говядина с картофелем и томатной пастой",
+    "timeMin": 42,
+    "tags": [
+      "stew",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 420,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 40,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 80,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте говядину, затем добавьте лук и морковь, чтобы мясная база не была пустой по аромату.",
+      "Вмешайте томатную пасту и дайте ей раскрыться до того, как добавите картофель и немного воды.",
+      "Тушите на умеренном огне до мягкости мяса и картофеля.",
+      "Перед подачей попробуйте вкус ещё раз: томат должен собирать жирность, а не спорить с мясом."
+    ],
+    "description": "Говядина с картофелем и томатной пастой — насыщенное тушёное блюдо, где томатная глубина помогает мясу звучать ярче и не уходить в тяжесть."
+  },
+  {
+    "id": "111",
+    "title": "Говядина с капустой и морковью",
+    "timeMin": 40,
+    "tags": [
+      "stew",
+      "healthy",
+      "dinner"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Капуста",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Начните с лука и моркови, затем обжарьте с ними говядину, чтобы построить ароматическую основу.",
+      "Добавьте капусту и готовьте мягко, а томатную пасту используйте как акцент, а не как доминирующий вкус.",
+      "Доведите блюдо под крышкой до мягкости, чтобы капуста не была сырой, а мясо не оставалось жёстким.",
+      "Перед подачей дайте блюду пару минут спокойно постоять."
+    ],
+    "description": "Говядина с капустой и морковью — домашнее тушёное блюдо, где капуста смягчает жирность мяса, а морковь и лук добавляют теплоту и глубину."
+  },
+  {
+    "id": "112",
+    "title": "Говядина с грибами и рисом",
+    "timeMin": 38,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Говядина",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте говядину, затем добавьте лук и грибы, чтобы мясной вкус получил дополнительную глубину.",
+      "Вмешайте рис и готовьте так, чтобы основа впитывала соки от мяса и грибов.",
+      "Если есть сметана, добавьте её в самом конце как мягкую связку, а не в начале.",
+      "Подавайте после короткого отдыха, чтобы рис успел стабилизироваться."
+    ],
+    "description": "Говядина с грибами и рисом — это сытное блюдо в одной посуде, где грибы усиливают мясную глубину, а рис собирает всё в спокойную подачу."
+  },
+  {
+    "id": "113",
+    "title": "Свинина с картофелем и грибами в духовке",
+    "timeMin": 48,
+    "tags": [
+      "oven",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Свинина",
+        "amount": 340,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Картофель",
+        "amount": 420,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 90,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Подготовьте свинину, картофель, грибы и лук; если есть сметана, используйте её как мягкую защиту для мяса.",
+      "Разложите всё в форме, накройте и запекайте до мягкости картофеля и мяса.",
+      "В конце откройте форму, чтобы получить лёгкую корочку, но не пересушить свинину.",
+      "После духовки дайте блюду коротко отдохнуть и только потом подавайте."
+    ],
+    "description": "Свинина с картофелем и грибами в духовке — сытное запечённое блюдо, где грибы и лук усиливают мясной вкус, а картофель забирает соки и становится насыщеннее."
+  },
+  {
+    "id": "114",
+    "title": "Свинина с томатной пастой и луком",
+    "timeMin": 28,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Свинина",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 80,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 35,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Перец сладкий",
+        "amount": 120,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Чеснок",
+        "amount": 5,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте свинину до уверенного цвета, затем добавьте лук и чеснок.",
+      "Вмешайте томатную пасту и дайте ей чуть поджариться, чтобы убрать сырую кислотность.",
+      "Если есть сладкий перец, добавьте его ближе к середине, чтобы сохранить часть свежего профиля.",
+      "Доведите блюдо до мягкости и подавайте горячим."
+    ],
+    "description": "Свинина с томатной пастой и луком — это быстрая мясная сковорода, где томатная глубина и лук удерживают жирность блюда в собранном состоянии."
+  },
+  {
+    "id": "115",
+    "title": "Свинина с капустой и морковью",
+    "timeMin": 35,
+    "tags": [
+      "stew",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Свинина",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Капуста",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Морковь",
+        "amount": 90,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 25,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Начните с лука и моркови, затем обжарьте свинину до первого румяного слоя.",
+      "Добавьте капусту и тушите под крышкой, чтобы она стала мягкой, но не потеряла характер.",
+      "Немного томатной пасты можно добавить для более собранного и чистого мясного вкуса.",
+      "Подавайте после короткого отдыха, чтобы капуста и мясо обменялись соками."
+    ],
+    "description": "Свинина с капустой и морковью — это домашнее тушёное блюдо, где капуста снимает часть тяжести, а томатный акцент при желании делает вкус чище."
+  },
+  {
+    "id": "116",
+    "title": "Фарш с рисом и помидорами",
+    "timeMin": 26,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Фарш",
+        "amount": 300,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Рис",
+        "amount": 160,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 35,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Обжарьте фарш с луком до полной готовности, чтобы мясная основа не была сырой и рыхлой.",
+      "Добавьте помидоры и дайте им стать сочной частью блюда.",
+      "Вмешайте рис и доведите всё вместе до собранного вкуса.",
+      "Если есть сыр, добавьте его в самом конце для мягкой связки."
+    ],
+    "description": "Фарш с рисом и помидорами — понятное блюдо на каждый день, где томаты освежают мясо, а рис собирает всё в спокойную и сытную подачу."
+  },
+  {
+    "id": "117",
+    "title": "Фарш с кабачком и сыром в духовке",
+    "timeMin": 36,
+    "tags": [
+      "oven",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Фарш",
+        "amount": 320,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Кабачок",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Яйцо",
+        "amount": 1,
+        "unit": "pcs",
+        "required": false
+      },
+      {
+        "name": "Сметана",
+        "amount": 70,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Фарш сначала прогрейте с луком до уверенной готовности, а кабачок подготовьте отдельно.",
+      "Соберите всё в форме: яйцо и сметана, если есть, помогут сделать структуру более собранной.",
+      "Накройте форму на первую часть запекания, затем откройте и доведите верх до лёгкой корочки.",
+      "Подавайте после короткого отдыха, чтобы соки распределились равномерно."
+    ],
+    "description": "Фарш с кабачком и сыром в духовке — это домашняя запеканка, где кабачок даёт мягкость, а сыр и яйцо помогают удержать форму и вкус."
+  },
+  {
+    "id": "118",
+    "title": "Гречка с говядиной и грибами",
+    "timeMin": 34,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 3,
+    "ingredients": [
+      {
+        "name": "Гречка",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Говядина",
+        "amount": 280,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Грибы",
+        "amount": 170,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сметана",
+        "amount": 60,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Начните с лука и грибов, затем обжарьте говядину, чтобы получить глубокую мясную базу.",
+      "Добавьте гречку и готовьте так, чтобы она впитала соки от мяса и грибов.",
+      "Сметану лучше вводить уже ближе к финалу как мягкий связующий штрих.",
+      "Перед подачей дайте блюду минуту постоять, чтобы гречка собралась."
+    ],
+    "description": "Гречка с говядиной и грибами — плотное домашнее блюдо, где грибы усиливают мясной вкус, а гречка забирает на себя всю глубину основы."
+  },
+  {
+    "id": "119",
+    "title": "Курица с макаронами и сыром",
+    "timeMin": 24,
+    "tags": [
+      "one_pan",
+      "dinner",
+      "pasta"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Курица",
+        "amount": 260,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Помидор",
+        "amount": 150,
+        "unit": "g",
+        "required": false
+      },
+      {
+        "name": "Молоко",
+        "amount": 90,
+        "unit": "ml",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Курицу доведите до готовности отдельно, чтобы она не осталась сырой внутри.",
+      "Отварите макароны и соедините их с курицей, молоком и сыром, чтобы получить мягкую связку, а не сухую смесь.",
+      "Если есть помидор, добавьте его ближе к финалу для более живого контраста.",
+      "Подавайте сразу, пока сыр держит блюдо собранным."
+    ],
+    "description": "Курица с макаронами и сыром — это домашний вариант мягкой пасты, где сыр связывает основу, а помидор при желании добавляет нужную свежесть."
+  },
+  {
+    "id": "120",
+    "title": "Паста с говядиной и томатной пастой",
+    "timeMin": 28,
+    "tags": [
+      "pasta",
+      "dinner",
+      "easy"
+    ],
+    "servingsBase": 2,
+    "ingredients": [
+      {
+        "name": "Макароны",
+        "amount": 180,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Говядина",
+        "amount": 240,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Лук",
+        "amount": 70,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Томатная паста",
+        "amount": 40,
+        "unit": "g",
+        "required": true
+      },
+      {
+        "name": "Сыр",
+        "amount": 30,
+        "unit": "g",
+        "required": false
+      }
+    ],
+    "steps": [
+      "Отварите макароны до состояния al dente и подготовьте мясную часть отдельно.",
+      "Обжарьте говядину с луком, затем вмешайте томатную пасту и дайте ей собрать вкус основы.",
+      "Соедините мясной соус с макаронами и прогрейте всё вместе, при необходимости добавив немного воды от варки.",
+      "Сыр добавляйте уже в конце, чтобы он смягчил блюдо, но не забил томатный профиль."
+    ],
+    "description": "Паста с говядиной и томатной пастой — более плотный вариант красной пасты, где томат и лук держат мясной вкус собранным, а сама основа не уходит в сухость."
   }
 ]

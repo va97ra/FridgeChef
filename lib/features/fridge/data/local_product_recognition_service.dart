@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_image_labeling/google_mlkit_image_labeling.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -11,21 +8,26 @@ import '../domain/detected_product_draft.dart';
 import '../domain/photo_import_result.dart';
 import '../domain/photo_import_utils.dart';
 import '../domain/product_catalog_entry.dart';
+import '../domain/product_search_suggestion.dart';
+import 'product_catalog_repo.dart';
 
 final localProductRecognitionServiceProvider =
     Provider<LocalProductRecognitionService>((ref) {
-  return const LocalProductRecognitionService();
+  return LocalProductRecognitionService(
+    catalogRepo: ref.watch(productCatalogRepoProvider),
+  );
 });
 
 class LocalProductRecognitionService {
-  static const _catalogPath = 'assets/products/catalog_ru.json';
-  static List<ProductCatalogEntry>? _cachedCatalog;
+  final ProductCatalogRepo catalogRepo;
 
-  const LocalProductRecognitionService();
+  const LocalProductRecognitionService({
+    required this.catalogRepo,
+  });
 
   Future<PhotoImportResult> detectFromImage(String imagePath) async {
     final warnings = <String>[];
-    final catalog = await _loadCatalog();
+    final catalog = await catalogRepo.loadCatalog();
     final inputImage = InputImage.fromFilePath(imagePath);
     final recognizer = TextRecognizer(script: TextRecognitionScript.latin);
     final labeler = ImageLabeler(
@@ -53,7 +55,8 @@ class LocalProductRecognitionService {
       );
 
       if (drafts.isEmpty) {
-        warnings.add('Не удалось уверенно распознать продукты, проверьте фото.');
+        warnings
+            .add('Не удалось уверенно распознать продукты, проверьте фото.');
       }
 
       return PhotoImportResult(
@@ -89,6 +92,8 @@ class LocalProductRecognitionService {
       required Unit unit,
       required double confidence,
       required String rawToken,
+      String? matchedProductId,
+      List<ProductSearchSuggestion> candidateMatches = const [],
     }) {
       final normalizedName = normalizeProductToken(name);
       if (normalizedName.isEmpty) {
@@ -105,6 +110,8 @@ class LocalProductRecognitionService {
           confidence: confidence.clamp(0.0, 1.0),
           rawTokens: [rawToken],
           source: DetectionSource.local,
+          matchedProductId: matchedProductId,
+          candidateMatches: candidateMatches,
         );
         return;
       }
@@ -115,35 +122,45 @@ class LocalProductRecognitionService {
             ? confidence.clamp(0.0, 1.0)
             : existing.confidence,
         rawTokens: [...existing.rawTokens, rawToken],
+        matchedProductId: matchedProductId ?? existing.matchedProductId,
+        candidateMatches: existing.candidateMatches.isNotEmpty
+            ? existing.candidateMatches
+            : candidateMatches,
       );
     }
 
     for (final line in lines) {
-      final match = findBestCatalogMatch(line, catalog);
-      if (match == null) {
+      final candidates = findCatalogMatches(line, catalog, limit: 4);
+      if (candidates.isEmpty) {
         continue;
       }
+      final match = candidates.first;
       final amountUnit = tryExtractAmountUnit(line);
       upsertDraft(
         name: match.name,
         amount: amountUnit?.amount ?? 1,
-        unit: amountUnit?.unit ?? Unit.pcs,
-        confidence: match.confidence,
+        unit: amountUnit?.unit ?? match.defaultUnit,
+        confidence: match.score,
         rawToken: line,
+        matchedProductId: match.id,
+        candidateMatches: candidates,
       );
     }
 
     for (final label in labels) {
-      final match = findBestCatalogMatch(label.label, catalog);
-      if (match == null) {
+      final candidates = findCatalogMatches(label.label, catalog, limit: 4);
+      if (candidates.isEmpty) {
         continue;
       }
+      final match = candidates.first;
       upsertDraft(
         name: match.name,
         amount: 1,
-        unit: Unit.pcs,
-        confidence: ((match.confidence + label.confidence) / 2).clamp(0.0, 1.0),
+        unit: match.defaultUnit,
+        confidence: ((match.score + label.confidence) / 2).clamp(0.0, 1.0),
         rawToken: label.label,
+        matchedProductId: match.id,
+        candidateMatches: candidates,
       );
     }
 
@@ -164,20 +181,5 @@ class LocalProductRecognitionService {
         source: DetectionSource.local,
       ),
     ];
-  }
-
-  Future<List<ProductCatalogEntry>> _loadCatalog() async {
-    final cached = _cachedCatalog;
-    if (cached != null && cached.isNotEmpty) {
-      return cached;
-    }
-
-    final jsonText = await rootBundle.loadString(_catalogPath);
-    final list = jsonDecode(jsonText) as List<dynamic>;
-    final catalog = list
-        .map((entry) => ProductCatalogEntry.fromJson(entry as Map<String, dynamic>))
-        .toList();
-    _cachedCatalog = catalog;
-    return catalog;
   }
 }

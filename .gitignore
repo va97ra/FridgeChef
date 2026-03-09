@@ -45,6 +45,9 @@ app.*.map.json
 
 # Android Studio will automatically create this file
 android/local.properties
+android/keystore.properties
+android/*.jks
+android/*.keystore
 
 # Exceptions to above rules.
 !/packages/*/example/.DS_Store

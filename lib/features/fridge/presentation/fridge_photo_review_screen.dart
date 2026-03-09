@@ -5,10 +5,12 @@ import 'package:uuid/uuid.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/utils/units.dart';
 import '../../../core/widgets/app_scaffold.dart';
+import '../data/product_search_service.dart';
 import '../domain/detected_product_draft.dart';
 import '../domain/fridge_item.dart';
 import '../domain/photo_import_result.dart';
 import '../domain/photo_import_utils.dart';
+import '../domain/product_search_suggestion.dart';
 import 'providers.dart';
 
 class FridgePhotoApplyResult {
@@ -34,9 +36,11 @@ class FridgePhotoReviewScreen extends ConsumerStatefulWidget {
       _FridgePhotoReviewScreenState();
 }
 
-class _FridgePhotoReviewScreenState extends ConsumerState<FridgePhotoReviewScreen> {
+class _FridgePhotoReviewScreenState
+    extends ConsumerState<FridgePhotoReviewScreen> {
   late List<DetectedProductDraft> _drafts;
   bool _saving = false;
+  final Map<String, List<ProductSearchSuggestion>> _candidateMatches = {};
 
   @override
   void initState() {
@@ -47,8 +51,47 @@ class _FridgePhotoReviewScreenState extends ConsumerState<FridgePhotoReviewScree
         draft: draft,
         fridgeItems: fridgeItems,
       );
+      _candidateMatches[draft.id] = draft.candidateMatches;
       return draft.copyWith(mergeTargetFridgeItemId: suggested);
     }).toList();
+    _primeCandidateMatches();
+  }
+
+  Future<void> _primeCandidateMatches() async {
+    final service = ref.read(productSearchServiceProvider);
+    final updates = <String, List<ProductSearchSuggestion>>{};
+
+    for (final draft in _drafts) {
+      if (_candidateMatches[draft.id]?.isNotEmpty ?? false) {
+        continue;
+      }
+      updates[draft.id] = await service.search(draft.name, limit: 4);
+    }
+
+    if (!mounted || updates.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _candidateMatches.addAll(updates);
+    });
+  }
+
+  Future<void> _refreshCandidatesForDraft(int index, String query) async {
+    final service = ref.read(productSearchServiceProvider);
+    final suggestions = query.trim().isEmpty
+        ? await service.recentSuggestions(limit: 4)
+        : await service.search(query, limit: 4);
+
+    if (!mounted) {
+      return;
+    }
+
+    final draft = _drafts[index];
+    setState(() {
+      _candidateMatches[draft.id] = suggestions;
+      _drafts[index] = draft.copyWith(candidateMatches: suggestions);
+    });
   }
 
   @override
@@ -76,15 +119,43 @@ class _FridgePhotoReviewScreenState extends ConsumerState<FridgePhotoReviewScree
                   draft: draft,
                   fridgeItems: fridgeItems,
                 );
-                final mergeId = draft.mergeTargetFridgeItemId ?? suggestedMergeId;
-                final mergeTarget = mergeId == null
-                    ? null
-                    : _findById(fridgeItems, mergeId);
+                final mergeId =
+                    draft.mergeTargetFridgeItemId ?? suggestedMergeId;
+                final mergeTarget =
+                    mergeId == null ? null : _findById(fridgeItems, mergeId);
 
                 return _DraftCard(
                   draft: draft,
                   mergeTarget: mergeTarget,
+                  candidates:
+                      _candidateMatches[draft.id] ?? draft.candidateMatches,
                   onChanged: (updated) {
+                    setState(() {
+                      _drafts[index] = updated;
+                    });
+                  },
+                  onNameChanged: (value) {
+                    final updated = draft.copyWith(
+                      name: value,
+                      matchedProductId: null,
+                      clearMergeTarget: true,
+                    );
+                    setState(() {
+                      _drafts[index] = updated;
+                    });
+                    _refreshCandidatesForDraft(index, value);
+                  },
+                  onSuggestionSelected: (suggestion) {
+                    final updated = draft.copyWith(
+                      name: suggestion.name,
+                      unit: draft.unit == Unit.pcs
+                          ? suggestion.defaultUnit
+                          : draft.unit,
+                      matchedProductId: suggestion.catalogId,
+                      candidateMatches:
+                          _candidateMatches[draft.id] ?? draft.candidateMatches,
+                      clearMergeTarget: true,
+                    );
                     setState(() {
                       _drafts[index] = updated;
                     });
@@ -160,9 +231,11 @@ class _FridgePhotoReviewScreenState extends ConsumerState<FridgePhotoReviewScree
             to: target.unit,
           );
           if (converted != null) {
-            final updated =
-                target.copyWith(amount: target.amount + converted);
-            await notifier.updateItem(updated);
+            final updated = target.copyWith(amount: target.amount + converted);
+            await notifier.updateItem(
+              updated,
+              productId: draft.matchedProductId,
+            );
             fridgeMap[updated.id] = updated;
             mergedCount++;
             continue;
@@ -176,7 +249,7 @@ class _FridgePhotoReviewScreenState extends ConsumerState<FridgePhotoReviewScree
         amount: amount,
         unit: draft.unit,
       );
-      await notifier.addItem(newItem);
+      await notifier.addItem(newItem, productId: draft.matchedProductId);
       addedCount++;
     }
 
@@ -239,13 +312,19 @@ class _WarningsCard extends StatelessWidget {
 class _DraftCard extends StatelessWidget {
   final DetectedProductDraft draft;
   final FridgeItem? mergeTarget;
+  final List<ProductSearchSuggestion> candidates;
   final ValueChanged<DetectedProductDraft> onChanged;
+  final ValueChanged<String> onNameChanged;
+  final ValueChanged<ProductSearchSuggestion> onSuggestionSelected;
   final ValueChanged<bool> onMergeChanged;
 
   const _DraftCard({
     required this.draft,
     required this.mergeTarget,
+    required this.candidates,
     required this.onChanged,
+    required this.onNameChanged,
+    required this.onSuggestionSelected,
     required this.onMergeChanged,
   });
 
@@ -269,29 +348,44 @@ class _DraftCard extends StatelessWidget {
               ),
               Expanded(
                 child: TextFormField(
+                  key: ValueKey('${draft.id}-${draft.name}'),
                   initialValue: draft.name,
                   decoration: const InputDecoration(
                     labelText: 'Продукт',
                   ),
-                  onChanged: (value) {
-                    onChanged(
-                      draft.copyWith(
-                        name: value,
-                        clearMergeTarget: true,
-                      ),
-                    );
-                  },
+                  onChanged: onNameChanged,
                 ),
               ),
               const SizedBox(width: 8),
               _ConfidenceBadge(confidence: draft.confidence),
             ],
           ),
+          if (candidates.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: candidates.map((candidate) {
+                  final isSelected = normalizeProductToken(candidate.name) ==
+                      normalizeProductToken(draft.name);
+                  return ChoiceChip(
+                    label: Text(candidate.name),
+                    selected: isSelected,
+                    onSelected: (_) => onSuggestionSelected(candidate),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: TextFormField(
+                  key: ValueKey(
+                      '${draft.id}-${draft.amount}-${draft.unit.name}'),
                   initialValue: _formatAmount(draft.amount),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,

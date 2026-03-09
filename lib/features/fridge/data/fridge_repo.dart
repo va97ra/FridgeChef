@@ -31,4 +31,19 @@ class FridgeRepo {
   Future<void> delete(String id) async {
     await _getBox().delete(id);
   }
+
+  Future<void> clear() async {
+    await _getBox().clear();
+  }
+
+  Future<void> replaceAll(List<FridgeItem> items) async {
+    final box = _getBox();
+    await box.clear();
+    if (items.isEmpty) {
+      return;
+    }
+    await box.putAll({
+      for (final item in items) item.id: FridgeHiveDto.fromDomain(item),
+    });
+  }
 }

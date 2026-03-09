@@ -1,15 +1,18 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../theme/tokens.dart';
 
-/// Базовый скаффолд приложения с градиентным фоном и декоративными пятнами.
+import '../theme/tokens.dart';
+import 'app_icon_button.dart';
+
 class AppScaffold extends StatelessWidget {
+  static const _countertopTextureAsset = 'assets/images/countertop_texture.png';
+
   final Widget body;
   final String? title;
   final Widget? floatingActionButton;
   final List<Widget>? actions;
   final Widget? leading;
   final bool showBackButton;
+  final EdgeInsetsGeometry bodyPadding;
 
   const AppScaffold({
     super.key,
@@ -19,68 +22,35 @@ class AppScaffold extends StatelessWidget {
     this.actions,
     this.leading,
     this.showBackButton = true,
+    this.bodyPadding = const EdgeInsets.symmetric(horizontal: AppTokens.p20),
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      backgroundColor: AppTokens.colors.background,
       appBar: title != null ? _buildAppBar(context) : null,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Фоновый градиент
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: AppTokens.bgGradient,
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(_countertopTextureAsset),
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+            opacity: 0.9,
+            filterQuality: FilterQuality.high,
           ),
-
-          // Декоративный блоб — верхний правый
-          Positioned(
-            top: -100,
-            right: -80,
-            child: Container(
-              width: 350,
-              height: 350,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTokens.primary.withValues(alpha: 0.35),
-              ),
-            ),
-          ),
-
-          // Декоративный блоб — нижний левый
-          Positioned(
-            bottom: -50,
-            left: MediaQuery.of(context).size.width * -0.2,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTokens.secondary.withValues(alpha: 0.25),
-              ),
-            ),
-          ),
-
-          // Размытие (Mesh Gradient)
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
-              child: const SizedBox(),
-            ),
-          ),
-
-          // Основной контент
-          SafeArea(
+        ),
+        child: Container(
+          color: const Color(0x18FFFFFF),
+          child: SafeArea(
+            top: title == null,
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTokens.p16),
+              padding: bodyPadding,
               child: body,
             ),
           ),
-        ],
+        ),
       ),
       floatingActionButton: floatingActionButton,
     );
@@ -89,38 +59,33 @@ class AppScaffold extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text(title!),
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTokens.colors.background,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
-      centerTitle: true,
+      centerTitle: false,
+      titleSpacing: 8,
+      toolbarHeight: 68,
       actions: actions,
-      leading:
-          showBackButton && Navigator.canPop(context) ? _BackButton() : leading,
+      leadingWidth: 64,
+      leading: showBackButton && Navigator.canPop(context)
+          ? const Padding(
+              padding: EdgeInsets.only(left: 20),
+              child: _BackButton(),
+            )
+          : leading,
     );
   }
 }
 
 class _BackButton extends StatelessWidget {
+  const _BackButton();
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.maybePop(context),
-      child: Container(
-        margin: const EdgeInsets.only(left: 12),
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: AppTokens.surface.withValues(alpha: 0.85),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: const Icon(Icons.arrow_back_ios_new, size: 16),
-      ),
+    return AppIconButton(
+      icon: Icons.arrow_back_rounded,
+      onPressed: () => Navigator.maybePop(context),
+      tooltip: 'Назад',
     );
   }
 }

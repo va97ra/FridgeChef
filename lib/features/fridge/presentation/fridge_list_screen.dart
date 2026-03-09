@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
+import '../../../core/widgets/app_icon_button.dart';
 import '../../../core/widgets/app_scaffold.dart';
-import 'providers.dart';
-import 'widgets/fridge_item_card.dart';
-import 'fridge_add_edit_screen.dart';
-import 'fridge_photo_review_screen.dart';
+import '../../../core/widgets/empty_state_panel.dart';
+import '../../../core/widgets/section_surface.dart';
+import '../data/fridge_photo_import_coordinator.dart';
+import '../data/photo_input_service.dart';
 import '../domain/fridge_item.dart';
 import '../domain/photo_source.dart';
-import 'package:animations/animations.dart';
+import 'fridge_add_edit_screen.dart';
+import 'fridge_photo_review_screen.dart';
+import 'providers.dart';
+import 'widgets/fridge_item_card.dart';
 
 class FridgeListScreen extends ConsumerStatefulWidget {
   const FridgeListScreen({super.key});
@@ -37,35 +43,79 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
   Widget build(BuildContext context) {
     final items = ref.watch(fridgeListProvider);
     final filteredItems = _filterItems(items, _query);
+    final expiringSoon = items.where((item) {
+      if (item.expiresAt == null) {
+        return false;
+      }
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final expiry = DateTime(
+        item.expiresAt!.year,
+        item.expiresAt!.month,
+        item.expiresAt!.day,
+      );
+      return expiry.difference(today).inDays <= 3;
+    }).length;
 
     return AppScaffold(
       title: 'Мой холодильник',
       actions: [
-        _PhotoButton(onTap: _startPhotoImport),
-        OpenContainer(
-          closedElevation: 0,
-          openElevation: 0,
-          closedColor: Colors.transparent,
-          openColor: AppTokens.background,
-          middleColor: Colors.transparent,
-          transitionType: ContainerTransitionType.fadeThrough,
-          closedBuilder: (context, action) => _AddButton(onTap: action),
-          openBuilder: (context, action) => const FridgeAddEditScreen(),
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: AppIconButton(
+            icon: Icons.camera_alt_rounded,
+            onPressed: _startPhotoImport,
+            tone: AppIconButtonTone.secondary,
+            tooltip: 'Добавить по фото',
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: AppIconButton(
+            icon: Icons.add_rounded,
+            onPressed: _openAddScreen,
+            tone: AppIconButtonTone.primary,
+            tooltip: 'Добавить продукт',
+          ),
         ),
       ],
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _MetricPanel(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Всего продуктов',
+                  value: '${items.length}',
+                ),
+              ),
+              const SizedBox(width: AppTokens.p12),
+              Expanded(
+                child: _MetricPanel(
+                  icon: Icons.schedule_rounded,
+                  label: 'Скоро использовать',
+                  value: '$expiringSoon',
+                  tone: expiringSoon == 0
+                      ? SectionSurfaceTone.base
+                      : SectionSurfaceTone.warnSoft,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTokens.p12),
           TextField(
             controller: _searchController,
             onChanged: (value) => setState(() => _query = value),
             decoration: InputDecoration(
               hintText: 'Поиск продукта',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _query.isEmpty
                   ? null
                   : IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(Icons.close_rounded),
                       onPressed: () {
                         _searchController.clear();
                         setState(() => _query = '');
@@ -73,16 +123,33 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
                     ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppTokens.p12),
           Expanded(
             child: items.isEmpty
-                ? _buildEmptyState()
+                ? EmptyStatePanel(
+                    icon: Icons.kitchen_outlined,
+                    title: 'Холодильник пока пуст',
+                    description:
+                        'Добавь продукты вручную или по фото, чтобы приложение могло подобрать лучшие блюда.',
+                    actionLabel: 'Добавить продукт',
+                    onAction: _openAddScreen,
+                    iconColor: AppTokens.accent,
+                    iconBackground: AppTokens.accentSoft,
+                  )
                 : filteredItems.isEmpty
-                    ? _buildNoResults()
+                    ? const EmptyStatePanel(
+                        icon: Icons.search_off_rounded,
+                        title: 'Ничего не найдено',
+                        description:
+                            'Попробуй другое название или очисти поиск, чтобы увидеть все продукты.',
+                        iconColor: AppTokens.info,
+                        iconBackground: AppTokens.infoSoft,
+                      )
                     : ListView.separated(
                         physics: const BouncingScrollPhysics(),
                         itemCount: filteredItems.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppTokens.p12),
                         itemBuilder: (context, index) {
                           final item = filteredItems[index];
                           return Dismissible(
@@ -105,24 +172,17 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
                                 ),
                               );
                             },
-                            child: OpenContainer(
-                              closedElevation: 0,
-                              openElevation: 0,
-                              closedColor: Colors.transparent,
-                              openColor: AppTokens.background,
-                              middleColor: Colors.transparent,
-                              transitionType:
-                                  ContainerTransitionType.fadeThrough,
-                              closedBuilder: (context, action) =>
-                                  FridgeItemCard(
-                                item: item,
-                                onTap: action,
-                                onDelete: () => ref
-                                    .read(fridgeListProvider.notifier)
-                                    .removeItem(item.id),
+                            child: FridgeItemCard(
+                              item: item,
+                              onTap: () => Navigator.push(
+                                context,
+                                AppRoutes.fadeThroughRoute(
+                                  page: FridgeAddEditScreen(itemToEdit: item),
+                                ),
                               ),
-                              openBuilder: (context, action) =>
-                                  FridgeAddEditScreen(itemToEdit: item),
+                              onDelete: () => ref
+                                  .read(fridgeListProvider.notifier)
+                                  .removeItem(item.id),
                             ),
                           );
                         },
@@ -130,6 +190,13 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _openAddScreen() {
+    Navigator.push(
+      context,
+      AppRoutes.fadeThroughRoute(page: const FridgeAddEditScreen()),
     );
   }
 
@@ -148,107 +215,10 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTokens.warn.withValues(alpha: 0.15),
-            AppTokens.warn.withValues(alpha: 0.35),
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        color: AppTokens.warnSoft,
         borderRadius: BorderRadius.circular(AppTokens.r20),
       ),
       child: const Icon(Icons.delete_outline_rounded, color: AppTokens.warn),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: AppTokens.surface.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(
-              color: Colors.white.withValues(alpha: 0.6), width: 1.5),
-          boxShadow: [
-            BoxShadow(
-              color: AppTokens.primary.withValues(alpha: 0.05),
-              blurRadius: 30,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: AppTokens.fridgeGradient,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTokens.accent.withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  )
-                ],
-              ),
-              child: const Center(
-                child: Text('🥦', style: TextStyle(fontSize: 48)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Холодильник пока пуст',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: AppTokens.text,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Нажми + чтобы добавить первые продукты,\nи мы придумаем из них блюдо!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppTokens.textLight,
-                fontSize: 15,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNoResults() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Text('🔎', style: TextStyle(fontSize: 48)),
-          SizedBox(height: 12),
-          Text(
-            'Ничего не найдено',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppTokens.text,
-            ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            'Попробуйте другое название продукта',
-            style: TextStyle(color: AppTokens.textLight),
-          ),
-        ],
-      ),
     );
   }
 
@@ -263,25 +233,24 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
     }
 
     _showLoadingDialog();
-    final result =
+    final attempt =
         await ref.read(photoImportStateProvider.notifier).importFromPhoto(source);
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pop();
     }
 
-    if (!mounted) {
+    if (!mounted || attempt.cancelled) {
       return;
     }
 
-    if (result == null) {
-      final state = ref.read(photoImportStateProvider);
-      if (state.status == PhotoImportStatus.error &&
-          state.errorMessage != null &&
-          state.errorMessage!.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.errorMessage!)),
-        );
-      }
+    if (!attempt.hasResult) {
+      await _handlePhotoImportFailure(attempt);
+      return;
+    }
+
+    final result = attempt.result!;
+
+    if (!mounted) {
       return;
     }
 
@@ -289,6 +258,154 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => FridgePhotoReviewScreen(result: result),
+      ),
+    );
+
+    if (!mounted || applyResult == null) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Добавлено: ${applyResult.addedCount}, объединено: ${applyResult.mergedCount}',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handlePhotoImportFailure(PhotoImportAttempt attempt) async {
+    switch (attempt.permissionState) {
+      case PhotoPermissionState.denied:
+        await _showCameraDeniedDialog();
+        return;
+      case PhotoPermissionState.permanentlyDenied:
+        await _showCameraSettingsDialog();
+        return;
+      case PhotoPermissionState.unavailable:
+        await _showUnavailableMessage(attempt.source);
+        return;
+      case PhotoPermissionState.granted:
+        final state = ref.read(photoImportStateProvider);
+        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.errorMessage!)),
+          );
+        }
+        return;
+    }
+  }
+
+  Future<void> _showCameraDeniedDialog() async {
+    final action = await showDialog<_PhotoPermissionAction>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Нужен доступ к камере'),
+          content: const Text(
+            'Разреши доступ к камере или выбери уже готовое фото из галереи.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, _PhotoPermissionAction.gallery),
+              child: const Text('Выбрать из галереи'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.pop(context, _PhotoPermissionAction.retryCamera),
+              child: const Text('Разрешить'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || action == null) {
+      return;
+    }
+    if (action == _PhotoPermissionAction.gallery) {
+      await _runPhotoImport(PhotoSource.gallery);
+      return;
+    }
+    await _runPhotoImport(PhotoSource.camera);
+  }
+
+  Future<void> _showCameraSettingsDialog() async {
+    final action = await showDialog<_PhotoPermissionAction>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Доступ к камере отключён'),
+          content: const Text(
+            'Камера запрещена на уровне системы. Открой настройки или выбери фото из галереи.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, _PhotoPermissionAction.gallery),
+              child: const Text('Выбрать из галереи'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.pop(context, _PhotoPermissionAction.openSettings),
+              child: const Text('Открыть настройки'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || action == null) {
+      return;
+    }
+    if (action == _PhotoPermissionAction.gallery) {
+      await _runPhotoImport(PhotoSource.gallery);
+      return;
+    }
+    await ref.read(photoInputServiceProvider).openSettings();
+  }
+
+  Future<void> _showUnavailableMessage(PhotoSource source) async {
+    if (source == PhotoSource.camera) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Камера недоступна. Можно выбрать фото из галереи.'),
+          action: SnackBarAction(
+            label: 'Галерея',
+            onPressed: () => _runPhotoImport(PhotoSource.gallery),
+          ),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Не удалось открыть фото. Попробуй снова.'),
+      ),
+    );
+  }
+
+  Future<void> _runPhotoImport(PhotoSource source) async {
+    _showLoadingDialog();
+    final attempt =
+        await ref.read(photoImportStateProvider.notifier).importFromPhoto(source);
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+    if (!mounted || attempt.cancelled) {
+      return;
+    }
+    if (!attempt.hasResult) {
+      await _handlePhotoImportFailure(attempt);
+      return;
+    }
+
+    final applyResult = await Navigator.push<FridgePhotoApplyResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FridgePhotoReviewScreen(result: attempt.result!),
       ),
     );
 
@@ -330,65 +447,52 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
   }
 }
 
-class _AddButton extends StatelessWidget {
-  final VoidCallback onTap;
+enum _PhotoPermissionAction { retryCamera, gallery, openSettings }
 
-  const _AddButton({required this.onTap});
+class _MetricPanel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final SectionSurfaceTone tone;
+
+  const _MetricPanel({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.tone = SectionSurfaceTone.base,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          gradient: AppTokens.primaryGradient,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppTokens.primary.withValues(alpha: 0.35),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: const Icon(Icons.add, color: Colors.white, size: 20),
+    return SectionSurface(
+      tone: tone,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTokens.p16,
+        vertical: AppTokens.p12,
       ),
-    );
-  }
-}
-
-class _PhotoButton extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _PhotoButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: AppTokens.surface.withValues(alpha: 0.9),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+      child: Row(
+        children: [
+          Icon(icon, color: AppTokens.textLight, size: 18),
+          const SizedBox(width: AppTokens.p8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: const Icon(
-          Icons.camera_alt_rounded,
-          color: AppTokens.text,
-          size: 18,
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -399,115 +503,54 @@ class _PhotoSourceSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppTokens.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTokens.r20)),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 42,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppTokens.textLight.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(99),
-            ),
-          ),
-          const SizedBox(height: 14),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Добавить по фото',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: AppTokens.text,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          _PhotoSourceTile(
-            icon: Icons.photo_camera_rounded,
-            title: 'Сделать фото',
-            subtitle: 'Откроется камера',
-            onTap: () => Navigator.pop(context, PhotoSource.camera),
-          ),
-          const SizedBox(height: 8),
-          _PhotoSourceTile(
-            icon: Icons.photo_library_rounded,
-            title: 'Выбрать из галереи',
-            subtitle: 'Использовать существующее фото',
-            onTap: () => Navigator.pop(context, PhotoSource.gallery),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoSourceTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _PhotoSourceTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTokens.r12),
+    return SafeArea(
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        margin: const EdgeInsets.all(AppTokens.p16),
         decoration: BoxDecoration(
-          color: AppTokens.surfaceVariant,
-          borderRadius: BorderRadius.circular(AppTokens.r12),
+          color: AppTokens.surface,
+          borderRadius: BorderRadius.circular(AppTokens.r20),
+          border: Border.all(color: AppTokens.border),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: AppTokens.primary.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(10),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppTokens.p16,
+                AppTokens.p16,
+                AppTokens.p16,
+                AppTokens.p8,
               ),
-              child: Icon(icon, size: 18, color: AppTokens.primary),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppTokens.text,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Icon(
+                    Icons.camera_alt_rounded,
+                    size: 18,
+                    color: AppTokens.primary,
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(width: 8),
                   Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: AppTokens.textLight,
-                      fontSize: 12,
-                    ),
+                    'Добавить по фото',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppTokens.textLight),
+            ListTile(
+              leading: const Icon(Icons.photo_camera_rounded),
+              title: const Text('Сделать фото'),
+              subtitle: const Text('Снять продукты сейчас'),
+              onTap: () => Navigator.pop(context, PhotoSource.camera),
+            ),
+            Divider(color: AppTokens.border.withValues(alpha: 0.8), height: 1),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded),
+              title: const Text('Выбрать из галереи'),
+              subtitle: const Text('Распознать продукты с готового снимка'),
+              onTap: () => Navigator.pop(context, PhotoSource.gallery),
+            ),
           ],
         ),
       ),

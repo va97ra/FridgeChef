@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
-import '../features/home/presentation/home_screen.dart';
+import 'package:animations/animations.dart';
+
+import 'bootstrap/bootstrap_gate.dart';
 import '../features/fridge/presentation/fridge_list_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
 import '../features/shelf/presentation/shelf_list_screen.dart';
 import '../features/recipes/presentation/cook_ideas_screen.dart';
-import 'package:animations/animations.dart';
 
 class AppRoutes {
   static const home = '/';
   static const fridge = '/fridge';
   static const shelf = '/shelf';
   static const cook = '/cook';
+  static const settings = '/settings';
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case home:
-        return _buildRoute(const HomeScreen());
+        return _buildRoute(const BootstrapGate());
       case fridge:
         return _buildRoute(const FridgeListScreen());
       case shelf:
         return _buildRoute(const ShelfListScreen());
       case cook:
         return _buildRoute(const CookIdeasScreen());
+      case AppRoutes.settings:
+        return _buildRoute(const SettingsScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

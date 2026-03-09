@@ -83,4 +83,21 @@ void main() {
 
     expect(signatureA, signatureB);
   });
+
+  test('keeps AI tip as recipe description when present', () {
+    const aiRecipe = AiRecipe(
+      title: 'Омлет',
+      timeMin: 10,
+      servings: 2,
+      ingredients: ['Яйца - 2 шт'],
+      steps: ['Пожарить'],
+      tip: 'Нежный завтрак, который лучше готовить на слабом огне.',
+    );
+
+    final draft = parser.parse(aiRecipe);
+    expect(
+      draft.description,
+      'Нежный завтрак, который лучше готовить на слабом огне.',
+    );
+  });
 }

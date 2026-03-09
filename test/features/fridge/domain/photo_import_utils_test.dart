@@ -15,8 +15,16 @@ void main() {
 
   test('finds best catalog match by contains', () {
     final catalog = [
-      const ProductCatalogEntry(name: 'Яйца', synonyms: ['яйцо', 'яйца']),
-      const ProductCatalogEntry(name: 'Молоко', synonyms: ['молоко']),
+      const ProductCatalogEntry(
+        id: 'eggs',
+        name: 'Яйца',
+        synonyms: ['яйцо', 'яйца'],
+      ),
+      const ProductCatalogEntry(
+        id: 'milk',
+        name: 'Молоко',
+        synonyms: ['молоко'],
+      ),
     ];
     final match = findBestCatalogMatch('десяток яйца', catalog);
     expect(match, isNotNull);
