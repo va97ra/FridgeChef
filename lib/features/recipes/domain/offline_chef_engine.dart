@@ -297,19 +297,24 @@ class OfflineChefEngine {
             (starters.missingCanonicals.length * 0.12))
         .clamp(0.0, 1.0);
 
+    final candidateReasons = _buildCandidateReasons(
+      inventory: inventory,
+      anchors: anchorCanonicals,
+      starters: starters,
+      chefSupport: chefSupport,
+      tasteAnalysis: tasteAnalysis,
+      repetitionPenalty: repetitionPenalty,
+    );
+
     return GeneratedRecipeCandidate(
-      recipe: recipe,
+      recipe: recipe.copyWith(
+        chefPriorityScore: priorityScore,
+        chefNotes: candidateReasons,
+      ),
       anchorCanonicals: anchorCanonicals,
       implicitPantryStarters: starters.missingCanonicals,
       priorityScore: priorityScore,
-      reasons: _buildCandidateReasons(
-        inventory: inventory,
-        anchors: anchorCanonicals,
-        starters: starters,
-        chefSupport: chefSupport,
-        tasteAnalysis: tasteAnalysis,
-        repetitionPenalty: repetitionPenalty,
-      ),
+      reasons: candidateReasons,
     );
   }
 

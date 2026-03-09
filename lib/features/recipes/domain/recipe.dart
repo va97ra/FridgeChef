@@ -46,6 +46,8 @@ class Recipe {
   final List<String> anchorIngredients;
   final List<String> implicitPantryItems;
   final String? chefProfile;
+  final double chefPriorityScore;
+  final List<String> chefNotes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -63,6 +65,8 @@ class Recipe {
     this.anchorIngredients = const [],
     this.implicitPantryItems = const [],
     this.chefProfile,
+    this.chefPriorityScore = 0,
+    this.chefNotes = const [],
     this.createdAt,
     this.updatedAt,
   });
@@ -98,6 +102,11 @@ class Recipe {
               .toList() ??
           const [],
       chefProfile: json['chefProfile'] as String?,
+      chefPriorityScore:
+          (json['chefPriorityScore'] as num?)?.toDouble() ?? 0,
+      chefNotes:
+          (json['chefNotes'] as List<dynamic>?)?.map((e) => '$e').toList() ??
+              const [],
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? ''),
       updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? ''),
     );
@@ -118,6 +127,8 @@ class Recipe {
       'anchorIngredients': anchorIngredients,
       'implicitPantryItems': implicitPantryItems,
       'chefProfile': chefProfile,
+      'chefPriorityScore': chefPriorityScore,
+      'chefNotes': chefNotes,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -137,6 +148,8 @@ class Recipe {
     List<String>? anchorIngredients,
     List<String>? implicitPantryItems,
     String? chefProfile,
+    double? chefPriorityScore,
+    List<String>? chefNotes,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -154,6 +167,8 @@ class Recipe {
       anchorIngredients: anchorIngredients ?? this.anchorIngredients,
       implicitPantryItems: implicitPantryItems ?? this.implicitPantryItems,
       chefProfile: chefProfile ?? this.chefProfile,
+      chefPriorityScore: chefPriorityScore ?? this.chefPriorityScore,
+      chefNotes: chefNotes ?? this.chefNotes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

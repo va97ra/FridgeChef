@@ -119,54 +119,34 @@ final recipeMatchesProvider = Provider<List<RecipeMatch>>((ref) {
   final tasteProfile = ref.watch(tasteProfileProvider);
   final seed = ref.watch(chefGenerationSeedProvider);
 
-  if (recipes == null ||
-      catalog == null ||
-      pantryCatalog == null ||
-      recipes.isEmpty) {
+  if (recipes == null || catalog == null || pantryCatalog == null) {
     return const [];
   }
 
-  final generatedRecipes = const OfflineChefEngine()
-      .generate(
-        OfflineChefRequest(
-          baseRecipes: recipes,
-          fridgeItems: fridgeItems,
-          shelfItems: shelfItems,
-          productCatalog: catalog,
-          pantryCatalog: pantryCatalog,
-          filters: filters,
-          tasteProfile: tasteProfile,
-          seed: seed,
-        ),
-      )
-      .map((candidate) => candidate.recipe)
-      .toList();
+  final generatedCandidates = const OfflineChefEngine().generate(
+    OfflineChefRequest(
+      baseRecipes: recipes,
+      fridgeItems: fridgeItems,
+      shelfItems: shelfItems,
+      productCatalog: catalog,
+      pantryCatalog: pantryCatalog,
+      filters: filters,
+      tasteProfile: tasteProfile,
+      seed: seed,
+    ),
+  );
 
-  final generatedMatches = generatedRecipes.isEmpty
-      ? const <RecipeMatch>[]
-      : rankBestRecipes(
-          recipes: const [],
-          generatedRecipes: generatedRecipes,
-          fridgeItems: fridgeItems,
-          shelfItems: shelfItems,
-          catalog: catalog,
-          filters: filters,
-          tasteProfile: tasteProfile,
-        );
-  final baseMatches = rankBestRecipes(
+  final matches = rankBestRecipes(
     recipes: recipes,
+    generatedRecipes: generatedCandidates
+        .map((candidate) => candidate.recipe)
+        .toList(growable: false),
     fridgeItems: fridgeItems,
     shelfItems: shelfItems,
     catalog: catalog,
     filters: filters,
     tasteProfile: tasteProfile,
   );
-  final matches = generatedMatches.isEmpty
-      ? baseMatches
-      : [
-          ...generatedMatches,
-          ...baseMatches,
-        ];
 
   if (query.isEmpty) {
     return matches;

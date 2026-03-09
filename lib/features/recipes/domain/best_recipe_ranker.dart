@@ -241,6 +241,10 @@ class BestRecipeRanker {
         candidate.source == RecipeMatchSource.generated
             ? _generatedAnchorUrgencyScore(recipe, inventory)
             : 0.0;
+    final generatedChefConfidence =
+        candidate.source == RecipeMatchSource.generated
+            ? recipe.chefPriorityScore.clamp(0.0, 1.0)
+            : 0.0;
     final pantryDebtPenalty = candidate.source == RecipeMatchSource.generated
         ? recipe.implicitPantryItems.length * 0.05
         : 0.0;
@@ -261,6 +265,7 @@ class BestRecipeRanker {
         (effortFitScore * 0.05);
     if (candidate.source == RecipeMatchSource.generated) {
       totalScore += generatedAnchorUrgency * 0.08;
+      totalScore += generatedChefConfidence * 0.04;
       totalScore -= pantryDebtPenalty;
     }
     totalScore *= pairAnalysis.hardPenalty;
@@ -558,9 +563,31 @@ class BestRecipeRanker {
   }) {
     final reasons = <String>[];
 
+    void addReason(String value) {
+      final normalized = value.trim();
+      if (normalized.isEmpty || reasons.contains(normalized)) {
+        return;
+      }
+      reasons.add(normalized);
+    }
+
+    void addReasons(Iterable<String> values) {
+      for (final value in values) {
+        if (reasons.length >= 3) {
+          break;
+        }
+        addReason(value);
+      }
+    }
+
     if (source == RecipeMatchSource.generated) {
-      if (recipe.anchorIngredients.isNotEmpty) {
-        reasons.add(
+      final hasPrioritizedChefNote = recipe.chefNotes.isNotEmpty;
+      if (recipe.chefNotes.isNotEmpty) {
+        addReason(recipe.chefNotes.first);
+      }
+
+      if (recipe.anchorIngredients.isNotEmpty && !hasPrioritizedChefNote) {
+        addReason(
           'шеф ставит в центр ${recipe.anchorIngredients.take(2).join(', ')}',
         );
       }
@@ -574,48 +601,37 @@ class BestRecipeRanker {
             (inventory.expiryScores[canonical] ?? 0) >= 4;
       }).toList();
       if (urgentAnchors.isNotEmpty) {
-        reasons.add(
+        addReason(
           'лучше использовать сейчас: ${urgentAnchors.take(2).join(', ')}',
         );
       }
 
       if (recipe.implicitPantryItems.isNotEmpty) {
-        reasons.add(
+        addReason(
           'из полки нужны только ${recipe.implicitPantryItems.take(2).join(', ')}',
         );
       }
     }
 
     if (totalRequired == 0 || matchedRequired == totalRequired) {
-      reasons.add('все продукты есть дома');
+      addReason('все продукты есть дома');
     } else if (matchedRequired >= totalRequired - 1) {
-      reasons.add('не хватает совсем немного');
+      addReason('не хватает совсем немного');
     }
 
     if (pairAnalysis.bestPairLabel != null) {
-      reasons.add('сильное сочетание ${pairAnalysis.bestPairLabel}');
+      addReason('сильное сочетание ${pairAnalysis.bestPairLabel}');
     }
 
-    for (final chefReason in chefAssessment.reasons) {
-      if (reasons.length >= 3) {
-        break;
-      }
-      if (!reasons.contains(chefReason)) {
-        reasons.add(chefReason);
-      }
+    if (source == RecipeMatchSource.generated && recipe.chefNotes.length > 1) {
+      addReasons(recipe.chefNotes.skip(1));
     }
 
-    for (final personalReason in personalAnalysis.reasons) {
-      if (reasons.length >= 3) {
-        break;
-      }
-      if (!reasons.contains(personalReason)) {
-        reasons.add(personalReason);
-      }
-    }
+    addReasons(chefAssessment.reasons);
+    addReasons(personalAnalysis.reasons);
 
     if (repetitionPenalty <= 0.12 && reasons.length < 3) {
-      reasons.add('не повторяет совсем недавние блюда');
+      addReason('не повторяет совсем недавние блюда');
     }
 
     if (usedPriorityCanonicals.isNotEmpty) {
@@ -623,16 +639,16 @@ class BestRecipeRanker {
           .map((name) => inventory.displayByCanonical[name] ?? name)
           .take(2)
           .join(', ');
-      reasons.add('использует скоропорт: $display');
+      addReason('использует скоропорт: $display');
     }
 
     if (reasons.length < 3) {
       if (recipe.timeMin <= 15) {
-        reasons.add('готовится быстро');
+        addReason('готовится быстро');
       } else if (recipe.tags
           .map((tag) => tag.toLowerCase())
           .contains('one_pan')) {
-        reasons.add('готовится в одной посуде');
+        addReason('готовится в одной посуде');
       }
     }
 

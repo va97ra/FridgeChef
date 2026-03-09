@@ -326,6 +326,8 @@ void main() {
       anchorIngredients: ['Яйца', 'Помидоры'],
       implicitPantryItems: ['Соль'],
       chefProfile: 'skillet',
+      chefPriorityScore: 0.86,
+      chefNotes: ['шеф берёт в основу Яйца, Помидоры'],
     );
 
     final matches = rankBestRecipes(
@@ -357,7 +359,10 @@ void main() {
       now: DateTime(2026, 3, 6),
     );
 
-    expect(matches.single.why, contains('шеф ставит в центр Яйца, Помидоры'));
+    expect(
+      matches.single.why,
+      contains('шеф берёт в основу Яйца, Помидоры'),
+    );
     expect(
       matches.single.why
           .any((reason) => reason.contains('лучше использовать сейчас')),
