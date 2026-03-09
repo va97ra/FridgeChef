@@ -75,18 +75,30 @@ flutter analyze
 flutter test
 ```
 
-Быстрый запуск браузерной release-сборки на локальном сервере (Windows PowerShell):
+Быстрый запуск браузерной release-сборки на локальном сервере:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_web_release.ps1
+```bat
+.\scripts\run_web_release.cmd
 ```
 
 По умолчанию приложение поднимется на `http://127.0.0.1:7361`, откроется в браузере, а лог сохранится в `web-release.log`.
 
-Браузерный smoke без эмулятора:
+Если нужен прямой вызов без `.cmd`, используйте `pwsh`, а не `powershell`, чтобы не открывались подряд `Windows PowerShell 5.1` и `PowerShell 7`:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\run_web_smoke.ps1
+pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_web_release.ps1
+```
+
+Браузерный smoke без эмулятора:
+
+```bat
+.\scripts\run_web_smoke.cmd
 ```
 
 Скрипт использует `flutter drive` + `integration_test` и гоняет browser smoke на `chrome` по умолчанию.
+
+Альтернатива прямым вызовом:
+
+```powershell
+pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_web_smoke.ps1
+```

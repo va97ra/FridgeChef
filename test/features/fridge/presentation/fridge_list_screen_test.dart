@@ -26,6 +26,38 @@ void main() {
     expect(find.text('Сделать фото'), findsOneWidget);
     expect(find.text('Выбрать из галереи'), findsOneWidget);
   });
+
+  testWidgets('exposes item actions through semantics and delete button works',
+      (tester) async {
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          fridgeRepoProvider.overrideWithValue(_FakeFridgeRepo()),
+        ],
+        child: const MaterialApp(
+          home: FridgeListScreen(),
+        ),
+      ),
+    );
+
+    expect(
+      find.bySemanticsLabel(RegExp('Открыть продукт Яйца')),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel('Удалить продукт Яйца'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.bySemanticsLabel('Удалить продукт Яйца'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Холодильник пока пуст'), findsOneWidget);
+
+    semantics.dispose();
+  });
 }
 
 class _FakeFridgeRepo extends FridgeRepo {

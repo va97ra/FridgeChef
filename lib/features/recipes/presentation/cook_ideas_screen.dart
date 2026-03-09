@@ -13,6 +13,7 @@ import '../domain/recipe.dart';
 import '../domain/recipe_match.dart';
 import 'providers.dart';
 import 'recipe_detail_screen.dart';
+import 'widgets/rename_recipe_dialog.dart';
 import 'widgets/match_bar.dart';
 import 'widgets/recipe_card.dart';
 
@@ -327,33 +328,10 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
   }
 
   Future<void> _renameRecipe(Recipe recipe) async {
-    final controller = TextEditingController(text: recipe.title);
-    final newTitle = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Переименовать рецепт'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: 'Новое название',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text('Сохранить'),
-            ),
-          ],
-        );
-      },
+    final newTitle = await showRenameRecipeDialog(
+      context,
+      initialTitle: recipe.title,
     );
-    controller.dispose();
 
     if (newTitle == null || newTitle.trim().isEmpty) {
       return;

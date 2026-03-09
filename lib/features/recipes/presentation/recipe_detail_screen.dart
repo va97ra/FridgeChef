@@ -11,6 +11,7 @@ import '../domain/recipe.dart';
 import 'providers.dart';
 import 'recipe_ui_meta.dart';
 import 'save_generated_recipe_flow.dart';
+import 'widgets/rename_recipe_dialog.dart';
 
 class RecipeDetailScreen extends ConsumerStatefulWidget {
   final Recipe recipe;
@@ -53,6 +54,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: PopupMenuButton<_DetailRecipeAction>(
+              tooltip: 'Действия рецепта',
               icon: const Icon(Icons.more_vert_rounded),
               onSelected: _handleRecipeAction,
               itemBuilder: (context) => const [
@@ -397,98 +399,123 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   Widget _buildStep(BuildContext context, int index) {
     final checked = _checkedSteps[index];
     final stepHint = buildStepHint(_recipe.steps[index]);
+    final semanticLabel = checked
+        ? 'Шаг ${index + 1} выполнен. ${_recipe.steps[index]}'
+        : 'Отметить шаг ${index + 1} выполненным. ${_recipe.steps[index]}';
+    void toggleStep() => setState(() => _checkedSteps[index] = !checked);
 
-    return GestureDetector(
-      onTap: () => setState(() => _checkedSteps[index] = !checked),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppTokens.p12),
-        child: SectionSurface(
-          tone: checked ? SectionSurfaceTone.accentSoft : SectionSurfaceTone.base,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: checked ? AppTokens.successSoft : AppTokens.primarySoft,
-                  borderRadius: BorderRadius.circular(AppTokens.pill),
+    return Semantics(
+      container: true,
+      button: true,
+      excludeSemantics: true,
+      label: semanticLabel,
+      onTap: toggleStep,
+      child: GestureDetector(
+        onTap: toggleStep,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: AppTokens.p12),
+          child: SectionSurface(
+            tone:
+                checked ? SectionSurfaceTone.accentSoft : SectionSurfaceTone.base,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color:
+                        checked ? AppTokens.successSoft : AppTokens.primarySoft,
+                    borderRadius: BorderRadius.circular(AppTokens.pill),
+                  ),
+                  alignment: Alignment.center,
+                  child: checked
+                      ? const Icon(
+                          Icons.check_rounded,
+                          size: 18,
+                          color: AppTokens.success,
+                        )
+                      : Text(
+                          '${index + 1}',
+                          style: const TextStyle(
+                            color: AppTokens.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                          ),
+                        ),
                 ),
-                alignment: Alignment.center,
-                child: checked
-                    ? const Icon(
-                        Icons.check_rounded,
-                        size: 18,
-                        color: AppTokens.success,
-                      )
-                    : Text(
-                        '${index + 1}',
-                        style: const TextStyle(
-                          color: AppTokens.primary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Шаг ${index + 1}',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: checked ? AppTokens.textLight : AppTokens.text,
-                            decoration: checked ? TextDecoration.lineThrough : null,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _recipe.steps[index],
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: checked ? AppTokens.textLight : AppTokens.text,
-                            decoration: checked ? TextDecoration.lineThrough : null,
-                          ),
-                    ),
-                    if (stepHint != null) ...[
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: checked ? AppTokens.surface : AppTokens.secondarySoft,
-                          borderRadius: BorderRadius.circular(AppTokens.r12),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.tips_and_updates_rounded,
-                              size: 14,
-                              color: checked ? AppTokens.textLight : AppTokens.secondaryDark,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Шаг ${index + 1}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color:
+                                  checked ? AppTokens.textLight : AppTokens.text,
+                              decoration:
+                                  checked ? TextDecoration.lineThrough : null,
                             ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                stepHint,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: checked
-                                          ? AppTokens.textLight
-                                          : AppTokens.secondaryDark,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _recipe.steps[index],
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color:
+                                  checked ? AppTokens.textLight : AppTokens.text,
+                              decoration:
+                                  checked ? TextDecoration.lineThrough : null,
+                            ),
+                      ),
+                      if (stepHint != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: checked
+                                ? AppTokens.surface
+                                : AppTokens.secondarySoft,
+                            borderRadius:
+                                BorderRadius.circular(AppTokens.r12),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.tips_and_updates_rounded,
+                                size: 14,
+                                color: checked
+                                    ? AppTokens.textLight
+                                    : AppTokens.secondaryDark,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  stepHint,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: checked
+                                            ? AppTokens.textLight
+                                            : AppTokens.secondaryDark,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -506,31 +533,10 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   Future<void> _renameCurrentRecipe() async {
-    final controller = TextEditingController(text: _recipe.title);
-    final newTitle = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Переименовать рецепт'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Новое название'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Отмена'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text('Сохранить'),
-            ),
-          ],
-        );
-      },
+    final newTitle = await showRenameRecipeDialog(
+      context,
+      initialTitle: _recipe.title,
     );
-    controller.dispose();
 
     if (newTitle == null || newTitle.trim().isEmpty) {
       return;
@@ -635,12 +641,15 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-          ),
+    return Semantics(
+      header: true,
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+      ),
     );
   }
 

@@ -16,6 +16,8 @@ import 'package:help_to_cook/features/fridge/presentation/fridge_list_screen.dar
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_match.dart';
+import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
+import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
 import 'package:help_to_cook/features/recipes/presentation/cook_ideas_screen.dart';
 import 'package:help_to_cook/features/recipes/presentation/providers.dart';
 import 'package:help_to_cook/features/shelf/data/pantry_catalog_repo.dart';
@@ -56,6 +58,50 @@ void main() {
     expect(fridgeRepo.items, hasLength(1));
     expect(fridgeRepo.items.single.name, 'Молоко');
     expect(find.text('Мой холодильник'), findsOneWidget);
+  });
+
+  testWidgets('fridge edit and delete works in browser smoke', (tester) async {
+    final fridgeRepo = _FakeFridgeRepo(
+      initialItems: [
+        FridgeItem(
+          id: 'milk',
+          name: 'Молоко',
+          amount: 1,
+          unit: Unit.l,
+        ),
+      ],
+    );
+
+    await _pumpSmokeScreen(
+      tester,
+      const FridgeListScreen(),
+      overrides: [
+        fridgeRepoProvider.overrideWithValue(fridgeRepo),
+        userProductMemoryRepoProvider.overrideWithValue(
+          const _NoopUserProductMemoryRepo(),
+        ),
+        productSearchServiceProvider.overrideWithValue(
+          _FakeProductSearchService(),
+        ),
+      ],
+    );
+
+    await tester.tap(find.text('Молоко').first);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(_fieldWithLabel('Количество'), '2');
+    await tester.tap(find.text('Сохранить'));
+    await tester.pumpAndSettle();
+
+    expect(fridgeRepo.items, hasLength(1));
+    expect(fridgeRepo.items.single.amount, 2);
+    expect(find.text('Мой холодильник'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.delete_outline_rounded).first);
+    await tester.pumpAndSettle();
+
+    expect(fridgeRepo.items, isEmpty);
+    expect(find.text('Холодильник пока пуст'), findsOneWidget);
   });
 
   testWidgets('shelf add works in browser smoke', (tester) async {
@@ -187,6 +233,124 @@ void main() {
     expect(find.text('Шакшука'), findsWidgets);
     expect(find.text('О блюде'), findsOneWidget);
   });
+
+  testWidgets('saved recipe rename and delete works in browser smoke',
+      (tester) async {
+    final baseRecipe = Recipe(
+      id: 'base',
+      title: 'Шакшука',
+      timeMin: 18,
+      tags: const ['one_pan'],
+      servingsBase: 2,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйцо', amount: 4, unit: Unit.pcs),
+      ],
+      steps: const ['Шаг 1', 'Шаг 2'],
+    );
+    final savedRecipe = Recipe(
+      id: 'saved_1',
+      title: 'Шеф-омлет',
+      timeMin: 10,
+      tags: const ['quick', 'generated_local'],
+      servingsBase: 1,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйцо', amount: 2, unit: Unit.pcs),
+      ],
+      steps: const ['Шаг 1'],
+      source: RecipeSource.generatedSaved,
+      isUserEditable: true,
+    );
+    final userRepo = _FakeUserRecipesRepo([savedRecipe]);
+
+    await _pumpSmokeScreen(
+      tester,
+      const CookIdeasScreen(),
+      overrides: [
+        userRecipesRepoProvider.overrideWithValue(userRepo),
+        recipesProvider.overrideWith(
+          (ref) async => [baseRecipe, ...await userRepo.getAllUserRecipes()],
+        ),
+        productCatalogProvider.overrideWith(
+          (ref) async => const [
+            ProductCatalogEntry(
+              id: 'egg',
+              name: 'Яйца',
+              synonyms: ['яйцо', 'яйца'],
+              defaultUnit: Unit.pcs,
+            ),
+          ],
+        ),
+        pantryCatalogProvider.overrideWith(
+          (ref) async => const [
+            PantryCatalogEntry(
+              id: 'salt',
+              name: 'Соль',
+              canonicalName: 'соль',
+              aliases: ['соль'],
+              category: 'basic',
+              isStarter: true,
+            ),
+          ],
+        ),
+        recipeMatchesProvider.overrideWith((ref) {
+          final recipes = ref.watch(recipesProvider).valueOrNull ?? const <Recipe>[];
+          return recipes.map((recipe) {
+            final isSaved = recipe.id == savedRecipe.id;
+            return RecipeMatch(
+              recipe: recipe,
+              source: isSaved ? RecipeMatchSource.base : RecipeMatchSource.generated,
+              score: isSaved ? 0.78 : 0.94,
+              why: isSaved
+                  ? const ['сохранённый вариант под рукой']
+                  : const ['все продукты есть дома'],
+              missingIngredients: const [],
+              matchedCount: recipe.ingredients.length,
+              totalCount: recipe.ingredients.length,
+              matchedRequired: recipe.ingredients.length,
+              totalRequired: recipe.ingredients.length,
+              matchedOptional: 0,
+              totalOptional: 0,
+            );
+          }).toList();
+        }),
+      ],
+    );
+
+    await tester.scrollUntilVisible(
+      find.byTooltip('Действия рецепта Шеф-омлет'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Действия рецепта Шеф-омлет'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Переименовать'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).last, 'Омлет шефа');
+    await tester.tap(find.text('Сохранить').last);
+    await tester.pumpAndSettle();
+
+    expect(userRepo.recipes.single.title, 'Омлет шефа');
+    await tester.scrollUntilVisible(
+      find.byTooltip('Действия рецепта Омлет шефа'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Омлет шефа'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Действия рецепта Омлет шефа'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Удалить'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Удалить').last);
+    await tester.pumpAndSettle();
+
+    expect(userRepo.recipes, isEmpty);
+    expect(find.text('Омлет шефа', skipOffstage: false), findsNothing);
+  });
 }
 
 Future<void> _pumpSmokeScreen(
@@ -208,9 +372,11 @@ Finder _fieldWithLabel(String label) {
 }
 
 class _FakeFridgeRepo extends FridgeRepo {
-  _FakeFridgeRepo() : super(boxName: 'test');
+  _FakeFridgeRepo({List<FridgeItem>? initialItems})
+      : items = List<FridgeItem>.from(initialItems ?? const []),
+        super(boxName: 'test');
 
-  final List<FridgeItem> items = [];
+  final List<FridgeItem> items;
 
   @override
   List<FridgeItem> getAll() => List<FridgeItem>.from(items);
@@ -251,6 +417,39 @@ class _FakeShelfRepo extends ShelfRepo {
     items
       ..clear()
       ..addAll(nextItems);
+  }
+}
+
+class _FakeUserRecipesRepo extends UserRecipesRepo {
+  _FakeUserRecipesRepo(List<Recipe> initialRecipes)
+      : recipes = List<Recipe>.from(initialRecipes),
+        super(
+          boxName: 'test',
+          parser: const GeneratedRecipeDraftParser(),
+        );
+
+  final List<Recipe> recipes;
+
+  @override
+  Future<List<Recipe>> getAllUserRecipes() async {
+    return List<Recipe>.from(recipes);
+  }
+
+  @override
+  Future<void> renameUserRecipe(String id, String newTitle) async {
+    final index = recipes.indexWhere((recipe) => recipe.id == id);
+    if (index == -1) {
+      return;
+    }
+    recipes[index] = recipes[index].copyWith(
+      title: newTitle.trim(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<void> deleteUserRecipe(String id) async {
+    recipes.removeWhere((recipe) => recipe.id == id);
   }
 }
 

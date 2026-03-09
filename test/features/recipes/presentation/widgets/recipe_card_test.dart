@@ -45,6 +45,7 @@ void main() {
     expect(find.text('Легко'), findsOneWidget);
     expect(find.text('все продукты есть дома'), findsOneWidget);
     expect(find.byIcon(Icons.more_vert_rounded), findsOneWidget);
+    expect(find.byTooltip('Действия рецепта Шеф-омлет'), findsOneWidget);
   });
 
   testWidgets('shows base source and hides actions menu for asset recipes',

@@ -35,6 +35,14 @@ build/
 /flutter/
 
 # Web related
+output/playwright/
+/flutter_*.log
+/web-*.log
+/tmp_*_check.png
+/cook-ideas-web-release.png
+/fridge-add-web-release-fixed*.png
+/fridgechef-web-*.png
+/output-add-product-error.png
 
 # Symbolication related
 app.*.symbols

@@ -81,6 +81,7 @@ class RecipeCard extends StatelessWidget {
                       if (match.recipe.isUserEditable &&
                           (onRename != null || onDelete != null))
                         PopupMenuButton<_RecipeAction>(
+                          tooltip: 'Действия рецепта ${match.recipe.title}',
                           icon: const Icon(Icons.more_vert_rounded, size: 18),
                           itemBuilder: (context) => [
                             if (onRename != null)
