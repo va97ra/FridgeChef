@@ -178,9 +178,10 @@ class OfflineChefEngine {
       return null;
     }
 
-    final recipeCanonicals = usedCanonicals.toSet()
+    final coreRecipeCanonicals = usedCanonicals.toSet();
+    final recipeCanonicals = coreRecipeCanonicals.toSet()
       ..addAll(starters.includedCanonicals);
-    if (!_passesPairingValidation(recipeCanonicals)) {
+    if (!_passesPairingValidation(coreRecipeCanonicals)) {
       return null;
     }
 
@@ -210,17 +211,24 @@ class OfflineChefEngine {
       recipe: recipe,
       canonicalizer: inventory.canonicalizer,
     );
+    final anchorUrgency = anchorCanonicals.isEmpty
+        ? 0.0
+        : anchorCanonicals
+                .map((canonical) => (inventory.expiryByCanonical[canonical] ?? 1) / 5)
+                .fold<double>(0.0, (sum, value) => sum + value) /
+            anchorCanonicals.length;
     final anchorPriority = anchorCanonicals.isEmpty
         ? 0.0
         : anchorCanonicals
                 .map((canonical) => inventory.priorityByCanonical[canonical] ?? 0.0)
                 .fold<double>(0.0, (sum, value) => sum + value) /
             anchorCanonicals.length;
-    final priorityScore = ((anchorPriority * 0.45) +
-            (_pairScore(recipeCanonicals) * 0.25) +
-            (chefAssessment.score * 0.20) +
-            (tasteAnalysis.score * 0.10) -
-            (starters.missingCanonicals.length * 0.08))
+    final priorityScore = ((anchorPriority * 0.38) +
+            (anchorUrgency * 0.22) +
+            (_pairScore(coreRecipeCanonicals) * 0.18) +
+            (chefAssessment.score * 0.14) +
+            (tasteAnalysis.score * 0.08) -
+            (starters.missingCanonicals.length * 0.12))
         .clamp(0.0, 1.0);
 
     return GeneratedRecipeCandidate(
@@ -458,18 +466,19 @@ class OfflineChefEngine {
 
     switch (blueprint.titleStyle) {
       case ChefTitleStyle.anchorWithSecondary:
-        if (secondary.isEmpty) {
+        if (anchor.isEmpty && secondary.isEmpty) {
           return blueprint.titlePrefix;
         }
-        return '${blueprint.titlePrefix} с $secondary';
+        final focus = [if (anchor.isNotEmpty) anchor, if (secondary.isNotEmpty) secondary]
+            .join(', ');
+        return '${blueprint.titlePrefix}: $focus';
       case ChefTitleStyle.anchorWithFocus:
-        if (anchor.isEmpty) {
+        if (anchor.isEmpty && secondary.isEmpty) {
           return blueprint.titlePrefix;
         }
-        if (secondary.isEmpty) {
-          return '${blueprint.titlePrefix} с $anchor';
-        }
-        return '${blueprint.titlePrefix} с $anchor и $secondary';
+        final focus = [if (anchor.isNotEmpty) anchor, if (secondary.isNotEmpty) secondary]
+            .join(', ');
+        return '${blueprint.titlePrefix}: $focus';
       case ChefTitleStyle.inventoryLead:
         final focus = _displayList(
           [
@@ -515,16 +524,16 @@ class OfflineChefEngine {
     switch (blueprint.stepStyle) {
       case ChefStepStyle.eggSkillet:
         return [
-          'Подготовь $secondary, прогрей сковороду и быстро обжарь добавки 3-4 минуты.',
-          'Отдельно слегка взбей $anchor, затем влей на сковороду и аккуратно распределяй массу лопаткой.',
+          'Подготовь $secondary, прогрей сковороду и быстро дай добавкам схватиться за 3-4 минуты.',
+          'Слегка взбей $anchor, затем влей массу и веди её лопаткой от краёв к центру, чтобы текстура осталась нежной.',
           startersText.isEmpty
-              ? 'Готовь до мягкой текстуры и подавай сразу.'
-              : 'В конце доведи вкус: $startersText, затем дай блюду минуту отдохнуть и подавай.',
+              ? 'Сними с огня, как только середина перестанет быть жидкой, и подавай сразу.'
+              : 'В конце доведи вкус: $startersText, затем дай блюду минуту стабилизироваться и подавай.',
         ];
       case ChefStepStyle.potatoSkillet:
         return [
-          'Нарежь $anchor крупными кусочками и начни обжаривать до золотистой корочки.',
-          'Добавь $secondary, убавь огонь и доведи всё вместе до мягкости.',
+          'Нарежь $anchor крупными кусочками и начни обжаривать, чтобы появилась уверенная золотистая корочка.',
+          'Добавь $secondary, убавь огонь и доведи всё вместе до мягкости без лишней влаги.',
           startersText.isEmpty
               ? 'Подавай горячим, когда картофель станет румяным и собранным по вкусу.'
               : 'В конце аккуратно добавь $startersText, чтобы вкус стал глубже и цельнее.',
@@ -540,7 +549,7 @@ class OfflineChefEngine {
       case ChefStepStyle.grainPan:
         return [
           'Подготовь основу: $anchor, а отдельно нарежь $secondary${support.isEmpty ? '' : ' и $support'}.',
-          'Сначала прогрей добавки, затем вмешай основу и собери блюдо на умеренном огне.',
+          'Сначала прогрей добавки, затем вмешай основу и собери блюдо на умеренном огне, чтобы крупа впитала вкус.',
           startersText.isEmpty
               ? 'Доведи до готовности и подавай как сытное домашнее блюдо.'
               : 'В конце доведи вкус: $startersText, чтобы текстура и аромат стали собраннее.',
@@ -548,7 +557,7 @@ class OfflineChefEngine {
       case ChefStepStyle.pastaPan:
         return [
           'Отвари $anchor до состояния al dente и параллельно подготовь $secondary.',
-          'Соедини основу с добавками на сковороде и быстро прогрей всё вместе.',
+          'Соедини основу с добавками на сковороде и быстро прогрей всё вместе, чтобы соус или соки покрыли пасту.',
           startersText.isEmpty
               ? 'Оставь блюдо на минуту после выключения огня и подавай.'
               : 'Перед подачей добавь $startersText, чтобы вкус стал ярче и мягче одновременно.',
@@ -556,7 +565,7 @@ class OfflineChefEngine {
       case ChefStepStyle.soup:
         return [
           'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'} и начни прогревать основу на спокойном огне.',
-          'Добавь овощи${support.isEmpty ? '' : ' и $support'}, влей воду и вари до мягкости ингредиентов.',
+          'Добавь овощи${support.isEmpty ? '' : ' и $support'}, влей воду и вари до мягкости ингредиентов, не давая вкусу распасться.',
           startersText.isEmpty
               ? 'Когда суп станет собранным по текстуре, сними с огня и дай ему постоять пару минут.'
               : 'В самом конце аккуратно добавь $startersText и дай супу настояться перед подачей.',
@@ -564,15 +573,15 @@ class OfflineChefEngine {
       case ChefStepStyle.bake:
         return [
           'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'} и сложи всё в форму одним ровным слоем.',
-          'Добавь связующие ингредиенты${support.isEmpty ? '' : ' и $support'}, чтобы блюдо держало форму и не пересохло.',
+          'Добавь связующие ингредиенты${support.isEmpty ? '' : ' и $support'}, чтобы блюдо держало форму и не пересохло в духовке.',
           startersText.isEmpty
               ? 'Запекай до румяной поверхности и дай блюду постоять 3-4 минуты перед подачей.'
               : 'Перед духовкой или в самом конце добавь $startersText, чтобы запекание дало более яркий аромат.',
         ];
       case ChefStepStyle.breakfast:
         return [
-          'Собери основу: $anchor${secondary.isEmpty ? '' : ', $secondary'} и добейся приятной текстуры.',
-          'Если нужно, слегка прогрей массу или оставь её свежей, чтобы сохранить мягкость блюда.',
+          'Собери основу: $anchor${secondary.isEmpty ? '' : ', $secondary'} и добейся мягкой, ровной текстуры.',
+          'Если нужно, слегка прогрей массу или оставь её свежей, чтобы сохранить лёгкость и нежность блюда.',
           startersText.isEmpty
               ? 'Подавай сразу как спокойный домашний завтрак.'
               : 'Финально добавь $startersText, чтобы вкус стал завершённым.',
@@ -580,7 +589,7 @@ class OfflineChefEngine {
       case ChefStepStyle.stew:
         return [
           'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'} и начни тушить самые плотные продукты на слабом огне.',
-          'Добавь остальные ингредиенты${support.isEmpty ? '' : ' и $support'}, периодически помешивая, пока текстура не станет густой.',
+          'Добавь остальные ингредиенты${support.isEmpty ? '' : ' и $support'}, периодически помешивая, пока текстура не станет густой и насыщенной.',
           startersText.isEmpty
               ? 'Сними с огня, когда рагу станет мягким и собранным.'
               : 'В конце добавь $startersText и дай блюду пару минут постоять перед подачей.',
@@ -617,12 +626,20 @@ class OfflineChefEngine {
         'шеф берёт в основу ${anchors.take(2).map(inventory.displayName).join(', ')}',
       );
     }
+    final urgentAnchors = anchors
+        .where((canonical) => (inventory.expiryByCanonical[canonical] ?? 0) >= 4)
+        .toList();
+    if (urgentAnchors.isNotEmpty) {
+      reasons.add(
+        'лучше пустить в дело сейчас: ${urgentAnchors.take(2).map(inventory.displayName).join(', ')}',
+      );
+    }
     if (starters.missingCanonicals.isNotEmpty) {
       reasons.add(
         'из базовых вещей пригодятся ${starters.missingCanonicals.map(inventory.displayName).join(', ')}',
       );
     }
-    return reasons;
+    return reasons.take(3).toList();
   }
 
   List<T> _rotate<T>(List<T> values, int seed) {
@@ -687,12 +704,17 @@ class _ChefInventory {
     final pantryByCanonical = <String, PantryCatalogEntry>{};
 
     for (final entry in pantryCatalog) {
-      final canonical = toPairingKey(entry.canonicalName);
+      final canonical = normalizeIngredientText(entry.canonicalName);
+      final pairingCanonical = toPairingKey(entry.canonicalName);
       if (canonical.isEmpty) {
         continue;
       }
       pantryByCanonical.putIfAbsent(canonical, () => entry);
       displayByCanonical.putIfAbsent(canonical, () => entry.name);
+      if (pairingCanonical.isNotEmpty) {
+        pantryByCanonical.putIfAbsent(pairingCanonical, () => entry);
+        displayByCanonical.putIfAbsent(pairingCanonical, () => entry.name);
+      }
     }
 
     for (final item in fridgeItems) {
@@ -717,15 +739,26 @@ class _ChefInventory {
       if (!item.inStock) {
         continue;
       }
-      final canonical = toPairingKey(
-        item.canonicalName.trim().isNotEmpty ? item.canonicalName : item.name,
-      );
-      if (canonical.isEmpty) {
+      final rawCanonical =
+          item.canonicalName.trim().isNotEmpty ? item.canonicalName : item.name;
+      final canonical = toPairingKey(rawCanonical);
+      final normalizedCanonical = normalizeIngredientText(rawCanonical);
+      if (canonical.isEmpty && normalizedCanonical.isEmpty) {
         continue;
       }
-      shelfCanonicals.add(canonical);
-      displayByCanonical.putIfAbsent(canonical, () => item.name.trim());
-      shelfSupportCanonicals.add(canonical);
+      if (normalizedCanonical.isNotEmpty) {
+        shelfCanonicals.add(normalizedCanonical);
+        displayByCanonical.putIfAbsent(
+          normalizedCanonical,
+          () => item.name.trim(),
+        );
+        shelfSupportCanonicals.add(normalizedCanonical);
+      }
+      if (canonical.isNotEmpty) {
+        shelfCanonicals.add(canonical);
+        displayByCanonical.putIfAbsent(canonical, () => item.name.trim());
+        shelfSupportCanonicals.add(canonical);
+      }
       for (final support in item.supportCanonicals) {
         final normalized = toPairingKey(support);
         if (normalized.isNotEmpty) {

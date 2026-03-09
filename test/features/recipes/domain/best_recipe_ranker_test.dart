@@ -254,7 +254,7 @@ void main() {
         greaterThan(matches.last.completenessScore));
   });
 
-  test('AI candidate with weak pairing is dropped from ranking', () {
+  test('generated candidate with weak pairing is dropped from ranking', () {
     final local = Recipe(
       id: 'local',
       title: 'Омлет',
@@ -267,11 +267,11 @@ void main() {
       ],
       steps: const ['Взбить', 'Пожарить'],
     );
-    final weirdAi = Recipe(
-      id: 'ai',
+    final weirdGenerated = Recipe(
+      id: 'generated_weird',
       title: 'Соль с сахаром',
       timeMin: 2,
-      tags: const ['ai_candidate'],
+      tags: const ['generated_local'],
       servingsBase: 1,
       ingredients: const [
         RecipeIngredient(name: 'Соль', amount: 1, unit: Unit.g),
@@ -282,7 +282,7 @@ void main() {
 
     final matches = rankBestRecipes(
       recipes: [local],
-      generatedRecipes: [weirdAi],
+      generatedRecipes: [weirdGenerated],
       fridgeItems: const [
         FridgeItem(id: 'f1', name: 'Яйцо', amount: 4, unit: Unit.pcs),
         FridgeItem(id: 'f2', name: 'Сыр', amount: 120, unit: Unit.g),
@@ -294,8 +294,75 @@ void main() {
       catalog: catalog,
     );
 
-    expect(matches.map((match) => match.recipe.id), isNot(contains('ai')));
+    expect(
+      matches.map((match) => match.recipe.id),
+      isNot(contains('generated_weird')),
+    );
     expect(matches.first.recipe.id, 'local');
+  });
+
+  test('generated reasons mention anchor urgency and pantry assumptions', () {
+    final generated = Recipe(
+      id: 'generated_1',
+      title: 'Шеф-сковорода: Яйца, Помидоры, Сыр',
+      timeMin: 12,
+      tags: const ['generated_local', 'quick', 'one_pan', 'breakfast'],
+      servingsBase: 2,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+        RecipeIngredient(name: 'Помидоры', amount: 180, unit: Unit.g),
+        RecipeIngredient(name: 'Сыр', amount: 80, unit: Unit.g),
+        RecipeIngredient(name: 'Соль', amount: 1, unit: Unit.g, required: false),
+      ],
+      steps: const [
+        'Быстро обжарь помидоры.',
+        'Влей яйца и аккуратно веди массу лопаткой.',
+        'Добавь сыр и подай сразу.',
+      ],
+      source: RecipeSource.generatedDraft,
+      anchorIngredients: ['Яйца', 'Помидоры'],
+      implicitPantryItems: ['Соль'],
+      chefProfile: 'skillet',
+    );
+
+    final matches = rankBestRecipes(
+      recipes: const [],
+      generatedRecipes: [generated],
+      fridgeItems: [
+        FridgeItem(
+          id: 'f1',
+          name: 'Яйца',
+          amount: 6,
+          unit: Unit.pcs,
+          expiresAt: DateTime(2026, 3, 7),
+        ),
+        const FridgeItem(
+          id: 'f2',
+          name: 'Помидоры',
+          amount: 400,
+          unit: Unit.g,
+        ),
+        const FridgeItem(
+          id: 'f3',
+          name: 'Сыр',
+          amount: 160,
+          unit: Unit.g,
+        ),
+      ],
+      shelfItems: const [],
+      catalog: catalog,
+      now: DateTime(2026, 3, 6),
+    );
+
+    expect(matches.single.why, contains('шеф ставит в центр Яйца, Помидоры'));
+    expect(
+      matches.single.why.any((reason) => reason.contains('лучше использовать сейчас')),
+      isTrue,
+    );
+    expect(
+      matches.single.why,
+      contains('из полки нужны только Соль'),
+    );
   });
 
   test('forbidden pairing ranks below neutral recipe with same coverage', () {

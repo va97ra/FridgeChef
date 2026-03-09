@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/app/data/app_settings_repo.dart';
 import 'package:help_to_cook/app/data/backup_service.dart';
@@ -6,7 +9,7 @@ import 'package:help_to_cook/features/fridge/data/fridge_repo.dart';
 import 'package:help_to_cook/features/fridge/data/user_product_memory_repo.dart';
 import 'package:help_to_cook/features/fridge/domain/fridge_item.dart';
 import 'package:help_to_cook/features/fridge/domain/user_product_memory_entry.dart';
-import 'package:help_to_cook/features/recipes/data/ai_to_recipe_parser.dart';
+import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
 import 'package:help_to_cook/features/recipes/data/recipe_feedback_repo.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
@@ -16,36 +19,36 @@ import 'package:help_to_cook/features/shelf/data/shelf_repo.dart';
 import 'package:help_to_cook/features/shelf/domain/shelf_item.dart';
 
 void main() {
-  test('parses legacy v1 backup without feedback and product memory', () {
-    final payload = BackupPayloadV2.fromJson({
+  test('loadImportPreview rejects schema 1 backups', () async {
+    final service = BackupService(
+      fridgeRepo: _FakeFridgeRepo(),
+      shelfRepo: _FakeShelfRepo(),
+      userRecipesRepo: _FakeUserRecipesRepo(),
+      recipeFeedbackRepo: _FakeRecipeFeedbackRepo(),
+      userProductMemoryRepo: _FakeUserProductMemoryRepo(),
+      appSettingsRepo: _FakeAppSettingsRepo(),
+    );
+    final path = await _writeBackupFile({
       'schemaVersion': 1,
       'exportedAt': '2026-03-09T10:00:00.000Z',
       'appVersion': '0.9.0+1',
-      'fridgeItems': [
-        const FridgeItem(id: 'f1', name: 'Яйца', amount: 6, unit: Unit.pcs)
-            .toJson(),
-      ],
-      'shelfItems': [
-        const ShelfItem(id: 's1', name: 'Соль', inStock: true).toJson(),
-      ],
-      'userRecipes': [
-        const Recipe(
-          id: 'r1',
-          title: 'Омлет',
-          timeMin: 10,
-          tags: ['quick'],
-          servingsBase: 2,
-          ingredients: [
-            RecipeIngredient(name: 'Яйцо', amount: 2, unit: Unit.pcs),
-          ],
-          steps: ['Шаг 1'],
-        ).toJson(),
-      ],
+      'fridgeItems': const [],
+      'shelfItems': const [],
+      'userRecipes': const [],
     });
 
-    expect(payload.schemaVersion, 1);
-    expect(payload.recipeFeedbackVotes, isEmpty);
-    expect(payload.userProductMemory, isEmpty);
+    addTearDown(() => File(path).deleteSync());
+
+    await expectLater(
+      service.loadImportPreview(path),
+      throwsA(
+        isA<BackupFormatException>().having(
+          (error) => error.message,
+          'message',
+          contains('Неподдерживаемая версия'),
+        ),
+      ),
+    );
   });
 
   test('round-trips v2 feedback votes and product memory', () {
@@ -161,6 +164,56 @@ void main() {
     expect(memoryRepo.items.single.productId, 'egg');
   });
 
+  test('loadImportPreview rejects legacy recipe sources', () async {
+    final service = BackupService(
+      fridgeRepo: _FakeFridgeRepo(),
+      shelfRepo: _FakeShelfRepo(),
+      userRecipesRepo: _FakeUserRecipesRepo(),
+      recipeFeedbackRepo: _FakeRecipeFeedbackRepo(),
+      userProductMemoryRepo: _FakeUserProductMemoryRepo(),
+      appSettingsRepo: _FakeAppSettingsRepo(),
+    );
+    final path = await _writeBackupFile({
+      'schemaVersion': BackupService.schemaVersion,
+      'exportedAt': '2026-03-09T10:00:00.000Z',
+      'appVersion': '1.0.0+1',
+      'fridgeItems': const [],
+      'shelfItems': const [],
+      'userRecipes': [
+        {
+          'id': 'r1',
+          'title': 'Старый рецепт',
+          'timeMin': 10,
+          'tags': ['quick'],
+          'servingsBase': 2,
+          'ingredients': const [
+            {
+              'name': 'Яйцо',
+              'amount': 2.0,
+              'unit': 'pcs',
+              'required': true,
+            },
+          ],
+          'steps': const ['Шаг 1'],
+          'source': 'ai_saved',
+        },
+      ],
+    });
+
+    addTearDown(() => File(path).deleteSync());
+
+    await expectLater(
+      service.loadImportPreview(path),
+      throwsA(
+        isA<BackupFormatException>().having(
+          (error) => error.message,
+          'message',
+          contains('неподдерживаемые рецепты'),
+        ),
+      ),
+    );
+  });
+
   test('clearAllData clears feedback memory and app flags', () async {
     final service = BackupService(
       fridgeRepo: _FakeFridgeRepo(),
@@ -183,6 +236,38 @@ void main() {
     );
     expect((service.appSettingsRepo as _FakeAppSettingsRepo).cleared, isTrue);
   });
+
+  test('replaceAllData rejects payloads below schema 2', () async {
+    final service = BackupService(
+      fridgeRepo: _FakeFridgeRepo(),
+      shelfRepo: _FakeShelfRepo(),
+      userRecipesRepo: _FakeUserRecipesRepo(),
+      recipeFeedbackRepo: _FakeRecipeFeedbackRepo(),
+      userProductMemoryRepo: _FakeUserProductMemoryRepo(),
+      appSettingsRepo: _FakeAppSettingsRepo(),
+    );
+
+    await expectLater(
+      service.replaceAllData(
+        BackupPayloadV2(
+          schemaVersion: 1,
+          exportedAt: DateTime.parse('2026-03-09T10:00:00.000Z'),
+          appVersion: '0.9.0+1',
+          fridgeItems: const [],
+          shelfItems: const [],
+          userRecipes: const [],
+        ),
+      ),
+      throwsA(isA<BackupFormatException>()),
+    );
+  });
+}
+
+Future<String> _writeBackupFile(Map<String, dynamic> payload) async {
+  final dir = await Directory.systemTemp.createTemp('backup_service_test');
+  final file = File('${dir.path}${Platform.pathSeparator}backup.json');
+  await file.writeAsString(jsonEncode(payload));
+  return file.path;
 }
 
 class _FakeFridgeRepo extends FridgeRepo {
@@ -234,7 +319,7 @@ class _FakeUserRecipesRepo extends UserRecipesRepo {
   _FakeUserRecipesRepo()
       : super(
           boxName: 'unused',
-          parser: const AiToRecipeParser(),
+          parser: const GeneratedRecipeDraftParser(),
         );
 
   @override

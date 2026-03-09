@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/core/utils/units.dart';
-import 'package:help_to_cook/features/ai_recipes/domain/ai_recipe.dart';
-import 'package:help_to_cook/features/ai_recipes/domain/auto_generation_utils.dart';
 import 'package:help_to_cook/features/fridge/domain/fridge_item.dart';
+import 'package:help_to_cook/features/recipes/domain/generated_recipe_draft.dart';
+import 'package:help_to_cook/features/recipes/domain/generated_recipe_fallback_utils.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_match.dart';
@@ -83,7 +83,7 @@ void main() {
 
   test('calculates ingredient validity against allowed names', () {
     const recipes = [
-      AiRecipe(
+      GeneratedRecipeDraft(
         title: 'Тест',
         timeMin: 10,
         servings: 1,
@@ -100,7 +100,7 @@ void main() {
     expect(validity, closeTo(0.5, 0.0001));
   });
 
-  test('maps recipe match to deterministic AiRecipe format', () {
+  test('maps recipe match to deterministic generated draft format', () {
     final recipe = Recipe(
       id: 'r1',
       title: 'Омлет',
@@ -130,11 +130,11 @@ void main() {
       totalOptional: 0,
     );
 
-    final aiRecipe = mapRecipeMatchToAiRecipe(match);
-    expect(aiRecipe.title, 'Омлет');
-    expect(aiRecipe.servings, 2);
-    expect(aiRecipe.ingredients.first, 'Яйцо — 2 шт');
-    expect(aiRecipe.steps, ['Взбить', 'Пожарить']);
+    final draft = mapRecipeMatchToGeneratedDraft(match);
+    expect(draft.title, 'Омлет');
+    expect(draft.servings, 2);
+    expect(draft.ingredients.first, 'Яйцо — 2 шт');
+    expect(draft.steps, ['Взбить', 'Пожарить']);
   });
 
   test('buildLocalFallbackRecipes picks strong matches first and fills to count', () {

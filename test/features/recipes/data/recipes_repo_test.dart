@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/core/utils/units.dart';
-import 'package:help_to_cook/features/recipes/data/ai_to_recipe_parser.dart';
+import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
 import 'package:help_to_cook/features/recipes/data/recipes_loader.dart';
 import 'package:help_to_cook/features/recipes/data/recipes_repo.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
@@ -62,7 +62,7 @@ class _FakeUserRecipesRepo extends UserRecipesRepo {
   _FakeUserRecipesRepo(this.recipes)
       : super(
           boxName: 'unused',
-          parser: const AiToRecipeParser(),
+          parser: const GeneratedRecipeDraftParser(),
         );
 
   @override

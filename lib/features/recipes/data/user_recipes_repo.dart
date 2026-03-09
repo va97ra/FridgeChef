@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../domain/generated_recipe_draft.dart';
 import '../domain/recipe.dart';
-import 'ai_to_recipe_parser.dart';
+import 'generated_recipe_draft_parser.dart';
 import 'user_recipe_hive_dto.dart';
 
 final userRecipesRepoProvider = Provider<UserRecipesRepo>((ref) {
@@ -50,7 +50,7 @@ class UserRecipesRepo {
   }
 
   Future<List<Recipe>> getAllUserRecipes() async {
-    final list = _getBox().values.map(_dtoToRecipe).toList();
+    final list = await _loadSanitizedRecipes();
     list.sort((a, b) {
       final aTime = a.updatedAt ?? a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
       final bTime = b.updatedAt ?? b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -60,6 +60,7 @@ class UserRecipesRepo {
   }
 
   Future<List<Recipe>> findPotentialDuplicatesForRecipe(Recipe recipe) async {
+    await _sanitizeStoredRecipes();
     final signature = buildRecipeSignatureFromRecipe(recipe);
     return _findPotentialDuplicatesBySignature(signature);
   }
@@ -67,6 +68,7 @@ class UserRecipesRepo {
   Future<List<Recipe>> findPotentialDuplicatesForDraft(
     GeneratedRecipeDraft draft,
   ) async {
+    await _sanitizeStoredRecipes();
     final parsed = parser.parse(draft);
     final signature = buildRecipeSignature(
       title: parsed.title,
@@ -96,6 +98,7 @@ class UserRecipesRepo {
     required SaveMode mode,
   }) async {
     final now = DateTime.now();
+    await _sanitizeStoredRecipes();
     final duplicates = await findPotentialDuplicatesForRecipe(recipe);
     final box = _getBox();
 
@@ -161,17 +164,6 @@ class UserRecipesRepo {
     );
   }
 
-  Future<List<Recipe>> findPotentialDuplicates(GeneratedRecipeDraft draft) {
-    return findPotentialDuplicatesForDraft(draft);
-  }
-
-  Future<SaveResult> saveFromAi({
-    required GeneratedRecipeDraft aiRecipe,
-    required SaveMode mode,
-  }) {
-    return saveFromGeneratedDraft(draft: aiRecipe, mode: mode);
-  }
-
   Future<void> renameUserRecipe(String id, String newTitle) async {
     final box = _getBox();
     final dto = box.get(id);
@@ -211,9 +203,45 @@ class UserRecipesRepo {
     });
   }
 
+  Future<List<Recipe>> _loadSanitizedRecipes() async {
+    final box = _getBox();
+    final recipes = <Recipe>[];
+    final invalidKeys = <dynamic>[];
+
+    for (final entry in box.toMap().entries) {
+      final recipe = _dtoToRecipeOrNull(entry.value);
+      if (recipe == null) {
+        invalidKeys.add(entry.key);
+        continue;
+      }
+      recipes.add(recipe);
+    }
+
+    if (invalidKeys.isNotEmpty) {
+      await box.deleteAll(invalidKeys);
+    }
+    return recipes;
+  }
+
+  Future<void> _sanitizeStoredRecipes() async {
+    await _loadSanitizedRecipes();
+  }
+
   Recipe _dtoToRecipe(UserRecipeHiveDto dto) {
-    final jsonMap = jsonDecode(dto.recipeJson) as Map<String, dynamic>;
-    return Recipe.fromJson(jsonMap);
+    final recipe = _dtoToRecipeOrNull(dto);
+    if (recipe == null) {
+      throw const FormatException('Stored recipe is malformed or unsupported');
+    }
+    return recipe;
+  }
+
+  Recipe? _dtoToRecipeOrNull(UserRecipeHiveDto dto) {
+    try {
+      final jsonMap = jsonDecode(dto.recipeJson) as Map<String, dynamic>;
+      return Recipe.fromJson(jsonMap);
+    } on Object {
+      return null;
+    }
   }
 
   UserRecipeHiveDto _recipeToDto(Recipe recipe) {

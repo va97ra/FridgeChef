@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/core/utils/units.dart';
-import 'package:help_to_cook/features/ai_recipes/domain/ai_recipe.dart';
-import 'package:help_to_cook/features/recipes/data/ai_to_recipe_parser.dart';
+import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
+import 'package:help_to_cook/features/recipes/domain/generated_recipe_draft.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 
 void main() {
-  const parser = AiToRecipeParser();
+  const parser = GeneratedRecipeDraftParser();
 
   test('parses common ingredient formats and units', () {
-    const aiRecipe = AiRecipe(
+    const draftRecipe = GeneratedRecipeDraft(
       title: 'Тестовый рецепт',
       timeMin: 20,
       servings: 2,
@@ -21,7 +21,7 @@ void main() {
       steps: ['Шаг 1'],
     );
 
-    final draft = parser.parse(aiRecipe);
+    final draft = parser.parse(draftRecipe);
     expect(draft.ingredients.length, 4);
 
     expect(draft.ingredients[0].name, 'Яйца');
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('keeps non-regular ingredient lines with safe fallback', () {
-    const aiRecipe = AiRecipe(
+    const draftRecipe = GeneratedRecipeDraft(
       title: 'Нестандартный',
       timeMin: 15,
       servings: 2,
@@ -54,7 +54,7 @@ void main() {
       steps: ['Шаг 1'],
     );
 
-    final draft = parser.parse(aiRecipe);
+    final draft = parser.parse(draftRecipe);
     expect(draft.ingredients.length, 1);
     expect(draft.ingredients.first.name, '*** необычный ингредиент ???');
     expect(draft.ingredients.first.amount, 1);
@@ -84,8 +84,8 @@ void main() {
     expect(signatureA, signatureB);
   });
 
-  test('keeps AI tip as recipe description when present', () {
-    const aiRecipe = AiRecipe(
+  test('keeps draft tip as recipe description when present', () {
+    const draftRecipe = GeneratedRecipeDraft(
       title: 'Омлет',
       timeMin: 10,
       servings: 2,
@@ -94,7 +94,7 @@ void main() {
       tip: 'Нежный завтрак, который лучше готовить на слабом огне.',
     );
 
-    final draft = parser.parse(aiRecipe);
+    final draft = parser.parse(draftRecipe);
     expect(
       draft.description,
       'Нежный завтрак, который лучше готовить на слабом огне.',

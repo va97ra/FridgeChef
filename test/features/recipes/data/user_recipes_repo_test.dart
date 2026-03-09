@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:help_to_cook/features/ai_recipes/domain/ai_recipe.dart';
-import 'package:help_to_cook/features/recipes/data/ai_to_recipe_parser.dart';
+import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipe_hive_dto.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
+import 'package:help_to_cook/features/recipes/domain/generated_recipe_draft.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 import 'package:help_to_cook/core/utils/units.dart';
@@ -32,7 +33,7 @@ void main() {
     const boxName = 'userRecipesBox_duplicates';
     final repo = await _openRepo(boxName);
     try {
-      const aiBase = AiRecipe(
+      const baseDraft = GeneratedRecipeDraft(
         title: 'Омлет',
         timeMin: 10,
         servings: 2,
@@ -42,7 +43,7 @@ void main() {
         ],
         steps: ['Смешай', 'Пожарь'],
       );
-      const aiSameContentDifferentOrder = AiRecipe(
+      const sameContentDifferentOrderDraft = GeneratedRecipeDraft(
         title: 'Омлет',
         timeMin: 12,
         servings: 2,
@@ -53,27 +54,32 @@ void main() {
         steps: ['Смешай', 'Пожарь'],
       );
 
-      await repo.saveFromAi(aiRecipe: aiBase, mode: SaveMode.createCopy);
+      await repo.saveFromGeneratedDraft(
+        draft: baseDraft,
+        mode: SaveMode.createCopy,
+      );
       final duplicates =
-          await repo.findPotentialDuplicates(aiSameContentDifferentOrder);
+          await repo.findPotentialDuplicatesForDraft(
+            sameContentDifferentOrderDraft,
+          );
       expect(duplicates, isNotEmpty);
     } finally {
       await _closeAndDeleteBox(boxName);
     }
   });
 
-  test('saveFromAi update mode rewrites existing recipe', () async {
+  test('saveFromGeneratedDraft update mode rewrites existing recipe', () async {
     const boxName = 'userRecipesBox_update';
     final repo = await _openRepo(boxName);
     try {
-      const original = AiRecipe(
+      const original = GeneratedRecipeDraft(
         title: 'Омлет',
         timeMin: 10,
         servings: 2,
         ingredients: ['Яйцо - 2 шт'],
         steps: ['Шаг 1'],
       );
-      const changed = AiRecipe(
+      const changed = GeneratedRecipeDraft(
         title: 'Омлет',
         timeMin: 25,
         servings: 3,
@@ -81,9 +87,14 @@ void main() {
         steps: ['Шаг 1'],
       );
 
-      await repo.saveFromAi(aiRecipe: original, mode: SaveMode.createCopy);
-      final result =
-          await repo.saveFromAi(aiRecipe: changed, mode: SaveMode.updateExisting);
+      await repo.saveFromGeneratedDraft(
+        draft: original,
+        mode: SaveMode.createCopy,
+      );
+      final result = await repo.saveFromGeneratedDraft(
+        draft: changed,
+        mode: SaveMode.updateExisting,
+      );
       final all = await repo.getAllUserRecipes();
 
       expect(result.action, SaveAction.updatedExisting);
@@ -96,11 +107,13 @@ void main() {
     }
   });
 
-  test('saveFromAi copy mode creates second recipe with copy suffix', () async {
+  test(
+      'saveFromGeneratedDraft copy mode creates second recipe with copy suffix',
+      () async {
     const boxName = 'userRecipesBox_copy';
     final repo = await _openRepo(boxName);
     try {
-      const aiRecipe = AiRecipe(
+      const generatedDraft = GeneratedRecipeDraft(
         title: 'Омлет',
         timeMin: 10,
         servings: 2,
@@ -108,9 +121,14 @@ void main() {
         steps: ['Шаг 1'],
       );
 
-      await repo.saveFromAi(aiRecipe: aiRecipe, mode: SaveMode.createCopy);
-      final result =
-          await repo.saveFromAi(aiRecipe: aiRecipe, mode: SaveMode.createCopy);
+      await repo.saveFromGeneratedDraft(
+        draft: generatedDraft,
+        mode: SaveMode.createCopy,
+      );
+      final result = await repo.saveFromGeneratedDraft(
+        draft: generatedDraft,
+        mode: SaveMode.createCopy,
+      );
       final all = await repo.getAllUserRecipes();
 
       expect(result.action, SaveAction.createdCopy);
@@ -161,6 +179,47 @@ void main() {
       await _closeAndDeleteBox(boxName);
     }
   });
+
+  test('purges unsupported legacy recipe sources from storage on read', () async {
+    const boxName = 'userRecipesBox_legacy_source';
+    final repo = await _openRepo(boxName);
+    try {
+      final box = Hive.box<UserRecipeHiveDto>(boxName);
+      await box.put(
+        'legacy',
+        UserRecipeHiveDto(
+          id: 'legacy',
+          recipeJson: jsonEncode({
+            'id': 'legacy',
+            'title': 'Старый рецепт',
+            'timeMin': 10,
+            'tags': ['quick'],
+            'servingsBase': 2,
+            'ingredients': [
+              {
+                'name': 'Яйцо',
+                'amount': 2.0,
+                'unit': 'pcs',
+                'required': true,
+              },
+            ],
+            'steps': ['Шаг 1'],
+            'source': 'ai_saved',
+          }),
+          signature: 'legacy-signature',
+          createdAt: DateTime(2026, 3, 9),
+          updatedAt: DateTime(2026, 3, 9),
+        ),
+      );
+
+      final recipes = await repo.getAllUserRecipes();
+
+      expect(recipes, isEmpty);
+      expect(box.containsKey('legacy'), isFalse);
+    } finally {
+      await _closeAndDeleteBox(boxName);
+    }
+  });
 }
 
 Future<UserRecipesRepo> _openRepo(String boxName) async {
@@ -169,7 +228,7 @@ Future<UserRecipesRepo> _openRepo(String boxName) async {
   }
   return UserRecipesRepo(
     boxName: boxName,
-    parser: const AiToRecipeParser(),
+    parser: const GeneratedRecipeDraftParser(),
   );
 }
 

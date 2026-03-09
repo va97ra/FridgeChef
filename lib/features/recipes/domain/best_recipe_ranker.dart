@@ -232,6 +232,12 @@ class BestRecipeRanker {
       usedPriorityWeights: usedPriorityWeights,
       inventory: inventory,
     );
+    final generatedAnchorUrgency = candidate.source == RecipeMatchSource.generated
+        ? _generatedAnchorUrgencyScore(recipe, inventory)
+        : 0.0;
+    final pantryDebtPenalty = candidate.source == RecipeMatchSource.generated
+        ? recipe.implicitPantryItems.length * 0.05
+        : 0.0;
     final completenessScore = _completenessScore(
       recipe: recipe,
       coverageScore: coverageScore,
@@ -247,6 +253,10 @@ class BestRecipeRanker {
         (priorityUsageScore * 0.20) +
         (completenessScore * 0.10) +
         (effortFitScore * 0.05);
+    if (candidate.source == RecipeMatchSource.generated) {
+      totalScore += generatedAnchorUrgency * 0.08;
+      totalScore -= pantryDebtPenalty;
+    }
     totalScore *= pairAnalysis.hardPenalty;
     totalScore =
         ((totalScore * 0.90) + (personalAnalysis.score * 0.10)).clamp(0.0, 1.0);
@@ -303,6 +313,7 @@ class BestRecipeRanker {
       flavorScore: chefAssessment.flavorScore,
       why: _buildReasons(
         recipe: recipe,
+        source: candidate.source,
         matchedRequired: matchedRequired,
         totalRequired: totalRequired,
         pairAnalysis: pairAnalysis,
@@ -383,6 +394,9 @@ class BestRecipeRanker {
     var score = strongPairs == 0
         ? (0.08 * pairKeys.length).clamp(0.08, 0.24)
         : (strongPairs / totalPairs).clamp(0.0, 1.0);
+    if (strongPairs >= 2 && weakPairs == 0 && forbiddenPairs == 0) {
+      score += 0.12;
+    }
     score -= (weakPairs / totalPairs) * 0.22;
     score -= (forbiddenPairs / totalPairs) * 0.55;
 
@@ -497,8 +511,33 @@ class BestRecipeRanker {
     return score.clamp(0.0, 1.0);
   }
 
+  double _generatedAnchorUrgencyScore(
+    Recipe recipe,
+    _InventorySnapshot inventory,
+  ) {
+    if (recipe.anchorIngredients.isEmpty) {
+      return 0.0;
+    }
+
+    final scores = recipe.anchorIngredients
+        .map(
+          (name) => canonicalizer.canonicalize(
+            name,
+            extraKnownNames: inventory.knownNames,
+          ),
+        )
+        .where((canonical) => canonical.isNotEmpty)
+        .map((canonical) => (inventory.expiryScores[canonical] ?? 0) / 5)
+        .toList();
+    if (scores.isEmpty) {
+      return 0.0;
+    }
+    return scores.reduce((a, b) => a + b) / scores.length;
+  }
+
   List<String> _buildReasons({
     required Recipe recipe,
+    required RecipeMatchSource source,
     required int matchedRequired,
     required int totalRequired,
     required _PairingAnalysis pairAnalysis,
@@ -508,6 +547,33 @@ class BestRecipeRanker {
     required _InventorySnapshot inventory,
   }) {
     final reasons = <String>[];
+
+    if (source == RecipeMatchSource.generated) {
+      if (recipe.anchorIngredients.isNotEmpty) {
+        reasons.add(
+          'шеф ставит в центр ${recipe.anchorIngredients.take(2).join(', ')}',
+        );
+      }
+
+      final urgentAnchors = recipe.anchorIngredients.where((name) {
+        final canonical = canonicalizer.canonicalize(
+          name,
+          extraKnownNames: inventory.knownNames,
+        );
+        return canonical.isNotEmpty && (inventory.expiryScores[canonical] ?? 0) >= 4;
+      }).toList();
+      if (urgentAnchors.isNotEmpty) {
+        reasons.add(
+          'лучше использовать сейчас: ${urgentAnchors.take(2).join(', ')}',
+        );
+      }
+
+      if (recipe.implicitPantryItems.isNotEmpty) {
+        reasons.add(
+          'из полки нужны только ${recipe.implicitPantryItems.take(2).join(', ')}',
+        );
+      }
+    }
 
     if (totalRequired == 0 || matchedRequired == totalRequired) {
       reasons.add('все продукты есть дома');
@@ -620,13 +686,25 @@ class _InventorySnapshot {
       final rawCanonical =
           item.canonicalName.trim().isNotEmpty ? item.canonicalName : item.name;
       final canonical = toPairingKey(rawCanonical);
-      if (canonical.isEmpty) {
+      final normalizedCanonical = normalizeIngredientText(rawCanonical);
+      if (canonical.isEmpty && normalizedCanonical.isEmpty) {
         continue;
       }
-      knownNames.add(canonical);
-      displayByCanonical.putIfAbsent(canonical, () => item.name.trim());
-      shelfCanonicals.add(canonical);
-      shelfSupportCanonicals.add(canonical);
+      if (normalizedCanonical.isNotEmpty) {
+        knownNames.add(normalizedCanonical);
+        displayByCanonical.putIfAbsent(
+          normalizedCanonical,
+          () => item.name.trim(),
+        );
+        shelfCanonicals.add(normalizedCanonical);
+        shelfSupportCanonicals.add(normalizedCanonical);
+      }
+      if (canonical.isNotEmpty) {
+        knownNames.add(canonical);
+        displayByCanonical.putIfAbsent(canonical, () => item.name.trim());
+        shelfCanonicals.add(canonical);
+        shelfSupportCanonicals.add(canonical);
+      }
       for (final support in item.supportCanonicals) {
         final normalizedSupport = toPairingKey(support);
         if (normalizedSupport.isNotEmpty) {

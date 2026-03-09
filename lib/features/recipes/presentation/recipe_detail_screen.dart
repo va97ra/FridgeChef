@@ -165,7 +165,12 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           _buildFeedbackCard(context, feedback),
           if (widget.why.isNotEmpty) ...[
             const SizedBox(height: AppTokens.p20),
-            _buildSectionTitle(context, 'Почему этот рецепт наверху'),
+            _buildSectionTitle(
+              context,
+              _recipe.isGenerated
+                  ? 'Почему шеф выбрал этот рецепт'
+                  : 'Почему этот рецепт наверху',
+            ),
             const SizedBox(height: AppTokens.p12),
             _buildWhyCard(context),
           ],

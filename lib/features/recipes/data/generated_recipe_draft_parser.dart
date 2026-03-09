@@ -1,7 +1,7 @@
 import '../../../core/utils/units.dart';
+import '../domain/generated_recipe_draft.dart';
 import '../domain/recipe.dart';
 import '../domain/recipe_ingredient.dart';
-import '../domain/generated_recipe_draft.dart';
 
 class ParsedRecipeDraft {
   final String title;
@@ -166,10 +166,6 @@ class GeneratedRecipeDraftParser {
     }
     return cleaned;
   }
-}
-
-class AiToRecipeParser extends GeneratedRecipeDraftParser {
-  const AiToRecipeParser();
 }
 
 String buildRecipeSignature({

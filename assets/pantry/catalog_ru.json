@@ -82,7 +82,8 @@
     "canonicalName": "корица",
     "aliases": ["корица", "молотая корица", "kotanyi корица", "kamis корица"],
     "category": "spice",
-    "supportCanonicals": ["тёплая специя", "сладкий акцент"]
+    "supportCanonicals": ["тёплая специя", "сладкий акцент"],
+    "isStarter": true
   },
   {
     "id": "bay_leaf",
@@ -90,7 +91,8 @@
     "canonicalName": "лавровый лист",
     "aliases": ["лавровый лист", "лаврушка", "bay leaf"],
     "category": "spice",
-    "supportCanonicals": ["травяной акцент"]
+    "supportCanonicals": ["травяной акцент"],
+    "isStarter": true
   },
   {
     "id": "dill_dried",

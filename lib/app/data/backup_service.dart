@@ -174,19 +174,22 @@ class BackupService {
 
   Future<BackupPreview> loadImportPreview(String path) async {
     final raw = await File(path).readAsString();
-    final payload = BackupPayloadV2.fromJson(
-      jsonDecode(raw) as Map<String, dynamic>,
-    );
-    if (payload.schemaVersion < 1 || payload.schemaVersion > schemaVersion) {
-      throw const BackupFormatException('Неподдерживаемая версия резервной копии');
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    _ensureSupportedSchema((decoded['schemaVersion'] as num?)?.toInt() ?? 0);
+
+    BackupPayloadV2 payload;
+    try {
+      payload = BackupPayloadV2.fromJson(decoded);
+    } on FormatException {
+      throw const BackupFormatException(
+        'Резервная копия содержит неподдерживаемые рецепты',
+      );
     }
     return BackupPreview(payload: payload);
   }
 
   Future<void> replaceAllData(BackupPayloadV2 payload) async {
-    if (payload.schemaVersion < 1 || payload.schemaVersion > schemaVersion) {
-      throw const BackupFormatException('Неподдерживаемая версия резервной копии');
-    }
+    _ensureSupportedSchema(payload.schemaVersion);
 
     await fridgeRepo.replaceAll(payload.fridgeItems);
     await shelfRepo.replaceAll(payload.shelfItems);
@@ -211,6 +214,12 @@ class BackupService {
     final h = value.hour.toString().padLeft(2, '0');
     final min = value.minute.toString().padLeft(2, '0');
     return '$y$m$d' '_$h$min';
+  }
+
+  void _ensureSupportedSchema(int version) {
+    if (version != schemaVersion) {
+      throw const BackupFormatException('Неподдерживаемая версия резервной копии');
+    }
   }
 }
 

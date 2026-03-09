@@ -237,7 +237,7 @@ const chefBlueprints = <ChefBlueprint>[
     tags: ['quick', 'one_pan', 'generated_local'],
     anchorSlot: 'base',
     secondaryAnchorSlot: 'addons',
-    preferredStarters: ['соль', 'перец', 'масло', 'базилик', 'орегано'],
+    preferredStarters: ['соль', 'перец', 'масло', 'чеснок'],
     titleStyle: ChefTitleStyle.anchorWithSecondary,
     stepStyle: ChefStepStyle.pastaPan,
     slots: [
@@ -323,7 +323,7 @@ const chefBlueprints = <ChefBlueprint>[
     anchorSlot: 'base',
     secondaryAnchorSlot: 'addons',
     supportSlot: 'binder',
-    preferredStarters: ['соль', 'перец', 'масло', 'паприка', 'итальянские травы'],
+    preferredStarters: ['соль', 'перец', 'масло', 'паприка', 'чеснок'],
     titleStyle: ChefTitleStyle.anchorWithFocus,
     stepStyle: ChefStepStyle.bake,
     slots: [

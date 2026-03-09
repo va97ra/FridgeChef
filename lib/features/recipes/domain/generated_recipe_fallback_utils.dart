@@ -1,14 +1,14 @@
 import '../../../core/utils/units.dart';
 import '../../fridge/domain/fridge_item.dart';
 import '../../fridge/domain/product_catalog_entry.dart';
-import '../../recipes/domain/ingredient_knowledge.dart';
-import '../../recipes/domain/recipe.dart';
-import '../../recipes/domain/recipe_match.dart';
-import '../../recipes/domain/recipe_matcher.dart';
 import '../../shelf/domain/shelf_item.dart';
-import 'ai_recipe.dart';
+import 'generated_recipe_draft.dart';
+import 'ingredient_knowledge.dart';
+import 'recipe.dart';
+import 'recipe_match.dart';
+import 'recipe_matcher.dart';
 
-const double kAiIngredientValidityThreshold = 0.65;
+const double kGeneratedIngredientValidityThreshold = 0.65;
 
 class PriorityItemScore {
   final String name;
@@ -182,7 +182,7 @@ PrioritySignals derivePrioritySignals({
 }
 
 double calculateIngredientValidity({
-  required List<AiRecipe> recipes,
+  required List<GeneratedRecipeDraft> recipes,
   required Set<String> allowedIngredientNames,
 }) {
   var total = 0;
@@ -207,7 +207,7 @@ double calculateIngredientValidity({
   return matched / total;
 }
 
-List<AiRecipe> buildLocalFallbackRecipes({
+List<GeneratedRecipeDraft> buildLocalFallbackRecipes({
   required List<Recipe> recipes,
   required List<FridgeItem> fridgeItems,
   required List<ShelfItem> shelfItems,
@@ -250,11 +250,11 @@ List<AiRecipe> buildLocalFallbackRecipes({
 
   return selected
       .take(count)
-      .map((match) => mapRecipeMatchToAiRecipe(match))
+      .map((match) => mapRecipeMatchToGeneratedDraft(match))
       .toList();
 }
 
-AiRecipe mapRecipeMatchToAiRecipe(RecipeMatch match) {
+GeneratedRecipeDraft mapRecipeMatchToGeneratedDraft(RecipeMatch match) {
   final recipe = match.recipe;
   final ingredients = recipe.ingredients
       .map((ingredient) =>
@@ -275,7 +275,7 @@ AiRecipe mapRecipeMatchToAiRecipe(RecipeMatch match) {
     tip = 'Не хватает: $missingPreview';
   }
 
-  return AiRecipe(
+  return GeneratedRecipeDraft(
     title: recipe.title,
     timeMin: recipe.timeMin,
     servings: recipe.servingsBase,

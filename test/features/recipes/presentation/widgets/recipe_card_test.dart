@@ -11,8 +11,8 @@ void main() {
       (tester) async {
     final match = _buildMatch(
       recipe: Recipe(
-        id: 'ai_1',
-        title: 'AI Омлет',
+        id: 'generated_1',
+        title: 'Шеф-омлет',
         timeMin: 12,
         tags: const ['breakfast', 'quick'],
         servingsBase: 2,

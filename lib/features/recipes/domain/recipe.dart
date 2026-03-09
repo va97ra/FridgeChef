@@ -16,16 +16,18 @@ extension RecipeSourceX on RecipeSource {
 
   static RecipeSource fromStorage(String? value) {
     switch (value) {
+      case null:
+      case '':
+      case 'asset':
+        return RecipeSource.asset;
       case 'generated_draft':
       case 'generatedDraft':
         return RecipeSource.generatedDraft;
       case 'generated_saved':
       case 'generatedSaved':
-      case 'ai_saved':
-      case 'aiSaved':
         return RecipeSource.generatedSaved;
       default:
-        return RecipeSource.asset;
+        throw FormatException('Unsupported recipe source: $value');
     }
   }
 }
