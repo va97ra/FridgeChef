@@ -12,6 +12,8 @@ import 'package:help_to_cook/features/shelf/domain/shelf_item.dart';
 
 void main() {
   testWidgets('Home screen renders 3 main actions', (tester) async {
+    final semantics = tester.ensureSemantics();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -25,6 +27,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Мой холодильник'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('Открыть раздел Мой холодильник')),
+      findsOneWidget,
+    );
     await tester.scrollUntilVisible(
       find.text('Полка'),
       250,
@@ -32,6 +38,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Полка'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('Открыть раздел Полка')),
+      findsOneWidget,
+    );
     await tester.scrollUntilVisible(
       find.text('Помоги приготовить'),
       250,
@@ -39,6 +49,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Помоги приготовить'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('Открыть раздел Помоги приготовить')),
+      findsOneWidget,
+    );
+
+    semantics.dispose();
   });
 }
 

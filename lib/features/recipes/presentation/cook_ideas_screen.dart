@@ -477,100 +477,114 @@ class _BestRecipeHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final confidence = (match.score * 100).round().clamp(0, 100);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTokens.r24),
-      child: SectionSurface(
-        tone: SectionSurfaceTone.primarySoft,
-        padding: const EdgeInsets.all(AppTokens.p20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Semantics(
+      button: true,
+      label: 'Открыть лучший рецепт ${match.recipe.title}. '
+          '${match.recipe.timeMin} минут. '
+          '$confidence процентов совпадение. '
+          'Совпадение ${match.matchedCount} из ${match.totalCount}.',
+      child: ExcludeSemantics(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTokens.r24),
+          child: SectionSurface(
+            tone: SectionSurfaceTone.primarySoft,
+            padding: const EdgeInsets.all(AppTokens.p20),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _SourceBadge(match: match),
-                      const SizedBox(height: 10),
-                      Text(
-                        match.recipe.title,
-                        style:
-                            Theme.of(context).textTheme.displayMedium?.copyWith(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SourceBadge(match: match),
+                          const SizedBox(height: 10),
+                          Text(
+                            match.recipe.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayMedium
+                                ?.copyWith(
                                   fontSize: 26,
                                 ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Icon(
-                  Icons.restaurant_menu_rounded,
-                  color: AppTokens.primary,
-                  size: 28,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppTokens.p16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _HeroInfoPill(
-                  icon: Icons.timer_outlined,
-                  label: '${match.recipe.timeMin} мин',
-                ),
-                _HeroInfoPill(
-                  icon: Icons.auto_awesome_outlined,
-                  label: '$confidence%',
-                ),
-                _HeroInfoPill(
-                  icon: Icons.checklist_rounded,
-                  label: '${match.matchedCount}/${match.totalCount}',
-                ),
-              ],
-            ),
-            if (match.why.isNotEmpty) ...[
-              const SizedBox(height: AppTokens.p16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: match.why.take(3).map((reason) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTokens.p12,
-                      vertical: AppTokens.p8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTokens.insetSurface,
-                      borderRadius: BorderRadius.circular(AppTokens.pill),
-                      border: Border.all(color: AppTokens.insetBorder),
-                    ),
-                    child: Text(
-                      reason,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTokens.text,
-                            fontWeight: FontWeight.w700,
                           ),
+                        ],
+                      ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
-            const SizedBox(height: AppTokens.p16),
-            Row(
-              children: [
-                Expanded(child: MatchBar(score: match.score)),
-                const SizedBox(width: AppTokens.p12),
-                const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: AppTokens.textLight,
+                    const SizedBox(width: 12),
+                    const Icon(
+                      Icons.restaurant_menu_rounded,
+                      color: AppTokens.primary,
+                      size: 28,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppTokens.p16),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _HeroInfoPill(
+                      icon: Icons.timer_outlined,
+                      label: '${match.recipe.timeMin} мин',
+                    ),
+                    _HeroInfoPill(
+                      icon: Icons.auto_awesome_outlined,
+                      label: '$confidence%',
+                    ),
+                    _HeroInfoPill(
+                      icon: Icons.checklist_rounded,
+                      label: '${match.matchedCount}/${match.totalCount}',
+                    ),
+                  ],
+                ),
+                if (match.why.isNotEmpty) ...[
+                  const SizedBox(height: AppTokens.p16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: match.why.take(3).map((reason) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTokens.p12,
+                          vertical: AppTokens.p8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTokens.insetSurface,
+                          borderRadius: BorderRadius.circular(
+                            AppTokens.pill,
+                          ),
+                          border: Border.all(color: AppTokens.insetBorder),
+                        ),
+                        child: Text(
+                          reason,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTokens.text,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+                const SizedBox(height: AppTokens.p16),
+                Row(
+                  children: [
+                    Expanded(child: MatchBar(score: match.score)),
+                    const SizedBox(width: AppTokens.p12),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: AppTokens.textLight,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

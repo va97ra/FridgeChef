@@ -74,3 +74,19 @@ flutter run
 flutter analyze
 flutter test
 ```
+
+Быстрый запуск браузерной release-сборки на локальном сервере (Windows PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_web_release.ps1
+```
+
+По умолчанию приложение поднимется на `http://127.0.0.1:7361`, откроется в браузере, а лог сохранится в `web-release.log`.
+
+Браузерный smoke без эмулятора:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_web_smoke.ps1
+```
+
+Скрипт использует `flutter drive` + `integration_test` и гоняет browser smoke на `chrome` по умолчанию.

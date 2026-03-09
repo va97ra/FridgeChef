@@ -12,6 +12,7 @@ class HomeActionButton extends StatefulWidget {
   final VoidCallback onTap;
   final bool isPrimary;
   final String? metaLabel;
+  final String? semanticLabel;
 
   const HomeActionButton({
     super.key,
@@ -22,6 +23,7 @@ class HomeActionButton extends StatefulWidget {
     required this.onTap,
     this.isPrimary = false,
     this.metaLabel,
+    this.semanticLabel,
   });
 
   @override
@@ -63,92 +65,118 @@ class _HomeActionButtonState extends State<HomeActionButton>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: SectionSurface(
-          tone: widget.isPrimary
-              ? SectionSurfaceTone.primarySoft
-              : SectionSurfaceTone.base,
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: widget.accentColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(AppTokens.r16),
-                ),
-                child: Icon(widget.icon, color: widget.accentColor, size: 24),
-              ),
-              const SizedBox(width: AppTokens.p16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+    final semanticLabel = widget.semanticLabel ?? _buildSemanticLabel();
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onTapDown: _handleTapDown,
+          onTapUp: _handleTapUp,
+          onTapCancel: _handleTapCancel,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: SectionSurface(
+              tone: widget.isPrimary
+                  ? SectionSurfaceTone.primarySoft
+                  : SectionSurfaceTone.base,
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: widget.accentColor.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(AppTokens.r16),
+                    ),
+                    child: Icon(
+                      widget.icon,
+                      color: widget.accentColor,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: AppTokens.p16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            widget.title,
-                            style:
-                                Theme.of(context).textTheme.titleLarge?.copyWith(
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.title,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w800,
                                     ),
-                          ),
-                        ),
-                        if ((widget.metaLabel ?? '').isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTokens.p8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.accentColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(AppTokens.pill),
-                            ),
-                            child: Text(
-                              widget.metaLabel!,
-                              style: TextStyle(
-                                color: widget.accentColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11,
                               ),
                             ),
-                          ),
+                            if ((widget.metaLabel ?? '').isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppTokens.p8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: widget.accentColor.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTokens.pill,
+                                  ),
+                                ),
+                                child: Text(
+                                  widget.metaLabel!,
+                                  style: TextStyle(
+                                    color: widget.accentColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.subtitle,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.subtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(width: AppTokens.p12),
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppTokens.surface,
+                      borderRadius: BorderRadius.circular(AppTokens.r12),
+                      border: Border.all(color: AppTokens.border),
                     ),
-                  ],
-                ),
+                    child: const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: AppTokens.textLight,
+                      size: 18,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppTokens.p12),
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppTokens.surface,
-                  borderRadius: BorderRadius.circular(AppTokens.r12),
-                  border: Border.all(color: AppTokens.border),
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: AppTokens.textLight,
-                  size: 18,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String _buildSemanticLabel() {
+    final meta = (widget.metaLabel ?? '').trim();
+    if (meta.isEmpty) {
+      return '${widget.title}. ${widget.subtitle}';
+    }
+    return '${widget.title}. $meta. ${widget.subtitle}';
   }
 }

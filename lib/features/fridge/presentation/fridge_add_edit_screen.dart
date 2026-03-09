@@ -495,48 +495,66 @@ class _FridgeAddEditScreenState extends ConsumerState<FridgeAddEditScreen> {
                         horizontal: AppTokens.p12,
                         vertical: AppTokens.p12,
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppTokens.primarySoft,
-                              borderRadius: BorderRadius.circular(AppTokens.r12),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.camera_alt_rounded,
-                              color: AppTokens.primary,
-                              size: 18,
-                            ),
-                          ),
-                          const SizedBox(width: AppTokens.p8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Фото-импорт',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w800),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: AppTokens.primarySoft,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTokens.r12,
+                                  ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Быстро распознать продукты',
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  color: AppTokens.primary,
+                                  size: 18,
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: AppTokens.p8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Фото-импорт',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Быстро распознать продукты',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: AppTokens.p8),
-                          OutlinedButton.icon(
-                            onPressed: _startPhotoImport,
-                            icon: const Icon(Icons.camera_alt_rounded, size: 16),
-                            label: const Text('По фото'),
+                          const SizedBox(height: AppTokens.p12),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: OutlinedButton.icon(
+                              onPressed: _startPhotoImport,
+                              icon: const Icon(
+                                Icons.camera_alt_rounded,
+                                size: 16,
+                              ),
+                              label: const Text('По фото'),
+                            ),
                           ),
                         ],
                       ),

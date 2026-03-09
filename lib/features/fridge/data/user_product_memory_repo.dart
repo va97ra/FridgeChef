@@ -20,16 +20,17 @@ class UserProductMemoryRepo {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(storageKey);
     if (raw == null || raw.isEmpty) {
-      return const [];
+      return <UserProductMemoryEntry>[];
     }
 
     final decoded = jsonDecode(raw);
     if (decoded is! List) {
-      return const [];
+      return <UserProductMemoryEntry>[];
     }
 
     return decoded
-        .whereType<Map<String, dynamic>>()
+        .whereType<Map>()
+        .map((entry) => Map<String, dynamic>.from(entry))
         .map(UserProductMemoryEntry.fromJson)
         .where((entry) => entry.key.isNotEmpty && entry.name.isNotEmpty)
         .toList()
@@ -43,7 +44,7 @@ class UserProductMemoryRepo {
     String? productId,
   }) async {
     final prefs = await SharedPreferences.getInstance();
-    final items = await loadAll();
+    final items = [...await loadAll()];
     final normalizedName = normalizeProductToken(name);
     if (normalizedName.isEmpty) {
       return;

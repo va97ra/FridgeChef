@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/fridge_item.dart';
 import '../domain/photo_import_result.dart';
@@ -21,29 +22,36 @@ class FridgeListNotifier extends StateNotifier<List<FridgeItem>> {
 
   Future<void> addItem(FridgeItem item, {String? productId}) async {
     await _repo.upsert(item);
-    await _memoryRepo.recordProduct(
-      name: item.name,
-      unit: item.unit,
-      amount: item.amount,
-      productId: productId,
-    );
+    await _recordProductMemorySafely(item, productId: productId);
     _load();
   }
 
   Future<void> updateItem(FridgeItem item, {String? productId}) async {
     await _repo.upsert(item);
-    await _memoryRepo.recordProduct(
-      name: item.name,
-      unit: item.unit,
-      amount: item.amount,
-      productId: productId,
-    );
+    await _recordProductMemorySafely(item, productId: productId);
     _load();
   }
 
   Future<void> removeItem(String id) async {
     await _repo.delete(id);
     _load();
+  }
+
+  Future<void> _recordProductMemorySafely(
+    FridgeItem item, {
+    String? productId,
+  }) async {
+    try {
+      await _memoryRepo.recordProduct(
+        name: item.name,
+        unit: item.unit,
+        amount: item.amount,
+        productId: productId,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('Failed to record fridge product memory: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 }
 

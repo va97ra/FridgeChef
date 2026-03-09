@@ -99,6 +99,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icons.kitchen_outlined,
             accentColor: AppTokens.accent,
             metaLabel: fridgeItems.isEmpty ? 'Пусто' : '${fridgeItems.length}',
+            semanticLabel: 'Открыть раздел Мой холодильник. '
+                '${fridgeItems.isEmpty ? 'Пусто' : '${fridgeItems.length} продуктов'}. '
+                '${fridgeItems.isEmpty ? 'Добавь продукты, чтобы начать подбор блюд' : '$expiringSoon скоро использовать'}',
             onTap: () => Navigator.pushNamed(context, AppRoutes.fridge),
           ),
           const SizedBox(height: AppTokens.p12),
@@ -110,6 +113,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icons.spa_outlined,
             accentColor: AppTokens.secondaryDark,
             metaLabel: inStockShelf == 0 ? 'Нужно' : '$inStockShelf',
+            semanticLabel: 'Открыть раздел Полка. '
+                '${inStockShelf == 0 ? 'Нужно' : '$inStockShelf позиций'}. '
+                '${inStockShelf == 0 ? 'Добавь специи, масла и соусы для точных рецептов' : '$inStockShelf позиций в наличии для усиления вкуса'}',
             onTap: () => Navigator.pushNamed(context, AppRoutes.shelf),
           ),
           const SizedBox(height: AppTokens.p12),
@@ -124,6 +130,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ? 'Оффлайн'
                 : '${(bestMatch.score * 100).round()}%',
             isPrimary: true,
+            semanticLabel: 'Открыть раздел Помоги приготовить. '
+                '${bestMatch == null ? 'Оффлайн подбор' : '${(bestMatch.score * 100).round()} процентов совпадение'}. '
+                '${bestMatch == null ? 'Подберём лучшее блюдо, когда дома появятся продукты' : 'Сейчас лучший вариант: ${bestMatch.recipe.title}'}',
             onTap: () => Navigator.pushNamed(context, AppRoutes.cook),
           ),
           const SizedBox(height: AppTokens.p24),
@@ -252,75 +261,80 @@ class _TodayCard extends StatelessWidget {
                 ? 'Специи, масла и соусы заметно повышают точность и вкус офлайн-рекомендаций.'
                 : 'Холодильник уже заполнен. Открой подбор и посмотри лучший вариант из того, что есть дома.';
 
-    return SectionSurface(
-      tone: readyToCook
-          ? SectionSurfaceTone.primarySoft
-          : SectionSurfaceTone.muted,
-      padding: const EdgeInsets.all(AppTokens.p20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTokens.p8,
-              vertical: 6,
+    return Semantics(
+      container: true,
+      label:
+          '${readyToCook ? 'Сегодняшний выбор' : 'Следующий шаг'}. $title. $subtitle',
+      child: SectionSurface(
+        tone: readyToCook
+            ? SectionSurfaceTone.primarySoft
+            : SectionSurfaceTone.muted,
+        padding: const EdgeInsets.all(AppTokens.p20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTokens.p8,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: readyToCook
+                    ? AppTokens.insetSurfaceStrong.withValues(alpha: 0.94)
+                    : AppTokens.insetSurface,
+                borderRadius: BorderRadius.circular(AppTokens.pill),
+                border: Border.all(color: AppTokens.insetBorder),
+              ),
+              child: Text(
+                readyToCook ? 'Сегодняшний выбор' : 'Следующий шаг',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color:
+                          readyToCook ? AppTokens.primary : AppTokens.textLight,
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
             ),
-            decoration: BoxDecoration(
-              color: readyToCook
-                  ? AppTokens.insetSurfaceStrong.withValues(alpha: 0.94)
-                  : AppTokens.insetSurface,
-              borderRadius: BorderRadius.circular(AppTokens.pill),
-              border: Border.all(color: AppTokens.insetBorder),
-            ),
-            child: Text(
-              readyToCook ? 'Сегодняшний выбор' : 'Следующий шаг',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color:
-                        readyToCook ? AppTokens.primary : AppTokens.textLight,
-                    fontWeight: FontWeight.w800,
+            const SizedBox(height: AppTokens.p12),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontSize: 22,
                   ),
             ),
-          ),
-          const SizedBox(height: AppTokens.p12),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontSize: 22,
-                ),
-          ),
-          const SizedBox(height: AppTokens.p8),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppTokens.p16),
-          Row(
-            children: [
-              if (readyToCook)
+            const SizedBox(height: AppTokens.p8),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: AppTokens.p16),
+            Row(
+              children: [
+                if (readyToCook)
+                  _InfoBox(
+                    label: '${bestMatch!.recipe.timeMin} мин',
+                    icon: Icons.timer_outlined,
+                  ),
+                if (readyToCook) const SizedBox(width: AppTokens.p8),
                 _InfoBox(
-                  label: '${bestMatch!.recipe.timeMin} мин',
-                  icon: Icons.timer_outlined,
+                  label: readyToCook
+                      ? '${(bestMatch!.score * 100).round()}% совпадение'
+                      : '$fridgeCount продуктов добавлено',
+                  icon: readyToCook
+                      ? Icons.auto_awesome_outlined
+                      : Icons.inventory_2_outlined,
                 ),
-              if (readyToCook) const SizedBox(width: AppTokens.p8),
-              _InfoBox(
-                label: readyToCook
-                    ? '${(bestMatch!.score * 100).round()}% совпадение'
-                    : '$fridgeCount продуктов добавлено',
-                icon: readyToCook
-                    ? Icons.auto_awesome_outlined
-                    : Icons.inventory_2_outlined,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppTokens.p16),
-          PrimaryButton(
-            text: readyToCook ? 'Открыть лучший рецепт' : 'Перейти дальше',
-            onPressed: onPrimaryAction,
-            icon: readyToCook
-                ? Icons.arrow_forward_rounded
-                : Icons.chevron_right_rounded,
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: AppTokens.p16),
+            PrimaryButton(
+              text: readyToCook ? 'Открыть лучший рецепт' : 'Перейти дальше',
+              onPressed: onPrimaryAction,
+              icon: readyToCook
+                  ? Icons.arrow_forward_rounded
+                  : Icons.chevron_right_rounded,
+            ),
+          ],
+        ),
       ),
     );
   }

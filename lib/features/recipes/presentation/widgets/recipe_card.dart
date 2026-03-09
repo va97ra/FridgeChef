@@ -32,151 +32,156 @@ class RecipeCard extends StatelessWidget {
         final compact = constraints.maxWidth < 380;
         final reasonMaxWidth = compact ? constraints.maxWidth - 32 : 220.0;
 
-        return InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppTokens.r20),
-          child: SectionSurface(
-            padding: const EdgeInsets.all(AppTokens.p16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _MiniTag(
-                            icon: _sourceIcon,
-                            label: _sourceLabel,
-                            color: _sourceColor,
-                            background: _sourceBackground,
-                            borderColor: Colors.transparent,
-                          ),
-                          _MiniTag(
-                            icon: Icons.timer_outlined,
-                            label: '${match.recipe.timeMin} мин',
-                            color: AppTokens.text,
-                            background: AppTokens.insetSurface,
-                            borderColor: AppTokens.insetBorder,
-                          ),
-                          for (final badge in moodBadges.take(3))
-                            _MiniTag(
-                              icon: _iconForBadge(badge),
-                              label: badge,
-                              color: AppTokens.secondaryDark,
-                              background: AppTokens.secondarySoft,
-                              borderColor: AppTokens.insetBorder,
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    if (match.recipe.isUserEditable &&
-                        (onRename != null || onDelete != null))
-                      PopupMenuButton<_RecipeAction>(
-                        icon: const Icon(Icons.more_vert_rounded, size: 18),
-                        itemBuilder: (context) => [
-                          if (onRename != null)
-                            const PopupMenuItem(
-                              value: _RecipeAction.rename,
-                              child: Text('Переименовать'),
-                            ),
-                          if (onDelete != null)
-                            const PopupMenuItem(
-                              value: _RecipeAction.delete,
-                              child: Text('Удалить'),
-                            ),
-                        ],
-                        onSelected: (value) {
-                          if (value == _RecipeAction.rename) {
-                            onRename?.call();
-                          } else if (value == _RecipeAction.delete) {
-                            onDelete?.call();
-                          }
-                        },
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppTokens.p12),
-                if (compact) ...[
-                  _CardMainContent(
-                    match: match,
-                    reasonMaxWidth: reasonMaxWidth,
-                  ),
-                  const SizedBox(height: AppTokens.p12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: MatchBar(score: match.score),
-                  ),
-                ] else
+        return Semantics(
+          button: true,
+          container: true,
+          label: _semanticLabel,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppTokens.r20),
+            child: SectionSurface(
+              padding: const EdgeInsets.all(AppTokens.p16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _CardMainContent(
-                          match: match,
-                          reasonMaxWidth: reasonMaxWidth,
-                        ),
-                      ),
-                      const SizedBox(width: AppTokens.p12),
-                      MatchBar(score: match.score),
-                    ],
-                  ),
-                const SizedBox(height: AppTokens.p16),
-                Container(
-                  padding: const EdgeInsets.all(AppTokens.p12),
-                  decoration: BoxDecoration(
-                    color: AppTokens.insetSurface,
-                    borderRadius: BorderRadius.circular(AppTokens.r16),
-                    border: Border.all(color: AppTokens.insetBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
-                            Text(
-                              'Совпадение ${match.matchedCount} из ${match.totalCount}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppTokens.text,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                            _MiniTag(
+                              icon: _sourceIcon,
+                              label: _sourceLabel,
+                              color: _sourceColor,
+                              background: _sourceBackground,
+                              borderColor: Colors.transparent,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              hasMissing
-                                  ? 'Нужно: ${_formatMissing()}'
-                                  : 'Все нужные продукты уже есть дома',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: hasMissing
-                                        ? AppTokens.warn
-                                        : AppTokens.accent,
-                                  ),
+                            _MiniTag(
+                              icon: Icons.timer_outlined,
+                              label: '${match.recipe.timeMin} мин',
+                              color: AppTokens.text,
+                              background: AppTokens.insetSurface,
+                              borderColor: AppTokens.insetBorder,
                             ),
+                            for (final badge in moodBadges.take(3))
+                              _MiniTag(
+                                icon: _iconForBadge(badge),
+                                label: badge,
+                                color: AppTokens.secondaryDark,
+                                background: AppTokens.secondarySoft,
+                                borderColor: AppTokens.insetBorder,
+                              ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: AppTokens.p12),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: AppTokens.textLight,
-                      ),
+                      const SizedBox(width: 12),
+                      if (match.recipe.isUserEditable &&
+                          (onRename != null || onDelete != null))
+                        PopupMenuButton<_RecipeAction>(
+                          icon: const Icon(Icons.more_vert_rounded, size: 18),
+                          itemBuilder: (context) => [
+                            if (onRename != null)
+                              const PopupMenuItem(
+                                value: _RecipeAction.rename,
+                                child: Text('Переименовать'),
+                              ),
+                            if (onDelete != null)
+                              const PopupMenuItem(
+                                value: _RecipeAction.delete,
+                                child: Text('Удалить'),
+                              ),
+                          ],
+                          onSelected: (value) {
+                            if (value == _RecipeAction.rename) {
+                              onRename?.call();
+                            } else if (value == _RecipeAction.delete) {
+                              onDelete?.call();
+                            }
+                          },
+                        ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: AppTokens.p12),
+                  if (compact) ...[
+                    _CardMainContent(
+                      match: match,
+                      reasonMaxWidth: reasonMaxWidth,
+                    ),
+                    const SizedBox(height: AppTokens.p12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: MatchBar(score: match.score),
+                    ),
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _CardMainContent(
+                            match: match,
+                            reasonMaxWidth: reasonMaxWidth,
+                          ),
+                        ),
+                        const SizedBox(width: AppTokens.p12),
+                        MatchBar(score: match.score),
+                      ],
+                    ),
+                  const SizedBox(height: AppTokens.p16),
+                  Container(
+                    padding: const EdgeInsets.all(AppTokens.p12),
+                    decoration: BoxDecoration(
+                      color: AppTokens.insetSurface,
+                      borderRadius: BorderRadius.circular(AppTokens.r16),
+                      border: Border.all(color: AppTokens.insetBorder),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Совпадение ${match.matchedCount} из ${match.totalCount}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppTokens.text,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                hasMissing
+                                    ? 'Нужно: ${_formatMissing()}'
+                                    : 'Все нужные продукты уже есть дома',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: hasMissing
+                                          ? AppTokens.warn
+                                          : AppTokens.accent,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: AppTokens.p12),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          color: AppTokens.textLight,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -231,6 +236,17 @@ class RecipeCard extends StatelessWidget {
               '${e.ingredient.name.toLowerCase()} ${_fmtNum(e.missingAmount)} ${e.ingredient.unit.label}',
         )
         .join(', ');
+  }
+
+  String get _semanticLabel {
+    final availability = match.missingIngredients.isEmpty
+        ? 'Все нужные продукты уже есть дома'
+        : 'Нужно: ${_formatMissing()}';
+    return 'Открыть рецепт ${match.recipe.title}. '
+        '${match.recipe.timeMin} минут. '
+        '$_sourceLabel. '
+        'Совпадение ${match.matchedCount} из ${match.totalCount}. '
+        '$availability';
   }
 
   static String _fmtNum(double v) => v <= 0

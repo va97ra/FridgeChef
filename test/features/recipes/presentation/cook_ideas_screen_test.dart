@@ -12,6 +12,8 @@ import 'package:help_to_cook/features/recipes/presentation/providers.dart';
 void main() {
   testWidgets('shows hero block and separate offline ideas section',
       (tester) async {
+    final semantics = tester.ensureSemantics();
+
     final bestRecipe = Recipe(
       id: 'best',
       title: 'Шакшука',
@@ -38,7 +40,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          recipesProvider.overrideWith((ref) async => [bestRecipe, secondRecipe]),
+          recipesProvider
+              .overrideWith((ref) async => [bestRecipe, secondRecipe]),
           productCatalogProvider.overrideWith(
             (ref) async => const [
               ProductCatalogEntry(
@@ -55,7 +58,10 @@ void main() {
                 recipe: bestRecipe,
                 source: RecipeMatchSource.generated,
                 score: 0.94,
-                why: const ['все продукты есть дома', 'сильное сочетание яйцо + помидор'],
+                why: const [
+                  'все продукты есть дома',
+                  'сильное сочетание яйцо + помидор'
+                ],
                 missingIngredients: const [],
                 matchedCount: 3,
                 totalCount: 3,
@@ -88,6 +94,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Лучшее блюдо сегодня'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('Открыть лучший рецепт Шакшука')),
+      findsOneWidget,
+    );
     expect(find.text('Шеф-идея'), findsWidgets);
     expect(find.text('все продукты есть дома'), findsOneWidget);
     await tester.scrollUntilVisible(
@@ -97,5 +107,11 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Шеф предлагает'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('Открыть рецепт Омлет')),
+      findsOneWidget,
+    );
+
+    semantics.dispose();
   });
 }
