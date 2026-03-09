@@ -10,6 +10,7 @@ import '../../../core/widgets/section_surface.dart';
 import '../data/user_recipes_repo.dart';
 import '../domain/cook_filter.dart';
 import '../domain/recipe.dart';
+import '../domain/recipe_interaction_event.dart';
 import '../domain/recipe_match.dart';
 import 'providers.dart';
 import 'recipe_detail_screen.dart';
@@ -96,10 +97,8 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
                     const SizedBox(width: AppTokens.p12),
                     AppIconButton(
                       icon: Icons.refresh_rounded,
-                      onPressed: () {
-                        final notifier =
-                            ref.read(chefGenerationSeedProvider.notifier);
-                        notifier.state = notifier.state + 1;
+                      onPressed: () async {
+                        await _refreshChefIdeas(generatedMatches);
                       },
                       tone: AppIconButtonTone.secondary,
                       tooltip: 'Пересобрать шеф-идеи',
@@ -337,9 +336,18 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
       return;
     }
 
+    final updatedRecipe = recipe.copyWith(
+      title: newTitle.trim(),
+      updatedAt: DateTime.now(),
+    );
+
     await ref
         .read(userRecipesRepoProvider)
         .renameUserRecipe(recipe.id, newTitle);
+    await ref.read(recipeInteractionHistoryProvider.notifier).record(
+          type: RecipeInteractionType.renamed,
+          recipe: updatedRecipe,
+        );
     ref.invalidate(recipesProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -374,12 +382,32 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
     }
 
     await ref.read(userRecipesRepoProvider).deleteUserRecipe(recipe.id);
+    await ref.read(recipeInteractionHistoryProvider.notifier).record(
+          type: RecipeInteractionType.deleted,
+          recipe: recipe,
+        );
     ref.invalidate(recipesProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Рецепт удалён')),
       );
     }
+  }
+
+  Future<void> _refreshChefIdeas(List<RecipeMatch> generatedMatches) async {
+    final ignoredRecipes = generatedMatches
+        .take(3)
+        .map((match) => match.recipe)
+        .toList(growable: false);
+    if (ignoredRecipes.isNotEmpty) {
+      await ref.read(recipeInteractionHistoryProvider.notifier).recordMany(
+            type: RecipeInteractionType.ignored,
+            recipes: ignoredRecipes,
+          );
+    }
+
+    final notifier = ref.read(chefGenerationSeedProvider.notifier);
+    notifier.state = notifier.state + 1;
   }
 }
 

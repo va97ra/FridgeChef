@@ -27,20 +27,23 @@ void main() {
           expect(
             productCanonicals.contains(candidate),
             isTrue,
-            reason: 'Unknown candidate "$candidate" in blueprint "${blueprint.id}"',
+            reason:
+                'Unknown candidate "$candidate" in blueprint "${blueprint.id}"',
           );
         }
       }
     }
   });
 
-  test('all preferred pantry starters are backed by starter pantry entries', () {
+  test('all preferred pantry starters are backed by starter pantry entries',
+      () {
     for (final blueprint in chefBlueprints) {
       for (final starter in blueprint.preferredStarters) {
         expect(
           pantryStarters.contains(starter),
           isTrue,
-          reason: 'Unknown or non-starter pantry item "$starter" in "${blueprint.id}"',
+          reason:
+              'Unknown or non-starter pantry item "$starter" in "${blueprint.id}"',
         );
       }
     }
@@ -52,6 +55,25 @@ void main() {
     expect(canonicalizer.canonicalize('Греческий йогурт'), 'йогурт');
     expect(canonicalizer.canonicalize('Помидоры черри'), 'помидор');
     expect(canonicalizer.canonicalize('Рожки'), 'макароны');
+    expect(canonicalizer.canonicalize('Фанзю'), 'макароны');
+    expect(canonicalizer.canonicalize('Рисовая лапша'), 'макароны');
+    expect(canonicalizer.canonicalize('Тертый пармезан'), 'сыр');
+    expect(canonicalizer.canonicalize('Салат айсберг'), 'зелень');
+    expect(canonicalizer.canonicalize('Филе лосося'), 'рыба');
+    expect(canonicalizer.canonicalize('Нут консервированный'), 'фасоль');
+    expect(canonicalizer.canonicalize('Соус соевый'), 'соевый соус');
+    expect(canonicalizer.canonicalize('Копченая куриная грудка'), 'курица');
+    expect(canonicalizer.canonicalize('Соленые огурцы'), 'огурец');
+    expect(canonicalizer.canonicalize('Докторская колбаса'), 'колбаса');
+    expect(canonicalizer.canonicalize('Зеленый горошек'), 'горошек');
+    expect(canonicalizer.canonicalize('Вареная свекла'), 'свекла');
+    expect(canonicalizer.canonicalize('Перловая крупа'), 'перловка');
+    expect(canonicalizer.canonicalize('Маслины'), 'оливки');
+    expect(canonicalizer.canonicalize('Копченая колбаса'), 'колбаса');
+    expect(canonicalizer.canonicalize('Манка'), 'манная крупа');
+    expect(canonicalizer.canonicalize('Пшенная крупа'), 'пшено');
+    expect(canonicalizer.canonicalize('Куриная печень'), 'печень');
+    expect(canonicalizer.canonicalize('Домашние котлеты'), 'фарш');
   });
 }
 
@@ -59,7 +81,8 @@ List<ProductCatalogEntry> _loadProducts() {
   final jsonText = File('assets/products/catalog_ru.json').readAsStringSync();
   final raw = jsonDecode(jsonText) as List<dynamic>;
   return raw
-      .map((entry) => ProductCatalogEntry.fromJson(entry as Map<String, dynamic>))
+      .map((entry) =>
+          ProductCatalogEntry.fromJson(entry as Map<String, dynamic>))
       .toList();
 }
 
@@ -67,6 +90,7 @@ List<PantryCatalogEntry> _loadPantry() {
   final jsonText = File('assets/pantry/catalog_ru.json').readAsStringSync();
   final raw = jsonDecode(jsonText) as List<dynamic>;
   return raw
-      .map((entry) => PantryCatalogEntry.fromJson(entry as Map<String, dynamic>))
+      .map(
+          (entry) => PantryCatalogEntry.fromJson(entry as Map<String, dynamic>))
       .toList();
 }

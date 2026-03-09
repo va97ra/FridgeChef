@@ -4,6 +4,7 @@ import '../../fridge/domain/product_catalog_entry.dart';
 import '../../shelf/domain/shelf_item.dart';
 import 'chef_rules.dart';
 import 'cook_filter.dart';
+import 'ingredient_amount_converter.dart';
 import 'ingredient_knowledge.dart';
 import 'recipe.dart';
 import 'recipe_match.dart';
@@ -228,13 +229,18 @@ class BestRecipeRanker {
       recipe: recipe,
       canonicalizer: canonicalizer,
     );
+    final repetitionPenalty = tasteProfile.recipeFatigue(
+      recipe: recipe,
+      canonicalizer: canonicalizer,
+    );
     final priorityUsageScore = _priorityUsageScore(
       usedPriorityWeights: usedPriorityWeights,
       inventory: inventory,
     );
-    final generatedAnchorUrgency = candidate.source == RecipeMatchSource.generated
-        ? _generatedAnchorUrgencyScore(recipe, inventory)
-        : 0.0;
+    final generatedAnchorUrgency =
+        candidate.source == RecipeMatchSource.generated
+            ? _generatedAnchorUrgencyScore(recipe, inventory)
+            : 0.0;
     final pantryDebtPenalty = candidate.source == RecipeMatchSource.generated
         ? recipe.implicitPantryItems.length * 0.05
         : 0.0;
@@ -260,6 +266,8 @@ class BestRecipeRanker {
     totalScore *= pairAnalysis.hardPenalty;
     totalScore =
         ((totalScore * 0.90) + (personalAnalysis.score * 0.10)).clamp(0.0, 1.0);
+    totalScore -= repetitionPenalty *
+        (candidate.source == RecipeMatchSource.generated ? 0.08 : 0.06);
 
     final missingRequired = totalRequired - matchedRequired;
     final worstGap = requiredGapRatios.isEmpty
@@ -319,6 +327,7 @@ class BestRecipeRanker {
         pairAnalysis: pairAnalysis,
         chefAssessment: chefAssessment,
         personalAnalysis: personalAnalysis,
+        repetitionPenalty: repetitionPenalty,
         usedPriorityCanonicals: usedPriorityWeights.keys.toList(),
         inventory: inventory,
       ),
@@ -543,6 +552,7 @@ class BestRecipeRanker {
     required _PairingAnalysis pairAnalysis,
     required ChefRulesAssessment chefAssessment,
     required TasteProfileAnalysis personalAnalysis,
+    required double repetitionPenalty,
     required List<String> usedPriorityCanonicals,
     required _InventorySnapshot inventory,
   }) {
@@ -560,7 +570,8 @@ class BestRecipeRanker {
           name,
           extraKnownNames: inventory.knownNames,
         );
-        return canonical.isNotEmpty && (inventory.expiryScores[canonical] ?? 0) >= 4;
+        return canonical.isNotEmpty &&
+            (inventory.expiryScores[canonical] ?? 0) >= 4;
       }).toList();
       if (urgentAnchors.isNotEmpty) {
         reasons.add(
@@ -601,6 +612,10 @@ class BestRecipeRanker {
       if (!reasons.contains(personalReason)) {
         reasons.add(personalReason);
       }
+    }
+
+    if (repetitionPenalty <= 0.12 && reasons.length < 3) {
+      reasons.add('не повторяет совсем недавние блюда');
     }
 
     if (usedPriorityCanonicals.isNotEmpty) {
@@ -751,7 +766,7 @@ class _InventorySnapshot {
         continue;
       }
       for (final entry in entries) {
-        final converted = _convertIngredientAmount(
+        final converted = convertIngredientAmount(
           canonical: candidateKey,
           amount: entry.amount,
           from: entry.unit,
@@ -787,52 +802,6 @@ class _InventorySnapshot {
     return 1;
   }
 }
-
-double? _convertIngredientAmount({
-  required String canonical,
-  required double amount,
-  required Unit from,
-  required Unit to,
-}) {
-  final direct = UnitConverter.convert(amount: amount, from: from, to: to);
-  if (direct != null) {
-    return direct;
-  }
-
-  final gramsPerPiece = _approxMassPerPiece[canonical];
-  if (gramsPerPiece == null) {
-    return null;
-  }
-
-  if (from == Unit.pcs && to == Unit.g) {
-    return amount * gramsPerPiece;
-  }
-  if (from == Unit.g && to == Unit.pcs) {
-    return amount / gramsPerPiece;
-  }
-  if (from == Unit.pcs && to == Unit.kg) {
-    return (amount * gramsPerPiece) / 1000.0;
-  }
-  if (from == Unit.kg && to == Unit.pcs) {
-    return (amount * 1000.0) / gramsPerPiece;
-  }
-
-  return null;
-}
-
-const Map<String, double> _approxMassPerPiece = {
-  'яблоко': 150,
-  'банан': 120,
-  'апельсин': 160,
-  'лимон': 90,
-  'помидор': 130,
-  'огурец': 120,
-  'лук': 90,
-  'картофель': 150,
-  'морковь': 80,
-  'перец сладкий': 140,
-  'кабачок': 250,
-};
 
 class _AvailableAmount {
   final double amount;

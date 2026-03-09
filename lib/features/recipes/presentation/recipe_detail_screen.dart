@@ -8,6 +8,7 @@ import '../../../core/widgets/section_surface.dart';
 import '../domain/taste_profile.dart';
 import '../data/user_recipes_repo.dart';
 import '../domain/recipe.dart';
+import '../domain/recipe_interaction_event.dart';
 import 'providers.dart';
 import 'recipe_ui_meta.dart';
 import 'save_generated_recipe_flow.dart';
@@ -32,6 +33,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   late Recipe _recipe;
   int _targetServings = 2;
   final List<bool> _checkedSteps = [];
+  bool _didRecordRecookForSession = false;
 
   @override
   void initState() {
@@ -134,7 +136,8 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     return ChoiceChip(
                       label: Text('$option'),
                       selected: selected,
-                      onSelected: (_) => setState(() => _targetServings = option),
+                      onSelected: (_) =>
+                          setState(() => _targetServings = option),
                     );
                   }).toList(),
                 ),
@@ -258,7 +261,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              (_recipe.description ?? 'Пошаговый офлайн-рецепт из твоих продуктов.').trim(),
+              (_recipe.description ??
+                      'Пошаговый офлайн-рецепт из твоих продуктов.')
+                  .trim(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTokens.text,
                   ),
@@ -388,7 +393,8 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   ],
                 ),
               ),
-              if (!isLast) Divider(color: AppTokens.border.withValues(alpha: 0.8)),
+              if (!isLast)
+                Divider(color: AppTokens.border.withValues(alpha: 0.8)),
             ],
           );
         }).toList(),
@@ -402,7 +408,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     final semanticLabel = checked
         ? 'Шаг ${index + 1} выполнен. ${_recipe.steps[index]}'
         : 'Отметить шаг ${index + 1} выполненным. ${_recipe.steps[index]}';
-    void toggleStep() => setState(() => _checkedSteps[index] = !checked);
+    void toggleStep() => _toggleStep(index, checked);
 
     return Semantics(
       container: true,
@@ -415,8 +421,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
         child: Container(
           margin: const EdgeInsets.only(bottom: AppTokens.p12),
           child: SectionSurface(
-            tone:
-                checked ? SectionSurfaceTone.accentSoft : SectionSurfaceTone.base,
+            tone: checked
+                ? SectionSurfaceTone.accentSoft
+                : SectionSurfaceTone.base,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -451,9 +458,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     children: [
                       Text(
                         'Шаг ${index + 1}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color:
-                                  checked ? AppTokens.textLight : AppTokens.text,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: checked
+                                  ? AppTokens.textLight
+                                  : AppTokens.text,
                               decoration:
                                   checked ? TextDecoration.lineThrough : null,
                             ),
@@ -462,8 +473,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                       Text(
                         _recipe.steps[index],
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color:
-                                  checked ? AppTokens.textLight : AppTokens.text,
+                              color: checked
+                                  ? AppTokens.textLight
+                                  : AppTokens.text,
                               decoration:
                                   checked ? TextDecoration.lineThrough : null,
                             ),
@@ -479,8 +491,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                             color: checked
                                 ? AppTokens.surface
                                 : AppTokens.secondarySoft,
-                            borderRadius:
-                                BorderRadius.circular(AppTokens.r12),
+                            borderRadius: BorderRadius.circular(AppTokens.r12),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -542,9 +553,18 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       return;
     }
 
+    final updatedRecipe = _recipe.copyWith(
+      title: newTitle.trim(),
+      updatedAt: DateTime.now(),
+    );
+
     await ref.read(userRecipesRepoProvider).renameUserRecipe(
           _recipe.id,
           newTitle.trim(),
+        );
+    await ref.read(recipeInteractionHistoryProvider.notifier).record(
+          type: RecipeInteractionType.renamed,
+          recipe: updatedRecipe,
         );
     ref.invalidate(recipesProvider);
     if (!mounted) {
@@ -552,10 +572,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     }
 
     setState(() {
-      _recipe = _recipe.copyWith(
-        title: newTitle.trim(),
-        updatedAt: DateTime.now(),
-      );
+      _recipe = updatedRecipe;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Название обновлено')),
@@ -588,6 +605,10 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     }
 
     await ref.read(userRecipesRepoProvider).deleteUserRecipe(_recipe.id);
+    await ref.read(recipeInteractionHistoryProvider.notifier).record(
+          type: RecipeInteractionType.deleted,
+          recipe: _recipe,
+        );
     ref.invalidate(recipesProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -637,6 +658,31 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     };
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(text)),
+    );
+  }
+
+  Future<void> _toggleStep(int index, bool checked) async {
+    setState(() {
+      _checkedSteps[index] = !checked;
+    });
+
+    final completedRecipe = !checked && _checkedSteps.every((step) => step);
+    if (!completedRecipe || _didRecordRecookForSession) {
+      return;
+    }
+
+    _didRecordRecookForSession = true;
+    await ref.read(recipeInteractionHistoryProvider.notifier).record(
+          type: RecipeInteractionType.recooked,
+          recipe: _recipe,
+        );
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Шеф запомнил, что ты приготовил это блюдо'),
+      ),
     );
   }
 

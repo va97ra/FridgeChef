@@ -4,12 +4,14 @@ import '../../fridge/data/product_catalog_repo.dart';
 import '../../fridge/presentation/providers.dart';
 import '../../shelf/data/pantry_catalog_repo.dart';
 import '../../shelf/presentation/providers.dart';
+import '../data/recipe_interaction_history_repo.dart';
 import '../data/recipes_repo.dart';
 import '../data/recipe_feedback_repo.dart';
 import '../domain/best_recipe_ranker.dart';
 import '../domain/cook_filter.dart';
 import '../domain/offline_chef_engine.dart';
 import '../domain/recipe.dart';
+import '../domain/recipe_interaction_event.dart';
 import '../domain/recipe_match.dart';
 import '../domain/taste_profile.dart';
 
@@ -52,8 +54,45 @@ final recipeFeedbackProvider = StateNotifierProvider<RecipeFeedbackNotifier,
   return RecipeFeedbackNotifier(ref.watch(recipeFeedbackRepoProvider));
 });
 
+class RecipeInteractionHistoryNotifier
+    extends StateNotifier<List<RecipeInteractionEvent>> {
+  final RecipeInteractionHistoryRepo _repo;
+
+  RecipeInteractionHistoryNotifier(this._repo) : super(const []) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    state = await _repo.loadAll();
+  }
+
+  Future<void> record({
+    required RecipeInteractionType type,
+    required Recipe recipe,
+  }) async {
+    await _repo.record(type: type, recipe: recipe);
+    await _load();
+  }
+
+  Future<void> recordMany({
+    required RecipeInteractionType type,
+    required Iterable<Recipe> recipes,
+  }) async {
+    await _repo.recordMany(type: type, recipes: recipes);
+    await _load();
+  }
+}
+
+final recipeInteractionHistoryProvider = StateNotifierProvider<
+    RecipeInteractionHistoryNotifier, List<RecipeInteractionEvent>>((ref) {
+  return RecipeInteractionHistoryNotifier(
+    ref.watch(recipeInteractionHistoryRepoProvider),
+  );
+});
+
 final tasteProfileProvider = Provider<TasteProfile>((ref) {
   final feedback = ref.watch(recipeFeedbackProvider);
+  final interactionHistory = ref.watch(recipeInteractionHistoryProvider);
   final recipes = ref.watch(recipesProvider).valueOrNull;
   final catalog = ref.watch(productCatalogProvider).valueOrNull;
 
@@ -65,6 +104,7 @@ final tasteProfileProvider = Provider<TasteProfile>((ref) {
     feedbackByRecipeId: feedback,
     recipes: recipes,
     catalog: catalog,
+    interactionHistory: interactionHistory,
   );
 });
 

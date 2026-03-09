@@ -9,6 +9,8 @@ import 'package:help_to_cook/features/recipes/domain/best_recipe_ranker.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient_canonicalizer.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_interaction_event.dart';
+import 'package:help_to_cook/features/recipes/domain/taste_profile.dart';
 import 'package:help_to_cook/features/shelf/domain/shelf_item.dart';
 
 void main() {
@@ -312,7 +314,8 @@ void main() {
         RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
         RecipeIngredient(name: 'Помидоры', amount: 180, unit: Unit.g),
         RecipeIngredient(name: 'Сыр', amount: 80, unit: Unit.g),
-        RecipeIngredient(name: 'Соль', amount: 1, unit: Unit.g, required: false),
+        RecipeIngredient(
+            name: 'Соль', amount: 1, unit: Unit.g, required: false),
       ],
       steps: const [
         'Быстро обжарь помидоры.',
@@ -356,12 +359,95 @@ void main() {
 
     expect(matches.single.why, contains('шеф ставит в центр Яйца, Помидоры'));
     expect(
-      matches.single.why.any((reason) => reason.contains('лучше использовать сейчас')),
+      matches.single.why
+          .any((reason) => reason.contains('лучше использовать сейчас')),
       isTrue,
     );
     expect(
       matches.single.why,
       contains('из полки нужны только Соль'),
+    );
+  });
+
+  test('recent repeats push a fresh close alternative above the same dish', () {
+    final now = DateTime(2026, 3, 9, 12);
+    final omelet = Recipe(
+      id: 'omelet',
+      title: 'Омлет с сыром',
+      timeMin: 9,
+      tags: const ['breakfast', 'one_pan'],
+      servingsBase: 1,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйцо', amount: 2, unit: Unit.pcs),
+        RecipeIngredient(name: 'Сыр', amount: 40, unit: Unit.g),
+      ],
+      steps: const ['Взбей', 'Обжарь', 'Подавай'],
+    );
+    final shakshuka = Recipe(
+      id: 'shakshuka',
+      title: 'Шакшука',
+      timeMin: 12,
+      tags: const ['breakfast', 'one_pan'],
+      servingsBase: 1,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйцо', amount: 2, unit: Unit.pcs),
+        RecipeIngredient(name: 'Помидор', amount: 180, unit: Unit.g),
+        RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+      ],
+      steps: const ['Обжарь лук', 'Добавь томаты', 'Влей яйца и доведи'],
+    );
+    final fatigueProfile = buildTasteProfile(
+      feedbackByRecipeId: const {},
+      recipes: const [],
+      catalog: catalog,
+      interactionHistory: [
+        RecipeInteractionEvent(
+          type: RecipeInteractionType.recooked,
+          recipeSnapshot: omelet,
+          occurredAt: now.subtract(const Duration(days: 4)),
+        ),
+        RecipeInteractionEvent(
+          type: RecipeInteractionType.recooked,
+          recipeSnapshot: omelet,
+          occurredAt: now.subtract(const Duration(days: 2)),
+        ),
+        RecipeInteractionEvent(
+          type: RecipeInteractionType.recooked,
+          recipeSnapshot: omelet,
+          occurredAt: now.subtract(const Duration(days: 1)),
+        ),
+      ],
+      referenceTime: now,
+    );
+
+    final fatigueMatches = rankBestRecipes(
+      recipes: [omelet, shakshuka],
+      fridgeItems: const [
+        FridgeItem(id: 'f1', name: 'Яйцо', amount: 4, unit: Unit.pcs),
+        FridgeItem(id: 'f2', name: 'Сыр', amount: 120, unit: Unit.g),
+        FridgeItem(id: 'f3', name: 'Помидор', amount: 250, unit: Unit.g),
+        FridgeItem(id: 'f4', name: 'Лук', amount: 2, unit: Unit.pcs),
+      ],
+      shelfItems: const [
+        ShelfItem(id: 's1', name: 'Соль', inStock: true),
+      ],
+      catalog: catalog,
+      now: now,
+      tasteProfile: fatigueProfile,
+    );
+
+    expect(fatigueMatches.first.recipe.id, 'shakshuka');
+    expect(
+      fatigueProfile.recipeFatigue(
+        recipe: omelet,
+        canonicalizer: RecipeIngredientCanonicalizer(catalog),
+      ),
+      greaterThan(
+        fatigueProfile.recipeFatigue(
+          recipe: shakshuka,
+          canonicalizer: RecipeIngredientCanonicalizer(catalog),
+        ),
+      ),
     );
   });
 
@@ -802,7 +888,8 @@ void main() {
     );
 
     expect(matches.first.recipe.id, 'protected_bake');
-    expect(matches.first.techniqueScore, greaterThan(matches.last.techniqueScore));
+    expect(
+        matches.first.techniqueScore, greaterThan(matches.last.techniqueScore));
     expect(matches.first.score, greaterThan(matches.last.score));
   });
 }

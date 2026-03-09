@@ -4,9 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/fridge/domain/product_catalog_entry.dart';
 import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
+import 'package:help_to_cook/features/recipes/data/recipe_interaction_history_repo.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_interaction_event.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_match.dart';
 import 'package:help_to_cook/features/recipes/presentation/cook_ideas_screen.dart';
 import 'package:help_to_cook/features/recipes/presentation/providers.dart';
@@ -145,11 +147,15 @@ void main() {
       isUserEditable: true,
     );
     final repo = _FakeUserRecipesRepo([savedRecipe]);
+    final interactionRepo = _FakeRecipeInteractionHistoryRepo();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           userRecipesRepoProvider.overrideWithValue(repo),
+          recipeInteractionHistoryRepoProvider.overrideWithValue(
+            interactionRepo,
+          ),
           recipesProvider.overrideWith(
             (ref) async => [baseRecipe, ...await repo.getAllUserRecipes()],
           ),
@@ -176,12 +182,15 @@ void main() {
             ],
           ),
           recipeMatchesProvider.overrideWith((ref) {
-            final recipes = ref.watch(recipesProvider).valueOrNull ?? const <Recipe>[];
+            final recipes =
+                ref.watch(recipesProvider).valueOrNull ?? const <Recipe>[];
             return recipes.map((recipe) {
               final isSaved = recipe.id == savedRecipe.id;
               return RecipeMatch(
                 recipe: recipe,
-                source: isSaved ? RecipeMatchSource.base : RecipeMatchSource.generated,
+                source: isSaved
+                    ? RecipeMatchSource.base
+                    : RecipeMatchSource.generated,
                 score: isSaved ? 0.78 : 0.94,
                 why: isSaved
                     ? const ['сохранённый вариант под рукой']
@@ -221,6 +230,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.recipes.single.title, 'Омлет шефа');
+    expect(
+      interactionRepo.events.any(
+        (event) => event.type == RecipeInteractionType.renamed,
+      ),
+      isTrue,
+    );
     await tester.scrollUntilVisible(
       find.byTooltip('Действия рецепта Омлет шефа'),
       300,
@@ -238,6 +253,102 @@ void main() {
 
     expect(repo.recipes, isEmpty);
     expect(find.text('Омлет шефа', skipOffstage: false), findsNothing);
+    expect(
+      interactionRepo.events.any(
+        (event) => event.type == RecipeInteractionType.deleted,
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('refresh records ignored chef ideas before reseed',
+      (tester) async {
+    final generatedOne = Recipe(
+      id: 'generated_1',
+      title: 'Шеф-омлет',
+      timeMin: 10,
+      tags: const ['quick'],
+      servingsBase: 1,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйцо', amount: 2, unit: Unit.pcs),
+      ],
+      steps: const ['Шаг 1'],
+      source: RecipeSource.generatedDraft,
+    );
+    final generatedTwo = Recipe(
+      id: 'generated_2',
+      title: 'Шеф-шакшука',
+      timeMin: 18,
+      tags: const ['one_pan'],
+      servingsBase: 2,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйцо', amount: 4, unit: Unit.pcs),
+      ],
+      steps: const ['Шаг 1', 'Шаг 2'],
+      source: RecipeSource.generatedDraft,
+    );
+    final interactionRepo = _FakeRecipeInteractionHistoryRepo();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          recipeInteractionHistoryRepoProvider.overrideWithValue(
+            interactionRepo,
+          ),
+          recipesProvider.overrideWith((ref) async => const <Recipe>[]),
+          productCatalogProvider.overrideWith((ref) async => const []),
+          pantryCatalogProvider.overrideWith((ref) async => const []),
+          recipeMatchesProvider.overrideWith(
+            (ref) => [
+              RecipeMatch(
+                recipe: generatedOne,
+                source: RecipeMatchSource.generated,
+                score: 0.91,
+                why: const ['все продукты уже есть'],
+                missingIngredients: const [],
+                matchedCount: 2,
+                totalCount: 2,
+                matchedRequired: 2,
+                totalRequired: 2,
+                matchedOptional: 0,
+                totalOptional: 0,
+              ),
+              RecipeMatch(
+                recipe: generatedTwo,
+                source: RecipeMatchSource.generated,
+                score: 0.82,
+                why: const ['можно быстро приготовить'],
+                missingIngredients: const [],
+                matchedCount: 3,
+                totalCount: 3,
+                matchedRequired: 3,
+                totalRequired: 3,
+                matchedOptional: 0,
+                totalOptional: 0,
+              ),
+            ],
+          ),
+        ],
+        child: const MaterialApp(
+          home: CookIdeasScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Пересобрать шеф-идеи'));
+    await tester.pumpAndSettle();
+
+    expect(
+      interactionRepo.events.where(
+        (event) => event.type == RecipeInteractionType.ignored,
+      ),
+      hasLength(2),
+    );
+    expect(
+      interactionRepo.events.first.recipeSnapshot.title,
+      anyOf('Шеф-омлет', 'Шеф-шакшука'),
+    );
   });
 }
 
@@ -271,5 +382,49 @@ class _FakeUserRecipesRepo extends UserRecipesRepo {
   @override
   Future<void> deleteUserRecipe(String id) async {
     recipes.removeWhere((recipe) => recipe.id == id);
+  }
+}
+
+class _FakeRecipeInteractionHistoryRepo extends RecipeInteractionHistoryRepo {
+  final List<RecipeInteractionEvent> events = [];
+
+  @override
+  Future<List<RecipeInteractionEvent>> loadAll() async {
+    return List<RecipeInteractionEvent>.from(events);
+  }
+
+  @override
+  Future<void> record({
+    required RecipeInteractionType type,
+    required Recipe recipe,
+    DateTime? occurredAt,
+  }) async {
+    events.insert(
+      0,
+      RecipeInteractionEvent(
+        type: type,
+        recipeSnapshot: recipe,
+        occurredAt: occurredAt ?? DateTime(2026, 3, 9, 12),
+      ),
+    );
+  }
+
+  @override
+  Future<void> recordMany({
+    required RecipeInteractionType type,
+    required Iterable<Recipe> recipes,
+    DateTime? occurredAt,
+  }) async {
+    final timestamp = occurredAt ?? DateTime(2026, 3, 9, 12);
+    for (final recipe in recipes.toList().reversed) {
+      events.insert(
+        0,
+        RecipeInteractionEvent(
+          type: type,
+          recipeSnapshot: recipe,
+          occurredAt: timestamp,
+        ),
+      );
+    }
   }
 }

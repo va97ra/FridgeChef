@@ -76,7 +76,12 @@ DishProfile inferDishProfile({
   final ingredientSet =
       ingredientCanonicals.map(normalizeIngredientText).toSet();
 
-  if (normalizedTitle.contains('суп')) {
+  if (normalizedTitle.contains('суп') ||
+      normalizedTitle.contains('щи') ||
+      normalizedTitle.contains('борщ') ||
+      normalizedTitle.contains('уха') ||
+      normalizedTitle.contains('рассольник') ||
+      normalizedTitle.contains('солянка')) {
     return DishProfile.soup;
   }
   if (normalizedTags.contains('soup')) {
@@ -89,6 +94,8 @@ DishProfile inferDishProfile({
     return DishProfile.bake;
   }
   if (normalizedTitle.contains('салат') ||
+      normalizedTitle.contains('оливье') ||
+      normalizedTitle.contains('винегрет') ||
       normalizedTags.contains('salad') ||
       (normalizedTags.contains('light') &&
           !normalizedTags.contains('one pan') &&
@@ -102,23 +109,30 @@ DishProfile inferDishProfile({
     return DishProfile.pasta;
   }
   if (normalizedTitle.contains('рагу') ||
+      normalizedTitle.contains('туш') ||
+      normalizedTitle.contains('жарк') ||
+      normalizedTitle.contains('голубц') ||
+      normalizedTitle.contains('котлет') ||
       normalizedTags.contains('stew') ||
       ingredientSet.contains('чечевица')) {
     return DishProfile.stew;
   }
   if (normalizedTags.contains('breakfast') ||
       normalizedTitle.contains('завтрак') ||
-      normalizedTitle.contains('каша')) {
+      normalizedTitle.contains('каша') ||
+      normalizedTitle.contains('сырник')) {
     return DishProfile.breakfast;
   }
   if (ingredientSet.contains('рис') ||
       ingredientSet.contains('гречка') ||
+      ingredientSet.contains('перловка') ||
       ingredientSet.contains('кускус')) {
     return DishProfile.grainBowl;
   }
   if (normalizedTags.contains('one pan') ||
       normalizedTitle.contains('сковород') ||
-      normalizedTitle.contains('омлет')) {
+      normalizedTitle.contains('омлет') ||
+      normalizedTitle.contains('драник')) {
     return DishProfile.skillet;
   }
   return DishProfile.general;
@@ -136,7 +150,7 @@ ChefSupportPlan buildChefSupportPlan({
 
   final aromatics = _pickOrdered(
     _recommendedAromatics(profile, ingredientSet),
-    ingredientSet,
+    allCanonicals,
     limit: 2,
   );
   final seasonings = _pickOrdered(
@@ -594,7 +608,8 @@ _TechniqueAnalysis _analyzeTechnique({
               _containsAny(recipeCanonicals, _herbCanonicals)) &&
           hasFinishLayer) {
         score += 0.08;
-        addReason('суп доводится ярким акцентом в конце, а не теряет его в варке');
+        addReason(
+            'суп доводится ярким акцентом в конце, а не теряет его в варке');
       }
       break;
     case DishProfile.salad:
@@ -630,7 +645,8 @@ _TechniqueAnalysis _analyzeTechnique({
           score += 0.10;
           addReason('мясо в духовке защищено от жёсткого пересушивания');
         } else {
-          addWarning('мясу в духовке лучше дать защиту: накрыть, мариновать или готовить мягче');
+          addWarning(
+              'мясу в духовке лучше дать защиту: накрыть, мариновать или готовить мягче');
           hardPenalty *= 0.82;
         }
         if (hasRest) {
@@ -778,7 +794,8 @@ _TechniqueAnalysis _analyzeTechnique({
   if (hasSauceElements) {
     if (hasSauceBindingAction) {
       score += 0.10;
-      addReason('соусная часть действительно связывает блюдо, а не лежит отдельно');
+      addReason(
+          'соусная часть действительно связывает блюдо, а не лежит отдельно');
     } else {
       addWarning('соусная часть не доводится и не собирает блюдо');
       hardPenalty *= 0.84;
@@ -1611,7 +1628,8 @@ _FlavorAnalysis _analyzeFlavor({
     case DishProfile.stew:
       if (umami >= 0.18 && (hasContrastCore || herbiness >= 0.10)) {
         score += 0.08;
-        addReason('у основы есть яркий акцент, поэтому вкус не уходит в тяжесть');
+        addReason(
+            'у основы есть яркий акцент, поэтому вкус не уходит в тяжесть');
       } else if (umami >= 0.18 && acidity < 0.08 && freshness < 0.10) {
         addWarning('основа получается тяжёлой: не хватает яркого акцента');
         hardPenalty *= 0.88;
@@ -1627,7 +1645,8 @@ _FlavorAnalysis _analyzeFlavor({
       } else if (umami < 0.12 ||
           (!hasBindingCore && fat < 0.12) ||
           (!hasContrastCore && freshness < 0.10)) {
-        addWarning('основе не хватает одной из опор: насыщенности, связки или контраста');
+        addWarning(
+            'основе не хватает одной из опор: насыщенности, связки или контраста');
         hardPenalty *= 0.88;
       }
       break;
@@ -1650,7 +1669,8 @@ _FlavorAnalysis _analyzeFlavor({
             creaminess >= 0.14 &&
             (freshness >= 0.14 || acidity >= 0.10)) {
           score += 0.10;
-          addReason('сладкий завтрак сбалансирован мягкостью и свежим контрастом');
+          addReason(
+              'сладкий завтрак сбалансирован мягкостью и свежим контрастом');
         } else if (sweetness >= 0.28 && creaminess < 0.12) {
           addWarning('сладкий завтрак может выйти приторным и сухим');
           hardPenalty *= 0.88;
@@ -1726,7 +1746,7 @@ List<String> _recommendedSeasonings(
 ) {
   if (profile == DishProfile.breakfast &&
       _isSweetBreakfast(ingredientCanonicals)) {
-    return const ['корица', 'соль'];
+    return const ['сахар', 'корица', 'соль'];
   }
 
   if (_containsAny(ingredientCanonicals, _fishCanonicals)) {
@@ -1933,6 +1953,7 @@ const Set<String> _proteinCanonicals = {
   'говядина',
   'свинина',
   'фарш',
+  'печень',
   'тунец',
   'яйцо',
   'фасоль',
@@ -1940,6 +1961,7 @@ const Set<String> _proteinCanonicals = {
   'сыр',
   'творог',
   'сосиски',
+  'колбаса',
 };
 
 const Set<String> _aromaticCanonicals = {
@@ -1955,6 +1977,9 @@ const Set<String> _baseCanonicals = {
   'макароны',
   'кускус',
   'гречка',
+  'перловка',
+  'пшено',
+  'манная крупа',
   'овсяные хлопья',
   'хлеб',
 };
@@ -1965,17 +1990,21 @@ const Set<String> _vegetableCanonicals = {
   'лук',
   'морковь',
   'капуста',
+  'свекла',
   'кабачок',
   'брокколи',
   'перец сладкий',
   'грибы',
+  'горошек',
   'яблоко',
+  'оливки',
 };
 
 const Set<String> _freshCanonicals = {
   'помидор',
   'огурец',
   'капуста',
+  'горошек',
   'яблоко',
   'апельсин',
   'перец сладкий',
@@ -2106,6 +2135,8 @@ const Set<String> _sweetCanonicals = {
   'банан',
   'апельсин',
   'корица',
+  'пшено',
+  'манная крупа',
   'овсяные хлопья',
 };
 
@@ -2175,6 +2206,8 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'лук': _FlavorVector(umami: 0.16, sweetness: 0.10, spice: 0.08),
   'чеснок': _FlavorVector(umami: 0.22, freshness: 0.06, spice: 0.18),
   'морковь': _FlavorVector(sweetness: 0.24, freshness: 0.14, crunch: 0.10),
+  'свекла':
+      _FlavorVector(sweetness: 0.30, acidity: 0.06, umami: 0.08, crunch: 0.08),
   'перец сладкий':
       _FlavorVector(freshness: 0.34, sweetness: 0.14, crunch: 0.22),
   'укроп': _FlavorVector(freshness: 0.42, herbiness: 0.92),
@@ -2185,6 +2218,9 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'макароны': _FlavorVector(),
   'кускус': _FlavorVector(),
   'гречка': _FlavorVector(umami: 0.08, crunch: 0.04),
+  'перловка': _FlavorVector(umami: 0.10, crunch: 0.06, sweetness: 0.02),
+  'пшено': _FlavorVector(sweetness: 0.10, creaminess: 0.12, crunch: 0.04),
+  'манная крупа': _FlavorVector(sweetness: 0.08, creaminess: 0.18),
   'овсяные хлопья': _FlavorVector(sweetness: 0.08, fat: 0.06, creaminess: 0.12),
   'хлеб': _FlavorVector(umami: 0.04, crunch: 0.22),
   'лаваш': _FlavorVector(umami: 0.04, crunch: 0.10),
@@ -2195,6 +2231,8 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'говядина': _FlavorVector(umami: 0.68, fat: 0.28),
   'свинина': _FlavorVector(umami: 0.62, fat: 0.34),
   'тунец': _FlavorVector(umami: 0.72, fat: 0.16),
+  'колбаса': _FlavorVector(umami: 0.56, fat: 0.32),
+  'печень': _FlavorVector(umami: 0.60, fat: 0.18, sweetness: 0.04),
   'фарш': _FlavorVector(umami: 0.58, fat: 0.26),
   'яйцо': _FlavorVector(umami: 0.42, fat: 0.26, creaminess: 0.18),
   'сыр': _FlavorVector(umami: 0.78, fat: 0.68, creaminess: 0.46, crunch: 0.04),
@@ -2203,6 +2241,8 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'молоко': _FlavorVector(fat: 0.26, sweetness: 0.16, creaminess: 0.30),
   'сметана': _FlavorVector(acidity: 0.22, fat: 0.56, creaminess: 0.74),
   'майонез': _FlavorVector(acidity: 0.12, fat: 0.86, creaminess: 0.80),
+  'оливки':
+      _FlavorVector(acidity: 0.08, umami: 0.20, fat: 0.18, freshness: 0.08),
   'йогурт': _FlavorVector(
       acidity: 0.24, fat: 0.18, freshness: 0.12, creaminess: 0.34),
   'кефир': _FlavorVector(
@@ -2217,6 +2257,7 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'брокколи': _FlavorVector(freshness: 0.30, umami: 0.10, crunch: 0.20),
   'чечевица': _FlavorVector(umami: 0.26),
   'фасоль': _FlavorVector(umami: 0.24),
+  'горошек': _FlavorVector(sweetness: 0.18, freshness: 0.20, creaminess: 0.06),
   'кукуруза': _FlavorVector(sweetness: 0.24, freshness: 0.14, crunch: 0.14),
   'капуста': _FlavorVector(freshness: 0.30, sweetness: 0.08, crunch: 0.56),
   'кабачок': _FlavorVector(freshness: 0.20, sweetness: 0.06, crunch: 0.08),

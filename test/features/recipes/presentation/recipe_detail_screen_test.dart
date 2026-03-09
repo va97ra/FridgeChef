@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
+import 'package:help_to_cook/features/recipes/data/recipe_interaction_history_repo.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_interaction_event.dart';
 import 'package:help_to_cook/features/recipes/presentation/recipe_detail_screen.dart';
 import 'package:help_to_cook/features/recipes/presentation/providers.dart';
 
@@ -156,11 +158,15 @@ void main() {
       isUserEditable: true,
     );
     final repo = _FakeUserRecipesRepo([recipe]);
+    final interactionRepo = _FakeRecipeInteractionHistoryRepo();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           userRecipesRepoProvider.overrideWithValue(repo),
+          recipeInteractionHistoryRepoProvider.overrideWithValue(
+            interactionRepo,
+          ),
           recipesProvider.overrideWith(
             (ref) async => await repo.getAllUserRecipes(),
           ),
@@ -200,6 +206,12 @@ void main() {
 
     expect(repo.recipes.single.title, 'Омлет шефа');
     expect(find.text('Омлет шефа'), findsWidgets);
+    expect(
+      interactionRepo.events.any(
+        (event) => event.type == RecipeInteractionType.renamed,
+      ),
+      isTrue,
+    );
 
     await tester.tap(find.byTooltip('Действия рецепта'));
     await tester.pumpAndSettle();
@@ -210,6 +222,114 @@ void main() {
 
     expect(repo.recipes, isEmpty);
     expect(find.text('Открыть рецепт'), findsOneWidget);
+    expect(
+      interactionRepo.events.any(
+        (event) => event.type == RecipeInteractionType.deleted,
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('records recook memory when all recipe steps are completed',
+      (tester) async {
+    final recipe = Recipe(
+      id: 'recook_recipe',
+      title: 'Омлет',
+      timeMin: 10,
+      tags: const ['quick'],
+      servingsBase: 2,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+      ],
+      steps: const ['Взбей яйца', 'Обжарь на сковороде'],
+    );
+    final interactionRepo = _FakeRecipeInteractionHistoryRepo();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          recipeInteractionHistoryRepoProvider.overrideWithValue(
+            interactionRepo,
+          ),
+        ],
+        child: MaterialApp(
+          home: RecipeDetailScreen(recipe: recipe),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Шаг 1'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Шаг 1'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Шаг 2'));
+    await tester.pumpAndSettle();
+
+    expect(
+      interactionRepo.events.where(
+        (event) => event.type == RecipeInteractionType.recooked,
+      ),
+      hasLength(1),
+    );
+    expect(
+      find.text('Шеф запомнил, что ты приготовил это блюдо'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('saving generated recipe records save interaction',
+      (tester) async {
+    final recipe = Recipe(
+      id: 'generated_recipe',
+      title: 'Шеф-идея',
+      timeMin: 12,
+      tags: const ['generated_local', 'quick'],
+      servingsBase: 2,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+      ],
+      steps: const ['Взбей', 'Пожарь'],
+      source: RecipeSource.generatedDraft,
+      anchorIngredients: const ['Яйца'],
+    );
+    final repo = _FakeUserRecipesRepo([]);
+    final interactionRepo = _FakeRecipeInteractionHistoryRepo();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          userRecipesRepoProvider.overrideWithValue(repo),
+          recipeInteractionHistoryRepoProvider.overrideWithValue(
+            interactionRepo,
+          ),
+          recipesProvider.overrideWith(
+            (ref) async => await repo.getAllUserRecipes(),
+          ),
+        ],
+        child: MaterialApp(
+          home: RecipeDetailScreen(recipe: recipe),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Сохранить в мои рецепты'));
+    await tester.pumpAndSettle();
+
+    expect(repo.recipes, hasLength(1));
+    expect(repo.recipes.single.source, RecipeSource.generatedSaved);
+    expect(
+      interactionRepo.events.where(
+        (event) => event.type == RecipeInteractionType.saved,
+      ),
+      hasLength(1),
+    );
   });
 }
 
@@ -243,5 +363,74 @@ class _FakeUserRecipesRepo extends UserRecipesRepo {
   @override
   Future<void> deleteUserRecipe(String id) async {
     recipes.removeWhere((recipe) => recipe.id == id);
+  }
+
+  @override
+  Future<List<Recipe>> findPotentialDuplicatesForRecipe(Recipe recipe) async {
+    return const [];
+  }
+
+  @override
+  Future<SaveResult> saveGeneratedRecipe({
+    required Recipe recipe,
+    required SaveMode mode,
+  }) async {
+    final savedRecipe = recipe.copyWith(
+      id: 'saved_${recipe.id}',
+      source: RecipeSource.generatedSaved,
+      isUserEditable: true,
+      createdAt: DateTime(2026, 3, 9, 12),
+      updatedAt: DateTime(2026, 3, 9, 12),
+    );
+    recipes.add(savedRecipe);
+    return SaveResult(
+      recipe: savedRecipe,
+      action: SaveAction.created,
+      duplicates: const [],
+    );
+  }
+}
+
+class _FakeRecipeInteractionHistoryRepo extends RecipeInteractionHistoryRepo {
+  final List<RecipeInteractionEvent> events = [];
+
+  @override
+  Future<List<RecipeInteractionEvent>> loadAll() async {
+    return List<RecipeInteractionEvent>.from(events);
+  }
+
+  @override
+  Future<void> record({
+    required RecipeInteractionType type,
+    required Recipe recipe,
+    DateTime? occurredAt,
+  }) async {
+    events.insert(
+      0,
+      RecipeInteractionEvent(
+        type: type,
+        recipeSnapshot: recipe,
+        occurredAt: occurredAt ?? DateTime(2026, 3, 9, 12),
+      ),
+    );
+  }
+
+  @override
+  Future<void> recordMany({
+    required RecipeInteractionType type,
+    required Iterable<Recipe> recipes,
+    DateTime? occurredAt,
+  }) async {
+    final timestamp = occurredAt ?? DateTime(2026, 3, 9, 12);
+    for (final recipe in recipes.toList().reversed) {
+      events.insert(
+        0,
+        RecipeInteractionEvent(
+          type: type,
+          recipeSnapshot: recipe,
+          occurredAt: timestamp,
+        ),
+      );
+    }
   }
 }

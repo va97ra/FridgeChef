@@ -5,6 +5,7 @@ import '../../shelf/domain/pantry_catalog_entry.dart';
 import '../../shelf/domain/shelf_item.dart';
 import 'chef_rules.dart';
 import 'cook_filter.dart';
+import 'ingredient_amount_converter.dart';
 import 'ingredient_knowledge.dart';
 import 'offline_chef_blueprints.dart';
 import 'recipe.dart';
@@ -119,6 +120,7 @@ class OfflineChefEngine {
       final slot = blueprint.slots[slotIndex];
       final selected = _pickSlotItems(
         slot: slot,
+        request: request,
         selectedBySlot: selectedBySlot,
         usedCanonicals: usedCanonicals,
         inventory: inventory,
@@ -141,19 +143,35 @@ class OfflineChefEngine {
       return null;
     }
 
+    final coreRecipeCanonicals = usedCanonicals.toSet();
+    final supportPlan = buildChefSupportPlan(
+      profile: blueprint.profile,
+      ingredientCanonicals: coreRecipeCanonicals,
+      supportCanonicals: inventory.availableSupportCanonicals,
+    );
     final starters = _resolveStarters(
       blueprint: blueprint,
       inventory: inventory,
+      supportPlan: supportPlan,
+      seed: request.seed + seedSalt,
+    );
+    final chefSupport = _resolveChefSupport(
+      inventory: inventory,
+      supportPlan: supportPlan,
+      usedCanonicals: usedCanonicals,
+      starters: starters,
       seed: request.seed + seedSalt,
     );
     final ingredients = _buildIngredients(
       blueprint: blueprint,
       selectedBySlot: selectedBySlot,
       starters: starters,
+      chefSupport: chefSupport,
       inventory: inventory,
     );
     final recipe = Recipe(
-      id: _buildRecipeId(blueprint.id, usedCanonicals, starters.includedCanonicals),
+      id: _buildRecipeId(
+          blueprint.id, usedCanonicals, starters.includedCanonicals),
       title: _buildTitle(blueprint, selectedBySlot, inventory),
       description: blueprint.description,
       timeMin: blueprint.timeMin,
@@ -164,6 +182,7 @@ class OfflineChefEngine {
         blueprint: blueprint,
         selectedBySlot: selectedBySlot,
         starters: starters,
+        chefSupport: chefSupport,
         inventory: inventory,
       ),
       source: RecipeSource.generatedDraft,
@@ -178,9 +197,9 @@ class OfflineChefEngine {
       return null;
     }
 
-    final coreRecipeCanonicals = usedCanonicals.toSet();
     final recipeCanonicals = coreRecipeCanonicals.toSet()
-      ..addAll(starters.includedCanonicals);
+      ..addAll(starters.includedCanonicals)
+      ..addAll(chefSupport.explicitCanonicals);
     if (!_passesPairingValidation(coreRecipeCanonicals)) {
       return null;
     }
@@ -190,11 +209,14 @@ class OfflineChefEngine {
       recipeCanonicals: recipeCanonicals,
       matchedCanonicals: {
         ...usedCanonicals,
-        ...starters.availableCanonicals,
+        ...starters.includedCanonicals,
+        ...chefSupport.availableCanonicals,
       },
       supportCanonicals: {
         ...inventory.shelfSupportCanonicals,
         ...starters.supportCanonicals,
+        for (final canonical in chefSupport.supportCanonicals)
+          ...inventory.supportCanonicalsFor(canonical),
       },
       displayByCanonical: {
         ...inventory.displayByCanonical,
@@ -203,7 +225,11 @@ class OfflineChefEngine {
       },
       steps: recipe.steps,
     );
-    if (chefAssessment.score < 0.45 || chefAssessment.flavorScore < 0.32) {
+    final russianClassic = blueprint.tags.contains('russian_classic');
+    final minimumChefScore = russianClassic ? 0.28 : 0.45;
+    final minimumFlavorScore = russianClassic ? 0.18 : 0.32;
+    if (chefAssessment.score < minimumChefScore ||
+        chefAssessment.flavorScore < minimumFlavorScore) {
       return null;
     }
 
@@ -214,20 +240,60 @@ class OfflineChefEngine {
     final anchorUrgency = anchorCanonicals.isEmpty
         ? 0.0
         : anchorCanonicals
-                .map((canonical) => (inventory.expiryByCanonical[canonical] ?? 1) / 5)
+                .map((canonical) =>
+                    (inventory.expiryByCanonical[canonical] ?? 1) / 5)
                 .fold<double>(0.0, (sum, value) => sum + value) /
             anchorCanonicals.length;
     final anchorPriority = anchorCanonicals.isEmpty
         ? 0.0
         : anchorCanonicals
-                .map((canonical) => inventory.priorityByCanonical[canonical] ?? 0.0)
+                .map((canonical) =>
+                    inventory.priorityByCanonical[canonical] ?? 0.0)
                 .fold<double>(0.0, (sum, value) => sum + value) /
             anchorCanonicals.length;
-    final priorityScore = ((anchorPriority * 0.38) +
-            (anchorUrgency * 0.22) +
-            (_pairScore(coreRecipeCanonicals) * 0.18) +
-            (chefAssessment.score * 0.14) +
-            (tasteAnalysis.score * 0.08) -
+    final stockConfidence = usedCanonicals.isEmpty
+        ? 0.0
+        : usedCanonicals
+                .map(
+                  (canonical) => inventory.availabilityRatioFor(
+                    canonical: canonical,
+                    targetAmount: _defaultAmountFor(canonical),
+                    targetUnit: _defaultUnitFor(canonical),
+                  ),
+                )
+                .fold<double>(0.0, (sum, value) => sum + value) /
+            usedCanonicals.length;
+    final supportCoverage = _supportCoverage(
+      supportPlan: supportPlan,
+      starters: starters,
+      chefSupport: chefSupport,
+    );
+    final profileAffinity =
+        request.tasteProfile.profilePreference(blueprint.profile);
+    final profileFatigue =
+        request.tasteProfile.profileFatigue(blueprint.profile);
+    final tagAffinity =
+        request.tasteProfile.averageTagPreference(blueprint.tags);
+    final pairAffinity =
+        request.tasteProfile.averagePairPreference(coreRecipeCanonicals);
+    final repetitionPenalty = request.tasteProfile.recipeFatigue(
+      recipe: recipe,
+      canonicalizer: inventory.canonicalizer,
+    );
+    final russianCuisineBias = russianClassic ? 0.08 : 0.0;
+    final priorityScore = ((anchorPriority * 0.30) +
+            (anchorUrgency * 0.20) +
+            (stockConfidence * 0.14) +
+            ((_pairScore(coreRecipeCanonicals) * 0.12) +
+                ((pairAffinity.clamp(-1.0, 1.0) + 1) * 0.04)) +
+            (chefAssessment.score * 0.10) +
+            (supportCoverage * 0.10) +
+            russianCuisineBias +
+            (((profileAffinity.clamp(-1.0, 1.0) + 1) * 0.05)) +
+            (((tagAffinity.clamp(-1.0, 1.0) + 1) * 0.03)) +
+            (tasteAnalysis.score * 0.06) -
+            (profileFatigue * 0.14) -
+            (repetitionPenalty * 0.20) -
             (starters.missingCanonicals.length * 0.12))
         .clamp(0.0, 1.0);
 
@@ -240,12 +306,16 @@ class OfflineChefEngine {
         inventory: inventory,
         anchors: anchorCanonicals,
         starters: starters,
+        chefSupport: chefSupport,
+        tasteAnalysis: tasteAnalysis,
+        repetitionPenalty: repetitionPenalty,
       ),
     );
   }
 
   List<String> _pickSlotItems({
     required ChefSlot slot,
+    required OfflineChefRequest request,
     required Map<String, List<String>> selectedBySlot,
     required Set<String> usedCanonicals,
     required _ChefInventory inventory,
@@ -255,7 +325,14 @@ class OfflineChefEngine {
       for (final entry in selectedBySlot.values) ...entry,
     };
     final available = slot.candidates
-        .where(inventory.hasAvailableCore)
+        .where(
+          (canonical) => inventory.hasEnoughCore(
+            canonical,
+            targetAmount: _defaultAmountFor(canonical),
+            targetUnit: _defaultUnitFor(canonical),
+            minimumRatio: slot.isAnchor ? 0.78 : 0.60,
+          ),
+        )
         .where((canonical) => !usedCanonicals.contains(canonical))
         .toList();
     if (available.isEmpty) {
@@ -266,12 +343,14 @@ class OfflineChefEngine {
       final aScore = _slotScore(
         canonical: a,
         slot: slot,
+        request: request,
         currentCanonicals: currentCanonicals,
         inventory: inventory,
       );
       final bScore = _slotScore(
         canonical: b,
         slot: slot,
+        request: request,
         currentCanonicals: currentCanonicals,
         inventory: inventory,
       );
@@ -283,7 +362,8 @@ class OfflineChefEngine {
     });
 
     final rotated = _rotate(available, seed);
-    final maxAllowed = slot.maxCount < rotated.length ? slot.maxCount : rotated.length;
+    final maxAllowed =
+        slot.maxCount < rotated.length ? slot.maxCount : rotated.length;
     if (maxAllowed < slot.minCount) {
       return rotated.take(maxAllowed).toList();
     }
@@ -296,12 +376,40 @@ class OfflineChefEngine {
   double _slotScore({
     required String canonical,
     required ChefSlot slot,
+    required OfflineChefRequest request,
     required Set<String> currentCanonicals,
     required _ChefInventory inventory,
   }) {
     final priority = inventory.priorityByCanonical[canonical] ?? 0.0;
+    final stockConfidence = inventory.availabilityRatioFor(
+      canonical: canonical,
+      targetAmount: _defaultAmountFor(canonical),
+      targetUnit: _defaultUnitFor(canonical),
+    );
+    final tasteWeight = request.tasteProfile.ingredientPreference(canonical);
+    final ingredientFatigue = request.tasteProfile.ingredientFatigue(canonical);
+    final pairPreference = currentCanonicals.isEmpty
+        ? 0.0
+        : currentCanonicals
+                .map((selected) =>
+                    request.tasteProfile.pairPreference(canonical, selected))
+                .fold<double>(0.0, (sum, value) => sum + value) /
+            currentCanonicals.length;
+    final stockBonus = (stockConfidence * (slot.isAnchor ? 0.28 : 0.18))
+        .clamp(0.0, slot.isAnchor ? 0.28 : 0.18);
+    final tasteBonus =
+        (tasteWeight * (slot.isAnchor ? 0.22 : 0.14)).clamp(-0.22, 0.22);
+    final pairBonus =
+        (pairPreference * (slot.isAnchor ? 0.12 : 0.18)).clamp(-0.18, 0.18);
+    final fatiguePenalty = (ingredientFatigue * (slot.isAnchor ? 0.24 : 0.14))
+        .clamp(0.0, slot.isAnchor ? 0.24 : 0.14);
     if (slot.isAnchor) {
-      return priority + (inventory.expiryByCanonical[canonical] ?? 0) * 0.12;
+      return priority +
+          (inventory.expiryByCanonical[canonical] ?? 0) * 0.12 +
+          stockBonus +
+          tasteBonus +
+          pairBonus -
+          fatiguePenalty;
     }
 
     var synergy = 0.0;
@@ -314,26 +422,41 @@ class OfflineChefEngine {
           pairedIngredientsFor(selected).contains(toPairingKey(canonical))) {
         synergy += 0.35;
       }
-      if (weaklyPairedIngredientsFor(canonical).contains(toPairingKey(selected)) ||
-          weaklyPairedIngredientsFor(selected).contains(toPairingKey(canonical))) {
+      if (weaklyPairedIngredientsFor(canonical)
+              .contains(toPairingKey(selected)) ||
+          weaklyPairedIngredientsFor(selected)
+              .contains(toPairingKey(canonical))) {
         synergy -= 0.15;
       }
     }
-    return priority + synergy;
+    return priority +
+        synergy +
+        stockBonus +
+        tasteBonus +
+        pairBonus -
+        fatiguePenalty;
   }
 
   _ResolvedStarters _resolveStarters({
     required ChefBlueprint blueprint,
     required _ChefInventory inventory,
+    required ChefSupportPlan supportPlan,
     required int seed,
   }) {
-    final preferred = _rotate(blueprint.preferredStarters, seed);
+    final preferred = _dedupeCanonicals([
+      ...blueprint.preferredStarters,
+      ...supportPlan.seasoningCanonicals,
+      ...supportPlan.finishingCanonicals.where(inventory.isPantryStarter),
+    ]);
     final included = <String>[];
     final missing = <String>[];
     final available = <String>[];
     final support = <String>{};
 
     for (final canonical in preferred) {
+      if (_hasCanonicalOverlap(canonical, included)) {
+        continue;
+      }
       if (inventory.hasShelfCanonical(canonical)) {
         included.add(canonical);
         available.add(canonical);
@@ -355,6 +478,103 @@ class OfflineChefEngine {
       availableCanonicals: available,
       supportCanonicals: support,
     );
+  }
+
+  _ResolvedChefSupport _resolveChefSupport({
+    required _ChefInventory inventory,
+    required ChefSupportPlan supportPlan,
+    required Set<String> usedCanonicals,
+    required _ResolvedStarters starters,
+    required int seed,
+  }) {
+    final reserved = <String>{
+      ...usedCanonicals,
+      ...starters.includedCanonicals,
+    };
+    final aromatics = _pickChefSupports(
+      candidates: _rotate(supportPlan.aromaticCanonicals, seed),
+      role: _ChefSupportRole.aromatic,
+      inventory: inventory,
+      reserved: reserved,
+      limit: 2,
+    );
+    reserved.addAll(aromatics.map((item) => item.canonical));
+    final seasonings = _pickChefSupports(
+      candidates: _rotate(supportPlan.seasoningCanonicals, seed + 1),
+      role: _ChefSupportRole.seasoning,
+      inventory: inventory,
+      reserved: reserved,
+      limit: 2,
+    );
+    reserved.addAll(seasonings.map((item) => item.canonical));
+    final finishes = _pickChefSupports(
+      candidates: _rotate(supportPlan.finishingCanonicals, seed + 2),
+      role: _ChefSupportRole.finish,
+      inventory: inventory,
+      reserved: reserved,
+      limit: 1,
+    );
+
+    return _ResolvedChefSupport(
+      aromatics: aromatics,
+      seasonings: seasonings,
+      finishes: finishes,
+    );
+  }
+
+  List<_ChefSupportSelection> _pickChefSupports({
+    required List<String> candidates,
+    required _ChefSupportRole role,
+    required _ChefInventory inventory,
+    required Set<String> reserved,
+    required int limit,
+  }) {
+    final picked = <_ChefSupportSelection>[];
+    for (final canonical in candidates) {
+      if (_hasCanonicalOverlap(canonical, reserved)) {
+        continue;
+      }
+      if (!inventory.hasAvailableSupport(
+        canonical: canonical,
+        targetAmount: _supportTargetAmountFor(canonical, role),
+        targetUnit: _supportTargetUnitFor(canonical, role),
+        minimumRatio: _supportMinimumRatioFor(role),
+      )) {
+        continue;
+      }
+      picked.add(
+        _ChefSupportSelection(
+          canonical: canonical,
+          role: role,
+        ),
+      );
+      reserved.add(canonical);
+      if (picked.length >= limit) {
+        break;
+      }
+    }
+    return picked;
+  }
+
+  double _supportCoverage({
+    required ChefSupportPlan supportPlan,
+    required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
+  }) {
+    final desired = _dedupeCanonicals([
+      ...supportPlan.aromaticCanonicals,
+      ...supportPlan.seasoningCanonicals.take(2),
+      ...supportPlan.finishingCanonicals.take(1),
+    ]);
+    if (desired.isEmpty) {
+      return 0.55;
+    }
+    final resolved = {
+      ...starters.includedCanonicals,
+      ...chefSupport.explicitCanonicals,
+    };
+    final matched = desired.where(resolved.contains).length;
+    return (0.25 + ((matched / desired.length) * 0.75)).clamp(0.0, 1.0);
   }
 
   bool _passesPairingValidation(Set<String> canonicals) {
@@ -421,16 +641,24 @@ class OfflineChefEngine {
     required ChefBlueprint blueprint,
     required Map<String, List<String>> selectedBySlot,
     required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
     required _ChefInventory inventory,
   }) {
     final ingredients = <RecipeIngredient>[];
     for (final slot in blueprint.slots) {
       for (final canonical in selectedBySlot[slot.key] ?? const <String>[]) {
+        final defaultAmount = _defaultAmountFor(canonical);
+        final defaultUnit = _defaultUnitFor(canonical);
         ingredients.add(
           inventory.ingredient(
             canonical,
-            amount: _defaultAmountFor(canonical),
-            unit: _defaultUnitFor(canonical),
+            amount: inventory.suggestedCoreAmount(
+              canonical: canonical,
+              targetAmount: defaultAmount,
+              targetUnit: defaultUnit,
+              minimumRatio: slot.isAnchor ? 0.78 : 0.60,
+            ),
+            unit: defaultUnit,
           ),
         );
       }
@@ -442,6 +670,30 @@ class OfflineChefEngine {
           amount: _supportAmountFor(canonical),
           unit: _supportUnitFor(canonical),
           required: false,
+        ),
+      );
+    }
+    for (final selection in chefSupport.all) {
+      final targetAmount = _supportTargetAmountFor(
+        selection.canonical,
+        selection.role,
+      );
+      final targetUnit = _supportTargetUnitFor(
+        selection.canonical,
+        selection.role,
+      );
+      final amount = inventory.suggestedSupportAmount(
+        canonical: selection.canonical,
+        targetAmount: targetAmount,
+        targetUnit: targetUnit,
+        minimumRatio: _supportMinimumRatioFor(selection.role),
+      );
+      ingredients.add(
+        inventory.ingredient(
+          selection.canonical,
+          amount: amount,
+          unit: targetUnit,
+          required: selection.role == _ChefSupportRole.aromatic,
         ),
       );
     }
@@ -469,21 +721,26 @@ class OfflineChefEngine {
         if (anchor.isEmpty && secondary.isEmpty) {
           return blueprint.titlePrefix;
         }
-        final focus = [if (anchor.isNotEmpty) anchor, if (secondary.isNotEmpty) secondary]
-            .join(', ');
+        final focus = [
+          if (anchor.isNotEmpty) anchor,
+          if (secondary.isNotEmpty) secondary
+        ].join(', ');
         return '${blueprint.titlePrefix}: $focus';
       case ChefTitleStyle.anchorWithFocus:
         if (anchor.isEmpty && secondary.isEmpty) {
           return blueprint.titlePrefix;
         }
-        final focus = [if (anchor.isNotEmpty) anchor, if (secondary.isNotEmpty) secondary]
-            .join(', ');
+        final focus = [
+          if (anchor.isNotEmpty) anchor,
+          if (secondary.isNotEmpty) secondary
+        ].join(', ');
         return '${blueprint.titlePrefix}: $focus';
       case ChefTitleStyle.inventoryLead:
         final focus = _displayList(
           [
             ...(selectedBySlot[blueprint.anchorSlot] ?? const <String>[]),
-            ...(selectedBySlot[blueprint.secondaryAnchorSlot] ?? const <String>[]),
+            ...(selectedBySlot[blueprint.secondaryAnchorSlot] ??
+                const <String>[]),
           ],
           inventory,
           limit: 3,
@@ -498,6 +755,7 @@ class OfflineChefEngine {
     required ChefBlueprint blueprint,
     required Map<String, List<String>> selectedBySlot,
     required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
     required _ChefInventory inventory,
   }) {
     final anchor = _displayList(
@@ -515,8 +773,21 @@ class OfflineChefEngine {
       inventory,
       limit: 2,
     );
-    final startersText = _displayList(
-      starters.includedCanonicals,
+    final aromaticsText = _displayList(
+      chefSupport.aromaticCanonicals,
+      inventory,
+      limit: 2,
+    );
+    final finishText = _displayList(
+      chefSupport.finishingCanonicals,
+      inventory,
+      limit: 2,
+    );
+    final seasoningText = _displayList(
+      [
+        ...starters.includedCanonicals,
+        ...chefSupport.seasoningCanonicals,
+      ],
       inventory,
       limit: 3,
     );
@@ -524,75 +795,107 @@ class OfflineChefEngine {
     switch (blueprint.stepStyle) {
       case ChefStepStyle.eggSkillet:
         return [
-          'Подготовь $secondary, прогрей сковороду и быстро дай добавкам схватиться за 3-4 минуты.',
+          'Подготовь $secondary${aromaticsText.isEmpty ? '' : ', а отдельно мелко нарежь $aromaticsText'}, прогрей сковороду и быстро дай добавкам схватиться за 3-4 минуты.',
           'Слегка взбей $anchor, затем влей массу и веди её лопаткой от краёв к центру, чтобы текстура осталась нежной.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Сними с огня, как только середина перестанет быть жидкой, и подавай сразу.'
-              : 'В конце доведи вкус: $startersText, затем дай блюду минуту стабилизироваться и подавай.',
+              : 'В конце доведи вкус${seasoningText.isEmpty ? '' : ': $seasoningText'}${finishText.isEmpty ? '' : ', а перед подачей добавь $finishText'}, затем дай блюду минуту стабилизироваться и подавай.',
         ];
       case ChefStepStyle.potatoSkillet:
         return [
-          'Нарежь $anchor крупными кусочками и начни обжаривать, чтобы появилась уверенная золотистая корочка.',
+          'Нарежь $anchor крупными кусочками${aromaticsText.isEmpty ? '' : ', а $aromaticsText подготовь для ароматной базы'} и начни обжаривать, чтобы появилась уверенная золотистая корочка.',
           'Добавь $secondary, убавь огонь и доведи всё вместе до мягкости без лишней влаги.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Подавай горячим, когда картофель станет румяным и собранным по вкусу.'
-              : 'В конце аккуратно добавь $startersText, чтобы вкус стал глубже и цельнее.',
+              : 'В конце аккуратно добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, чтобы вкус стал глубже и цельнее.',
         ];
       case ChefStepStyle.freshSalad:
         return [
-          'Подготовь и нарежь $anchor${secondary.isEmpty ? '' : ', $secondary'} удобными кусочками.',
+          'Подготовь и нарежь $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ', а $aromaticsText используй как ароматный штрих'} удобными кусочками.',
           'Сложи всё в большую миску и аккуратно перемешай, чтобы текстуры остались разными.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Подавай сразу, пока блюдо остаётся свежим.'
-              : 'Перед подачей добавь $startersText, чтобы собрать вкус и аромат.',
+              : 'Перед подачей заправь салат${seasoningText.isEmpty ? '' : ' через $seasoningText'}${finishText.isEmpty ? '' : ' и собери всё через $finishText'}, чтобы вкус стал цельным и свежим.',
         ];
       case ChefStepStyle.grainPan:
         return [
-          'Подготовь основу: $anchor, а отдельно нарежь $secondary${support.isEmpty ? '' : ' и $support'}.',
+          'Подготовь основу: $anchor, а отдельно нарежь $secondary${support.isEmpty ? '' : ' и $support'}${aromaticsText.isEmpty ? '' : ', плюс $aromaticsText для аромата'}.',
           'Сначала прогрей добавки, затем вмешай основу и собери блюдо на умеренном огне, чтобы крупа впитала вкус.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Доведи до готовности и подавай как сытное домашнее блюдо.'
-              : 'В конце доведи вкус: $startersText, чтобы текстура и аромат стали собраннее.',
+              : 'В конце доведи вкус${seasoningText.isEmpty ? '' : ': $seasoningText'}${finishText.isEmpty ? '' : ', а для мягкого финиша добавь $finishText'}, чтобы текстура и аромат стали собраннее.',
         ];
       case ChefStepStyle.pastaPan:
         return [
-          'Отвари $anchor до состояния al dente и параллельно подготовь $secondary.',
+          'Отвари $anchor до состояния al dente и параллельно подготовь $secondary${aromaticsText.isEmpty ? '' : ' вместе с $aromaticsText'}.',
           'Соедини основу с добавками на сковороде и быстро прогрей всё вместе, чтобы соус или соки покрыли пасту.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Оставь блюдо на минуту после выключения огня и подавай.'
-              : 'Перед подачей добавь $startersText, чтобы вкус стал ярче и мягче одновременно.',
+              : 'Перед подачей добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши всё через $finishText'}, чтобы вкус стал ярче и мягче одновременно.',
         ];
       case ChefStepStyle.soup:
         return [
-          'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'} и начни прогревать основу на спокойном огне.',
+          'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ' и сначала мягко прогрей $aromaticsText'} на спокойном огне.',
           'Добавь овощи${support.isEmpty ? '' : ' и $support'}, влей воду и вари до мягкости ингредиентов, не давая вкусу распасться.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Когда суп станет собранным по текстуре, сними с огня и дай ему постоять пару минут.'
-              : 'В самом конце аккуратно добавь $startersText и дай супу настояться перед подачей.',
+              : 'В самом конце аккуратно добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, затем дай супу настояться перед подачей.',
         ];
       case ChefStepStyle.bake:
         return [
-          'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'} и сложи всё в форму одним ровным слоем.',
+          'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ', а $aromaticsText вмешай для глубины вкуса'} и сложи всё в форму одним ровным слоем.',
           'Добавь связующие ингредиенты${support.isEmpty ? '' : ' и $support'}, чтобы блюдо держало форму и не пересохло в духовке.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Запекай до румяной поверхности и дай блюду постоять 3-4 минуты перед подачей.'
-              : 'Перед духовкой или в самом конце добавь $startersText, чтобы запекание дало более яркий аромат.',
+              : 'Перед духовкой или в самом конце добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, чтобы запекание дало более яркий аромат.',
         ];
       case ChefStepStyle.breakfast:
         return [
-          'Собери основу: $anchor${secondary.isEmpty ? '' : ', $secondary'} и добейся мягкой, ровной текстуры.',
+          'Собери основу: $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ', а $aromaticsText оставь как аккуратный ароматный акцент'} и добейся мягкой, ровной текстуры.',
           'Если нужно, слегка прогрей массу или оставь её свежей, чтобы сохранить лёгкость и нежность блюда.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Подавай сразу как спокойный домашний завтрак.'
-              : 'Финально добавь $startersText, чтобы вкус стал завершённым.',
+              : 'Финально добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и доведи текстуру через $finishText'}, чтобы вкус стал завершённым.',
+        ];
+      case ChefStepStyle.syrniki:
+        return [
+          'Соедини $anchor${secondary.isEmpty ? '' : ' с $secondary'}${support.isEmpty ? '' : ', а для мягкого акцента добавь $support'}, затем аккуратно собери плотную творожную массу.',
+          'Сформируй небольшие шайбы и обжарь их на умеренном огне до уверенной румяной корочки с двух сторон.',
+          seasoningText.isEmpty && finishText.isEmpty
+              ? 'Дай сырникам минуту отдохнуть после сковороды и подавай тёплыми.'
+              : 'Перед подачей добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, чтобы сырники остались нежными внутри и собранными по вкусу.',
+        ];
+      case ChefStepStyle.draniki:
+        return [
+          'Натри $anchor${support.isEmpty ? '' : ', мелко нарежь $support'}${secondary.isEmpty ? '' : ' и вмешай $secondary'}, затем быстро собери плотную картофельную массу без лишней влаги.',
+          'Выкладывай небольшие порции на сковороду и обжарь драники с двух сторон до уверенной золотистой корочки.',
+          seasoningText.isEmpty && finishText.isEmpty
+              ? 'Дай драникам минуту стабилизироваться после сковороды и подавай горячими.'
+              : 'В конце доведи вкус${seasoningText.isEmpty ? '' : ': $seasoningText'}${finishText.isEmpty ? '' : ' и подай со $finishText'}, чтобы драники остались хрустящими снаружи и мягкими внутри.',
+        ];
+      case ChefStepStyle.porridge:
+        return [
+          'Подготовь основу: $anchor${secondary.isEmpty ? '' : ', а рядом держи $secondary'}${support.isEmpty ? '' : ' и $support для мягкого финального акцента'}.',
+          'Вари кашу на спокойном огне, постепенно вмешивая жидкую или сливочную часть, чтобы текстура стала ровной и мягкой.',
+          seasoningText.isEmpty && finishText.isEmpty
+              ? 'Дай каше минуту под крышкой и подавай сразу, пока она остаётся нежной.'
+              : 'В конце доведи вкус${seasoningText.isEmpty ? '' : ': $seasoningText'}${finishText.isEmpty ? '' : ', а перед подачей добавь $finishText'}, чтобы каша стала спокойной и собранной.',
+        ];
+      case ChefStepStyle.cutlets:
+        return [
+          'Соедини $anchor${support.isEmpty ? '' : ' с $support'}${secondary.isEmpty ? '' : ', а $secondary подготовь как домашний гарнир'}, затем собери плотную мясную массу.',
+          'Сформируй котлеты и обжарь их до уверенной корочки, после чего доведи до готовности на более мягком огне.',
+          seasoningText.isEmpty && finishText.isEmpty
+              ? 'Подавай котлеты горячими вместе с гарниром, когда соки внутри успеют стабилизироваться.'
+              : 'Перед подачей добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши всё через $finishText'}, чтобы мясная часть и гарнир собрались в один домашний вкус.',
         ];
       case ChefStepStyle.stew:
         return [
-          'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'} и начни тушить самые плотные продукты на слабом огне.',
+          'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ', а $aromaticsText прогрей в самом начале'} и начни тушить самые плотные продукты на слабом огне.',
           'Добавь остальные ингредиенты${support.isEmpty ? '' : ' и $support'}, периодически помешивая, пока текстура не станет густой и насыщенной.',
-          startersText.isEmpty
+          seasoningText.isEmpty && finishText.isEmpty
               ? 'Сними с огня, когда рагу станет мягким и собранным.'
-              : 'В конце добавь $startersText и дай блюду пару минут постоять перед подачей.',
+              : 'В конце добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, затем дай блюду пару минут постоять перед подачей.',
         ];
     }
   }
@@ -619,6 +922,9 @@ class OfflineChefEngine {
     required _ChefInventory inventory,
     required List<String> anchors,
     required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
+    required TasteProfileAnalysis tasteAnalysis,
+    required double repetitionPenalty,
   }) {
     final reasons = <String>[];
     if (anchors.isNotEmpty) {
@@ -627,17 +933,35 @@ class OfflineChefEngine {
       );
     }
     final urgentAnchors = anchors
-        .where((canonical) => (inventory.expiryByCanonical[canonical] ?? 0) >= 4)
+        .where(
+            (canonical) => (inventory.expiryByCanonical[canonical] ?? 0) >= 4)
         .toList();
     if (urgentAnchors.isNotEmpty) {
       reasons.add(
         'лучше пустить в дело сейчас: ${urgentAnchors.take(2).map(inventory.displayName).join(', ')}',
       );
     }
+    final supportHighlights = _dedupeEquivalentCanonicals([
+      ...starters.availableCanonicals,
+      ...chefSupport.aromaticCanonicals,
+      ...chefSupport.seasoningCanonicals,
+      ...chefSupport.finishingCanonicals,
+    ]);
+    if (supportHighlights.isNotEmpty) {
+      reasons.add(
+        'вкус собирают ${supportHighlights.take(3).map(inventory.displayName).join(', ')}',
+      );
+    }
     if (starters.missingCanonicals.isNotEmpty) {
       reasons.add(
         'из базовых вещей пригодятся ${starters.missingCanonicals.map(inventory.displayName).join(', ')}',
       );
+    }
+    if (tasteAnalysis.reasons.isNotEmpty) {
+      reasons.add(tasteAnalysis.reasons.first);
+    }
+    if (repetitionPenalty <= 0.12 && reasons.length < 3) {
+      reasons.add('не зацикливается на том, что было у тебя совсем недавно');
     }
     return reasons.take(3).toList();
   }
@@ -668,9 +992,59 @@ class _ResolvedStarters {
   });
 }
 
+enum _ChefSupportRole { aromatic, seasoning, finish }
+
+class _ChefSupportSelection {
+  final String canonical;
+  final _ChefSupportRole role;
+
+  const _ChefSupportSelection({
+    required this.canonical,
+    required this.role,
+  });
+}
+
+class _ResolvedChefSupport {
+  final List<_ChefSupportSelection> aromatics;
+  final List<_ChefSupportSelection> seasonings;
+  final List<_ChefSupportSelection> finishes;
+
+  const _ResolvedChefSupport({
+    this.aromatics = const [],
+    this.seasonings = const [],
+    this.finishes = const [],
+  });
+
+  List<_ChefSupportSelection> get all => [
+        ...aromatics,
+        ...seasonings,
+        ...finishes,
+      ];
+
+  List<String> get aromaticCanonicals =>
+      aromatics.map((item) => item.canonical).toList(growable: false);
+
+  List<String> get seasoningCanonicals =>
+      seasonings.map((item) => item.canonical).toList(growable: false);
+
+  List<String> get finishingCanonicals =>
+      finishes.map((item) => item.canonical).toList(growable: false);
+
+  Set<String> get explicitCanonicals => {
+        ...aromaticCanonicals,
+        ...seasoningCanonicals,
+        ...finishingCanonicals,
+      };
+
+  Set<String> get availableCanonicals => explicitCanonicals;
+
+  Set<String> get supportCanonicals => explicitCanonicals;
+}
+
 class _ChefInventory {
   final RecipeIngredientCanonicalizer canonicalizer;
   final Set<String> fridgeCanonicals;
+  final Map<String, List<_StoredChefAmount>> fridgeByCanonical;
   final Set<String> shelfCanonicals;
   final Set<String> shelfSupportCanonicals;
   final Map<String, String> displayByCanonical;
@@ -681,6 +1055,7 @@ class _ChefInventory {
   const _ChefInventory({
     required this.canonicalizer,
     required this.fridgeCanonicals,
+    required this.fridgeByCanonical,
     required this.shelfCanonicals,
     required this.shelfSupportCanonicals,
     required this.displayByCanonical,
@@ -697,6 +1072,7 @@ class _ChefInventory {
   }) {
     final canonicalizer = RecipeIngredientCanonicalizer(productCatalog);
     final fridgeCanonicals = <String>{};
+    final fridgeByCanonical = <String, List<_StoredChefAmount>>{};
     final shelfCanonicals = <String>{};
     final shelfSupportCanonicals = <String>{};
     final displayByCanonical = <String, String>{};
@@ -726,6 +1102,12 @@ class _ChefInventory {
         continue;
       }
       fridgeCanonicals.add(canonical);
+      fridgeByCanonical.putIfAbsent(canonical, () => []).add(
+            _StoredChefAmount(
+              amount: item.amount,
+              unit: item.unit,
+            ),
+          );
       displayByCanonical.putIfAbsent(canonical, () => item.name.trim());
 
       final expiry = _expiryScore(item.expiresAt);
@@ -779,6 +1161,7 @@ class _ChefInventory {
     return _ChefInventory(
       canonicalizer: canonicalizer,
       fridgeCanonicals: fridgeCanonicals,
+      fridgeByCanonical: fridgeByCanonical,
       shelfCanonicals: shelfCanonicals,
       shelfSupportCanonicals: shelfSupportCanonicals,
       displayByCanonical: displayByCanonical,
@@ -788,9 +1171,88 @@ class _ChefInventory {
     );
   }
 
-  bool hasAvailableCore(String canonical) => fridgeCanonicals.contains(canonical);
+  Set<String> get availableSupportCanonicals => {
+        ...fridgeCanonicals,
+        ...shelfCanonicals,
+        ...shelfSupportCanonicals,
+        ...pantryByCanonical.entries
+            .where((entry) => entry.value.isStarter)
+            .map((entry) => entry.key),
+      };
 
-  bool hasShelfCanonical(String canonical) => shelfCanonicals.contains(canonical);
+  bool hasEnoughCore(
+    String canonical, {
+    required double targetAmount,
+    required Unit targetUnit,
+    required double minimumRatio,
+  }) {
+    return availabilityRatioFor(
+          canonical: canonical,
+          targetAmount: targetAmount,
+          targetUnit: targetUnit,
+        ) >=
+        minimumRatio;
+  }
+
+  double availabilityRatioFor({
+    required String canonical,
+    required double targetAmount,
+    required Unit targetUnit,
+  }) {
+    if (targetAmount <= 0) {
+      return fridgeCanonicals.contains(canonical) ? 1.0 : 0.0;
+    }
+    final available = availableAmountFor(
+      canonical: canonical,
+      targetUnit: targetUnit,
+    );
+    return (available / targetAmount).clamp(0.0, 1.0);
+  }
+
+  double availableAmountFor({
+    required String canonical,
+    required Unit targetUnit,
+  }) {
+    var total = 0.0;
+    for (final candidateKey in compatibleIngredientKeysForMatching(canonical)) {
+      final entries = fridgeByCanonical[candidateKey];
+      if (entries == null || entries.isEmpty) {
+        continue;
+      }
+      for (final entry in entries) {
+        final converted = convertIngredientAmount(
+          canonical: candidateKey,
+          amount: entry.amount,
+          from: entry.unit,
+          to: targetUnit,
+        );
+        if (converted != null) {
+          total += converted;
+        }
+      }
+    }
+    return total;
+  }
+
+  bool hasShelfCanonical(String canonical) =>
+      shelfCanonicals.contains(canonical);
+
+  bool hasAvailableSupport({
+    required String canonical,
+    required double targetAmount,
+    required Unit targetUnit,
+    required double minimumRatio,
+  }) {
+    if (hasShelfCanonical(canonical)) {
+      return true;
+    }
+    return availabilityRatioFor(
+          canonical: canonical,
+          targetAmount: targetAmount,
+          targetUnit: targetUnit,
+        ) >=
+        minimumRatio;
+  }
 
   bool isPantryStarter(String canonical) =>
       pantryByCanonical[canonical]?.isStarter ?? false;
@@ -824,6 +1286,53 @@ class _ChefInventory {
       required: required,
     );
   }
+
+  double suggestedCoreAmount({
+    required String canonical,
+    required double targetAmount,
+    required Unit targetUnit,
+    required double minimumRatio,
+  }) {
+    final available = availableAmountFor(
+      canonical: canonical,
+      targetUnit: targetUnit,
+    );
+    final minimumAmount = targetAmount * minimumRatio;
+    final bounded = available <= 0
+        ? targetAmount
+        : available < targetAmount
+            ? available
+            : targetAmount;
+    final normalized = bounded < minimumAmount ? minimumAmount : bounded;
+    return _normalizeRecipeAmount(normalized, targetUnit);
+  }
+
+  double suggestedSupportAmount({
+    required String canonical,
+    required double targetAmount,
+    required Unit targetUnit,
+    required double minimumRatio,
+  }) {
+    if (hasShelfCanonical(canonical)) {
+      return _normalizeRecipeAmount(targetAmount, targetUnit);
+    }
+    return suggestedCoreAmount(
+      canonical: canonical,
+      targetAmount: targetAmount,
+      targetUnit: targetUnit,
+      minimumRatio: minimumRatio,
+    );
+  }
+}
+
+class _StoredChefAmount {
+  final double amount;
+  final Unit unit;
+
+  const _StoredChefAmount({
+    required this.amount,
+    required this.unit,
+  });
 }
 
 int _expiryScore(DateTime? expiresAt) {
@@ -886,11 +1395,15 @@ double _defaultAmountFor(String canonical) {
       return 3;
     case 'картофель':
       return 4;
+    case 'капуста':
+      return 400;
     case 'лук':
     case 'морковь':
+    case 'свекла':
     case 'яблоко':
     case 'банан':
     case 'апельсин':
+    case 'лимон':
       return 1;
     case 'помидор':
     case 'огурец':
@@ -904,6 +1417,12 @@ double _defaultAmountFor(String canonical) {
     case 'кукуруза':
     case 'фасоль':
       return 1;
+    case 'горошек':
+      return 160;
+    case 'оливки':
+      return 90;
+    case 'майонез':
+      return 60;
     case 'чеснок':
       return 2;
     case 'молоко':
@@ -912,19 +1431,31 @@ double _defaultAmountFor(String canonical) {
     case 'овсяные хлопья':
     case 'рис':
     case 'гречка':
+    case 'перловка':
+    case 'пшено':
     case 'макароны':
     case 'чечевица':
     case 'кускус':
+    case 'мука':
+      return 120;
+    case 'манная крупа':
+      return 70;
     case 'грибы':
     case 'сыр':
+    case 'колбаса':
     case 'курица':
+    case 'индейка':
+    case 'говядина':
+    case 'свинина':
+    case 'печень':
     case 'рыба':
     case 'брокколи':
     case 'творог':
     case 'сметана':
     case 'фарш':
-    case 'томатная паста':
       return 180;
+    case 'томатная паста':
+      return 70;
     default:
       return 1;
   }
@@ -949,8 +1480,19 @@ double _supportAmountFor(String canonical) {
       return 15;
     case 'сахар':
       return 10;
+    case 'майонез':
+      return 45;
+    case 'сметана':
+    case 'йогурт':
+      return 60;
+    case 'томатная паста':
+      return 40;
+    case 'уксус':
+      return 10;
     case 'укроп':
       return 12;
+    case 'лимон':
+      return 1;
     default:
       return _defaultAmountFor(canonical);
   }
@@ -962,6 +1504,7 @@ Unit _defaultUnitFor(String canonical) {
     case 'картофель':
     case 'лук':
     case 'морковь':
+    case 'свекла':
     case 'помидор':
     case 'огурец':
     case 'перец сладкий':
@@ -973,6 +1516,7 @@ Unit _defaultUnitFor(String canonical) {
     case 'яблоко':
     case 'банан':
     case 'апельсин':
+    case 'лимон':
     case 'чеснок':
       return Unit.pcs;
     case 'молоко':
@@ -988,7 +1532,137 @@ Unit _supportUnitFor(String canonical) {
     case 'масло':
     case 'оливковое масло':
       return Unit.ml;
+    case 'лимон':
+      return Unit.pcs;
     default:
       return Unit.g;
+  }
+}
+
+double _supportTargetAmountFor(String canonical, _ChefSupportRole role) {
+  switch (role) {
+    case _ChefSupportRole.aromatic:
+      switch (canonical) {
+        case 'лук':
+        case 'морковь':
+        case 'перец сладкий':
+        case 'лимон':
+          return 1;
+        case 'чеснок':
+          return 1;
+        default:
+          return (_defaultAmountFor(canonical) * 0.6).clamp(1.0, 120.0);
+      }
+    case _ChefSupportRole.seasoning:
+      return _supportAmountFor(canonical);
+    case _ChefSupportRole.finish:
+      switch (canonical) {
+        case 'сыр':
+          return 40;
+        case 'сметана':
+        case 'йогурт':
+          return 60;
+        case 'лимон':
+          return 1;
+        case 'укроп':
+          return 10;
+        default:
+          return _supportAmountFor(canonical);
+      }
+  }
+}
+
+Unit _supportTargetUnitFor(String canonical, _ChefSupportRole role) {
+  switch (role) {
+    case _ChefSupportRole.aromatic:
+      return _defaultUnitFor(canonical);
+    case _ChefSupportRole.seasoning:
+      return _supportUnitFor(canonical);
+    case _ChefSupportRole.finish:
+      switch (canonical) {
+        case 'лимон':
+          return Unit.pcs;
+        case 'сыр':
+        case 'сметана':
+          return Unit.g;
+        case 'йогурт':
+          return Unit.ml;
+        default:
+          return _supportUnitFor(canonical);
+      }
+  }
+}
+
+double _supportMinimumRatioFor(_ChefSupportRole role) {
+  switch (role) {
+    case _ChefSupportRole.aromatic:
+      return 0.5;
+    case _ChefSupportRole.seasoning:
+      return 0.6;
+    case _ChefSupportRole.finish:
+      return 0.55;
+  }
+}
+
+List<String> _dedupeCanonicals(List<String> values) {
+  final unique = <String>[];
+  for (final value in values) {
+    final normalized = value.trim();
+    if (normalized.isEmpty || unique.contains(normalized)) {
+      continue;
+    }
+    unique.add(normalized);
+  }
+  return unique;
+}
+
+List<String> _dedupeEquivalentCanonicals(List<String> values) {
+  final unique = <String>[];
+  for (final value in values) {
+    final normalized = value.trim();
+    if (normalized.isEmpty || _hasCanonicalOverlap(normalized, unique)) {
+      continue;
+    }
+    unique.add(normalized);
+  }
+  return unique;
+}
+
+bool _hasCanonicalOverlap(String canonical, Iterable<String> existing) {
+  final candidateVariants = _canonicalVariants(canonical);
+  for (final value in existing) {
+    if (candidateVariants.intersection(_canonicalVariants(value)).isNotEmpty) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Set<String> _canonicalVariants(String canonical) {
+  return {
+    canonical,
+    normalizeIngredientText(canonical),
+    toPairingKey(canonical),
+    ...compatibleIngredientKeysForMatching(canonical),
+  }.where((value) => value.trim().isNotEmpty).toSet();
+}
+
+double _normalizeRecipeAmount(double amount, Unit unit) {
+  switch (unit) {
+    case Unit.pcs:
+      if (amount <= 1) {
+        return 1;
+      }
+      return amount.roundToDouble();
+    case Unit.g:
+    case Unit.ml:
+      if (amount <= 20) {
+        return amount.roundToDouble();
+      }
+      final step = amount < 120 ? 10.0 : 20.0;
+      return ((amount / step).round() * step).toDouble();
+    case Unit.kg:
+    case Unit.l:
+      return ((amount * 10).round() / 10).toDouble();
   }
 }

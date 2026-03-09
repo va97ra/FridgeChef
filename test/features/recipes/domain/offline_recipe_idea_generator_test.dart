@@ -104,6 +104,8 @@ void main() {
         FridgeItem(id: '4', name: 'Лук', amount: 2, unit: Unit.pcs),
         FridgeItem(id: '5', name: 'Рис', amount: 300, unit: Unit.g),
         FridgeItem(id: '6', name: 'Сыр', amount: 220, unit: Unit.g),
+        FridgeItem(id: '7', name: 'Грибы', amount: 180, unit: Unit.g),
+        FridgeItem(id: '8', name: 'Яйца', amount: 3, unit: Unit.pcs),
       ],
       shelfItems: const [],
       pantryCatalog: const [
@@ -174,6 +176,20 @@ void main() {
           canonicalName: 'сыр',
           synonyms: [],
           defaultUnit: Unit.g,
+        ),
+        ProductCatalogEntry(
+          id: 'mushrooms',
+          name: 'Грибы',
+          canonicalName: 'грибы',
+          synonyms: [],
+          defaultUnit: Unit.g,
+        ),
+        ProductCatalogEntry(
+          id: 'eggs',
+          name: 'Яйца',
+          canonicalName: 'яйцо',
+          synonyms: ['яйцо'],
+          defaultUnit: Unit.pcs,
         ),
       ],
     );

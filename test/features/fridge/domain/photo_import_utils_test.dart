@@ -31,6 +31,32 @@ void main() {
     expect(match!.name, 'Яйца');
   });
 
+  test('finds transliterated colloquial ingredient aliases in catalog', () {
+    final catalog = [
+      const ProductCatalogEntry(
+        id: 'glass_noodles',
+        name: 'Фунчоза',
+        canonicalName: 'Макароны',
+        synonyms: ['фунчоза', 'фунчеза', 'фанзю', 'funchoza', 'fanju'],
+        defaultUnit: Unit.g,
+      ),
+      const ProductCatalogEntry(
+        id: 'soy_sauce',
+        name: 'Соевый соус',
+        synonyms: ['соевый соус', 'соус соевый', 'soy sauce'],
+        defaultUnit: Unit.ml,
+      ),
+    ];
+
+    final funchozaMatch = findBestCatalogMatch('фанзю', catalog);
+    expect(funchozaMatch, isNotNull);
+    expect(funchozaMatch!.name, 'Фунчоза');
+
+    final soySauceMatch = findBestCatalogMatch('соус соевый', catalog);
+    expect(soySauceMatch, isNotNull);
+    expect(soySauceMatch!.name, 'Соевый соус');
+  });
+
   test('suggests merge target for compatible duplicate names', () {
     final draft = const DetectedProductDraft(
       id: 'd1',

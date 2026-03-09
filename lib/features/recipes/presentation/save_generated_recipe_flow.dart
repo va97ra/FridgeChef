@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/user_recipes_repo.dart';
 import '../domain/recipe.dart';
+import '../domain/recipe_interaction_event.dart';
 import 'providers.dart';
 
 Future<SaveResult?> saveGeneratedRecipeWithDialog({
@@ -47,6 +48,10 @@ Future<SaveResult?> saveGeneratedRecipeWithDialog({
   }
 
   final result = await repo.saveGeneratedRecipe(recipe: recipe, mode: mode);
+  await ref.read(recipeInteractionHistoryProvider.notifier).record(
+        type: RecipeInteractionType.saved,
+        recipe: result.recipe,
+      );
   ref.invalidate(recipesProvider);
   ref.invalidate(recipeMatchesProvider);
   return result;
