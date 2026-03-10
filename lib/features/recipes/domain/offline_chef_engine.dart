@@ -18,6 +18,7 @@ const _pairingNeutralCanonicals = {
   'соль',
   'перец',
   'сахар',
+  'мука',
   'масло',
   'масло сливочное',
   'вода',
@@ -140,6 +141,7 @@ class OfflineChefEngine {
     for (var slotIndex = 0; slotIndex < blueprint.slots.length; slotIndex++) {
       final slot = blueprint.slots[slotIndex];
       final selected = _pickSlotItems(
+        blueprint: blueprint,
         slot: slot,
         request: request,
         selectedBySlot: selectedBySlot,
@@ -183,6 +185,21 @@ class OfflineChefEngine {
       starters: starters,
       seed: request.seed + seedSalt,
     );
+    if (!_passesMinimalSupportGate(
+      blueprint: blueprint,
+      starters: starters,
+      chefSupport: chefSupport,
+    )) {
+      return null;
+    }
+    if (!_passesFamilySupportGate(
+      blueprint: blueprint,
+      selectedBySlot: selectedBySlot,
+      starters: starters,
+      chefSupport: chefSupport,
+    )) {
+      return null;
+    }
     final ingredients = _buildIngredients(
       blueprint: blueprint,
       selectedBySlot: selectedBySlot,
@@ -257,8 +274,17 @@ class OfflineChefEngine {
       steps: recipe.steps,
     );
     final russianClassic = blueprint.tags.contains('russian_classic');
-    final minimumChefScore = russianClassic ? 0.28 : 0.45;
-    final minimumFlavorScore = russianClassic ? 0.18 : 0.32;
+    final minimalist = blueprint.tags.contains('minimal');
+    final minimumChefScore = minimalist
+        ? 0.30
+        : russianClassic
+            ? 0.28
+            : 0.45;
+    final minimumFlavorScore = minimalist
+        ? 0.18
+        : russianClassic
+            ? 0.18
+            : 0.32;
     if (chefAssessment.score < minimumChefScore ||
         chefAssessment.flavorScore < minimumFlavorScore) {
       return null;
@@ -299,6 +325,18 @@ class OfflineChefEngine {
       starters: starters,
       chefSupport: chefSupport,
     );
+    final anchorTasteAffinity = anchorCanonicals.isEmpty
+        ? 0.0
+        : anchorCanonicals
+                .map(request.tasteProfile.ingredientPreference)
+                .fold<double>(0.0, (sum, value) => sum + value) /
+            anchorCanonicals.length;
+    final anchorFatigue = anchorCanonicals.isEmpty
+        ? 0.0
+        : anchorCanonicals
+                .map(request.tasteProfile.ingredientFatigue)
+                .fold<double>(0.0, (sum, value) => sum + value) /
+            anchorCanonicals.length;
     final profileAffinity =
         request.tasteProfile.profilePreference(blueprint.profile);
     final profileFatigue =
@@ -319,13 +357,15 @@ class OfflineChefEngine {
                 ((pairAffinity.clamp(-1.0, 1.0) + 1) * 0.04)) +
             (chefAssessment.score * 0.10) +
             (supportCoverage * 0.10) +
+            (anchorTasteAffinity.clamp(-1.0, 1.0) * 0.10) +
             russianCuisineBias +
             (((profileAffinity.clamp(-1.0, 1.0) + 1) * 0.05)) +
-            (((tagAffinity.clamp(-1.0, 1.0) + 1) * 0.03)) +
-            (tasteAnalysis.score * 0.06) -
+            (((tagAffinity.clamp(-1.0, 1.0) + 1) * 0.05)) +
+            (tasteAnalysis.score * 0.08) -
+            (anchorFatigue * 0.10) -
             (profileFatigue * 0.14) -
             (repetitionPenalty * 0.20) -
-            (starters.missingCanonicals.length * 0.12))
+            (starters.missingCanonicals.length * 0.07))
         .clamp(0.0, 1.0);
 
     final candidateReasons = _buildCandidateReasons(
@@ -351,6 +391,7 @@ class OfflineChefEngine {
   }
 
   List<String> _pickSlotItems({
+    required ChefBlueprint blueprint,
     required ChefSlot slot,
     required OfflineChefRequest request,
     required Map<String, List<String>> selectedBySlot,
@@ -365,8 +406,8 @@ class OfflineChefEngine {
         .where(
           (canonical) => inventory.hasEnoughCore(
             canonical,
-            targetAmount: _defaultAmountFor(canonical),
-            targetUnit: _defaultUnitFor(canonical),
+            targetAmount: _coreTargetAmountFor(blueprint, canonical),
+            targetUnit: _coreTargetUnitFor(blueprint, canonical),
             minimumRatio: slot.isAnchor ? 0.78 : 0.60,
           ),
         )
@@ -378,6 +419,7 @@ class OfflineChefEngine {
 
     available.sort((a, b) {
       final aScore = _slotScore(
+        blueprint: blueprint,
         canonical: a,
         slot: slot,
         request: request,
@@ -385,6 +427,7 @@ class OfflineChefEngine {
         inventory: inventory,
       );
       final bScore = _slotScore(
+        blueprint: blueprint,
         canonical: b,
         slot: slot,
         request: request,
@@ -411,6 +454,7 @@ class OfflineChefEngine {
   }
 
   double _slotScore({
+    required ChefBlueprint blueprint,
     required String canonical,
     required ChefSlot slot,
     required OfflineChefRequest request,
@@ -418,10 +462,12 @@ class OfflineChefEngine {
     required _ChefInventory inventory,
   }) {
     final priority = inventory.priorityByCanonical[canonical] ?? 0.0;
+    final targetAmount = _coreTargetAmountFor(blueprint, canonical);
+    final targetUnit = _coreTargetUnitFor(blueprint, canonical);
     final stockConfidence = inventory.availabilityRatioFor(
       canonical: canonical,
-      targetAmount: _defaultAmountFor(canonical),
-      targetUnit: _defaultUnitFor(canonical),
+      targetAmount: targetAmount,
+      targetUnit: targetUnit,
     );
     final tasteWeight = request.tasteProfile.ingredientPreference(canonical);
     final ingredientFatigue = request.tasteProfile.ingredientFatigue(canonical);
@@ -614,6 +660,119 @@ class OfflineChefEngine {
     return (0.25 + ((matched / desired.length) * 0.75)).clamp(0.0, 1.0);
   }
 
+  bool _passesMinimalSupportGate({
+    required ChefBlueprint blueprint,
+    required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
+  }) {
+    if (!blueprint.tags.contains('minimal')) {
+      return true;
+    }
+
+    final available = {
+      ...starters.includedCanonicals,
+      ...chefSupport.explicitCanonicals,
+    };
+
+    bool hasAny(Iterable<String> canonicals) =>
+        canonicals.any(available.contains);
+
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.perfectOmeletteSkillet:
+      case ChefDishFamily.butterEggSkillet:
+        return hasAny(const {'масло сливочное'});
+      case ChefDishFamily.eggSkillet:
+      case ChefDishFamily.potatoSkillet:
+      case ChefDishFamily.caramelizedOnionToast:
+      case ChefDishFamily.shakshukaSkillet:
+      case ChefDishFamily.breadEggSkillet:
+      case ChefDishFamily.potatoEggHash:
+        return hasAny(const {'масло', 'масло сливочное', 'оливковое масло'});
+      case ChefDishFamily.aglioEOlioPasta:
+        return hasAny(const {'оливковое масло'});
+      case ChefDishFamily.potatoPureeSide:
+        return hasAny(const {'молоко', 'масло сливочное'});
+      case ChefDishFamily.cucumberSmetanaSalad:
+      case ChefDishFamily.simpleRiceKasha:
+      case ChefDishFamily.savoryClosedPie:
+        return true;
+      case ChefDishFamily.freshSalad:
+      case ChefDishFamily.coldSoup:
+      case ChefDishFamily.okroshkaColdSoup:
+      case ChefDishFamily.okroshkaKvassColdSoup:
+      case ChefDishFamily.olivierSalad:
+      case ChefDishFamily.vinegretSalad:
+      case ChefDishFamily.grainPan:
+      case ChefDishFamily.pastaPan:
+      case ChefDishFamily.navyPasta:
+      case ChefDishFamily.soup:
+      case ChefDishFamily.cabbageSoup:
+      case ChefDishFamily.borschtSoup:
+      case ChefDishFamily.fishSoup:
+      case ChefDishFamily.pickleSoup:
+      case ChefDishFamily.solyankaSoup:
+      case ChefDishFamily.bake:
+      case ChefDishFamily.curdBake:
+      case ChefDishFamily.savoryClosedPie:
+      case ChefDishFamily.breakfast:
+      case ChefDishFamily.panBatter:
+      case ChefDishFamily.bliniPan:
+      case ChefDishFamily.fritterBatter:
+      case ChefDishFamily.oladyiFritter:
+      case ChefDishFamily.curdFritter:
+      case ChefDishFamily.potatoFritter:
+      case ChefDishFamily.porridge:
+      case ChefDishFamily.lazyCabbageRollStew:
+      case ChefDishFamily.tefteliSauceStew:
+      case ChefDishFamily.homeCutletDinner:
+      case ChefDishFamily.zrazyStuffedCutlets:
+      case ChefDishFamily.bitochkiGravyCutlets:
+      case ChefDishFamily.zharkoeStew:
+      case ChefDishFamily.goulashSauceStew:
+      case ChefDishFamily.stroganoffSauceStew:
+      case ChefDishFamily.cutlets:
+      case ChefDishFamily.stew:
+        return true;
+    }
+  }
+
+  bool _passesFamilySupportGate({
+    required ChefBlueprint blueprint,
+    required Map<String, List<String>> selectedBySlot,
+    required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
+  }) {
+    final available = <String>{
+      for (final values in selectedBySlot.values) ...values,
+      ...starters.includedCanonicals,
+      ...chefSupport.explicitCanonicals,
+    };
+
+    bool hasAny(Iterable<String> canonicals) =>
+        canonicals.any(available.contains);
+
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.eggSkillet:
+      case ChefDishFamily.potatoSkillet:
+        return hasAny(const {
+          'масло',
+          'масло сливочное',
+          'оливковое масло',
+        });
+      case ChefDishFamily.savoryClosedPie:
+        return hasAny(const {
+          'масло сливочное',
+          'масло',
+          'оливковое масло',
+          'сметана',
+          'кефир',
+          'молоко',
+        });
+      default:
+        return true;
+    }
+  }
+
   bool _passesPairingValidation(Set<String> canonicals) {
     final pairKeys = canonicals.map(toPairingKey).toList()..sort();
     var strongPairs = 0;
@@ -680,6 +839,77 @@ class OfflineChefEngine {
         .toSet();
   }
 
+  double _coreTargetAmountFor(ChefBlueprint blueprint, String canonical) {
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.savoryClosedPie:
+        switch (canonical) {
+          case 'мука':
+            return 260;
+          case 'капуста':
+            return 450;
+          case 'яйцо':
+            return 3;
+          case 'лук':
+            return 1;
+          case 'сметана':
+            return 120;
+          case 'кефир':
+            return 180;
+          case 'молоко':
+            return 140;
+          default:
+            return _defaultAmountFor(canonical);
+        }
+      default:
+        return _defaultAmountFor(canonical);
+    }
+  }
+
+  Unit _coreTargetUnitFor(ChefBlueprint blueprint, String canonical) {
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.savoryClosedPie:
+        return _defaultUnitFor(canonical);
+      default:
+        return _defaultUnitFor(canonical);
+    }
+  }
+
+  double _starterAmountForBlueprint(ChefBlueprint blueprint, String canonical) {
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.savoryClosedPie:
+        switch (canonical) {
+          case 'масло сливочное':
+            return 70;
+          case 'масло':
+          case 'оливковое масло':
+            return 40;
+          case 'соль':
+            return 4;
+          case 'перец':
+            return 2;
+          default:
+            return _supportAmountFor(canonical);
+        }
+      default:
+        return _supportAmountFor(canonical);
+    }
+  }
+
+  Unit _starterUnitForBlueprint(ChefBlueprint blueprint, String canonical) {
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.savoryClosedPie:
+        switch (canonical) {
+          case 'масло':
+          case 'оливковое масло':
+            return Unit.ml;
+          default:
+            return _supportUnitFor(canonical);
+        }
+      default:
+        return _supportUnitFor(canonical);
+    }
+  }
+
   List<RecipeIngredient> _buildIngredients({
     required ChefBlueprint blueprint,
     required Map<String, List<String>> selectedBySlot,
@@ -690,8 +920,8 @@ class OfflineChefEngine {
     final ingredients = <RecipeIngredient>[];
     for (final slot in blueprint.slots) {
       for (final canonical in selectedBySlot[slot.key] ?? const <String>[]) {
-        final defaultAmount = _defaultAmountFor(canonical);
-        final defaultUnit = _defaultUnitFor(canonical);
+        final defaultAmount = _coreTargetAmountFor(blueprint, canonical);
+        final defaultUnit = _coreTargetUnitFor(blueprint, canonical);
         ingredients.add(
           inventory.ingredient(
             canonical,
@@ -710,8 +940,8 @@ class OfflineChefEngine {
       ingredients.add(
         inventory.ingredient(
           canonical,
-          amount: _supportAmountFor(canonical),
-          unit: _supportUnitFor(canonical),
+          amount: _starterAmountForBlueprint(blueprint, canonical),
+          unit: _starterUnitForBlueprint(blueprint, canonical),
           required: false,
         ),
       );
@@ -841,26 +1071,93 @@ class OfflineChefEngine {
       limit: 3,
     );
     final panGreaseText = _displayList(
-      [
+      _dedupeCanonicals([
         for (final canonical in starters.includedCanonicals)
-          if (canonical == 'масло' || canonical == 'масло сливочное') canonical,
+          if (canonical == 'масло' ||
+              canonical == 'масло сливочное' ||
+              canonical == 'оливковое масло')
+            canonical,
         for (final canonical in chefSupport.finishingCanonicals)
-          if (canonical == 'масло' || canonical == 'масло сливочное') canonical,
-      ],
+          if (canonical == 'масло' ||
+              canonical == 'масло сливочное' ||
+              canonical == 'оливковое масло')
+            canonical,
+      ]),
       inventory,
       limit: 1,
     );
     final seasoningWithoutOilText = _displayList(
-      [
+      _dedupeCanonicals([
         for (final canonical in [
           ...starters.includedCanonicals,
           ...chefSupport.seasoningCanonicals,
         ])
-          if (canonical != 'масло' && canonical != 'масло сливочное') canonical,
-      ],
+          if (canonical != 'масло' &&
+              canonical != 'масло сливочное' &&
+              canonical != 'оливковое масло')
+            canonical,
+      ]),
       inventory,
       limit: 3,
     );
+    final creamyPantryText = _displayList(
+      _dedupeCanonicals([
+        for (final canonical in [
+          ...(selectedBySlot['creamy'] ?? const <String>[]),
+          ...starters.includedCanonicals,
+          ...chefSupport.seasoningCanonicals,
+          ...chefSupport.finishingCanonicals,
+        ])
+          if (canonical == 'молоко' || canonical == 'масло сливочное')
+            canonical,
+      ]),
+      inventory,
+      limit: 2,
+    );
+    final caramelSweetenerText = _displayList(
+      _dedupeCanonicals([
+        for (final canonical in [
+          ...starters.includedCanonicals,
+          ...chefSupport.seasoningCanonicals,
+          ...chefSupport.finishingCanonicals,
+        ])
+          if (canonical == 'сахар') canonical,
+      ]),
+      inventory,
+      limit: 1,
+    );
+    final delicateFinishText = _displayList(
+      _dedupeCanonicals([
+        for (final canonical in [
+          ...starters.includedCanonicals,
+          ...chefSupport.seasoningCanonicals,
+          ...chefSupport.finishingCanonicals,
+        ])
+          if (canonical == 'укроп' ||
+              canonical == 'зелень' ||
+              canonical == 'перец')
+            canonical,
+      ]),
+      inventory,
+      limit: 2,
+    );
+    final shakshukaSpiceText = _displayList(
+      _dedupeCanonicals([
+        for (final canonical in [
+          ...starters.includedCanonicals,
+          ...chefSupport.aromaticCanonicals,
+          ...chefSupport.seasoningCanonicals,
+        ])
+          if (canonical == 'паприка' ||
+              canonical == 'чеснок' ||
+              canonical == 'перец' ||
+              canonical == 'соль')
+            canonical,
+      ]),
+      inventory,
+      limit: 3,
+    );
+    final cookingFatText = panGreaseText.isNotEmpty ? panGreaseText : 'масло';
 
     switch (blueprint.stepStyle) {
       case ChefStepStyle.eggSkillet:
@@ -873,7 +1170,7 @@ class OfflineChefEngine {
         ];
       case ChefStepStyle.potatoSkillet:
         return [
-          'Нарежь $anchor крупными кусочками${aromaticsText.isEmpty ? '' : ', а $aromaticsText подготовь для ароматной базы'} и обжаривай 12-14 минут, чтобы появилась уверенная золотистая корочка.',
+          'Нарежь $anchor крупными кусочками${aromaticsText.isEmpty ? '' : ', а $aromaticsText подготовь для ароматной базы'} и выложи картофель одним слоем. Обжаривай 12-14 минут, чтобы появилась уверенная золотистая корочка.',
           'Добавь $secondary, убавь огонь и доведи всё вместе ещё 6-8 минут до мягкости без лишней влаги.',
           seasoningText.isEmpty && finishText.isEmpty
               ? 'Подавай горячим, когда картофель станет румяным и собранным по вкусу.'
@@ -919,13 +1216,13 @@ class OfflineChefEngine {
           'Подготовь основу: $anchor, а отдельно нарежь $secondary${support.isEmpty ? '' : ' и $support'}${aromaticsText.isEmpty ? '' : ', плюс $aromaticsText для аромата'}. ${_grainCookTiming(anchorCanonicals)}',
           'Сначала прогрей добавки 4-5 минут, затем вмешай основу и собери блюдо на умеренном огне ещё 3-4 минуты, чтобы крупа впитала вкус.',
           seasoningText.isEmpty && finishText.isEmpty
-              ? 'Доведи до готовности и подавай как сытное домашнее блюдо.'
+              ? 'Доведи до готовности, дай блюду 1-2 минуты постоять и подавай как сытное домашнее блюдо.'
               : 'В конце доведи вкус${seasoningText.isEmpty ? '' : ': $seasoningText'}${finishText.isEmpty ? '' : ', а для мягкого финиша добавь $finishText'}, чтобы текстура и аромат стали собраннее, и дай блюду 1-2 минуты постоять.',
         ];
       case ChefStepStyle.pastaPan:
         return [
-          'Отвари $anchor 8-10 минут до состояния al dente и параллельно подготовь $secondary${aromaticsText.isEmpty ? '' : ' вместе с $aromaticsText'}.',
-          'Соедини основу с добавками на сковороде и быстро прогрей всё вместе 2-3 минуты, чтобы соус или соки покрыли пасту.',
+          'Отвари $anchor 8-10 минут до состояния al dente, сохрани несколько ложек воды от варки и параллельно подготовь $secondary${aromaticsText.isEmpty ? '' : ' вместе с $aromaticsText'}.',
+          'Соедини основу с добавками на сковороде и быстро прогрей всё вместе 2-3 минуты, при необходимости добавив немного воды от варки, чтобы соус или соки покрыли пасту.',
           seasoningText.isEmpty && finishText.isEmpty
               ? 'Оставь блюдо на минуту после выключения огня и подавай.'
               : 'Перед подачей добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши всё через $finishText'}, чтобы вкус стал ярче и мягче одновременно.',
@@ -969,6 +1266,55 @@ class OfflineChefEngine {
           seasoningText.isEmpty && finishText.isEmpty
               ? 'Дай блюду постоять 3-4 минуты перед подачей, чтобы соки и текстура стабилизировались.'
               : 'Перед духовкой или в самом конце добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, чтобы запекание дало более яркий аромат, а потом дай блюду 3-4 минуты отдохнуть.',
+        ];
+      case ChefStepStyle.closedPie:
+        final pieAromaticsText = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['aromatic'] ?? const <String>[],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final pieSoftenerText = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['softener'] ?? const <String>[],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final pieFatText = _sentenceIngredientText(
+          _displayList(
+            _dedupeCanonicals([
+              for (final canonical in [
+                ...starters.includedCanonicals,
+                ...chefSupport.seasoningCanonicals,
+                ...chefSupport.finishingCanonicals,
+              ])
+                if (canonical == 'масло сливочное' ||
+                    canonical == 'масло' ||
+                    canonical == 'оливковое масло')
+                  canonical,
+            ]),
+            inventory,
+            limit: 1,
+          ),
+        );
+        final pieDoughText = _sentenceIngredientText(support);
+        final pieFillingText = _sentenceIngredientText(anchor);
+        final pieBinderText = _sentenceIngredientText(secondary);
+        final pieSeasoningText = _sentenceIngredientText(
+          seasoningWithoutOilText.isEmpty
+              ? 'соль и перец'
+              : seasoningWithoutOilText,
+        );
+        final doughAssemblyStep = pieFatText.isEmpty
+            ? 'Подготовь тесто: просей $pieDoughText, добавь часть $pieBinderText${pieSoftenerText.isEmpty ? '' : ' и $pieSoftenerText'} и быстро собери мягкое тесто, при необходимости подлей 1-2 ложки холодной воды. Не вымешивай долго; заверни тесто и дай ему отдохнуть 20 минут в холоде.'
+            : 'Подготовь тесто: просей $pieDoughText, быстро вработай $pieFatText до влажной крошки${pieSoftenerText.isEmpty ? '' : ', затем добавь $pieSoftenerText'} и часть $pieBinderText, чтобы собрать мягкое тесто. Не вымешивай долго; заверни тесто и дай ему отдохнуть 20 минут в холоде.';
+        return [
+          'Подготовь начинку: тонко нашинкуй $pieFillingText${pieAromaticsText.isEmpty ? '' : ' и мелко нарежь $pieAromaticsText'}. Спокойно прогрей её${pieFatText.isEmpty ? '' : ' на $pieFatText'} 8-10 минут, пока лишняя влага не уйдёт; отдельно отвари $pieBinderText 8-9 минут, остуди, мелко поруби и вмешай в полностью остывшую начинку, доведя её через $pieSeasoningText.',
+          doughAssemblyStep,
+          'Раздели тесто на две части, раскатай нижний пласт и выложи его в форму или на противень. Сверху разложи холодную начинку, накрой вторым пластом, защипни края, запечатай шов, сделай 2-3 отверстия для выхода пара и, если часть $pieBinderText осталась, смажь верх.',
+          'Выпекай пирог в духовке 35-40 минут при 180-190°C до ровной золотистой корочки. Дай ему отдохнуть 12-15 минут, затем нарежь и подавай тёплым.',
         ];
       case ChefStepStyle.breakfast:
         return [
@@ -1065,7 +1411,7 @@ class OfflineChefEngine {
         return [
           'Разбей $anchor в миску, добавь щепотку соли$omeletteFinish, слегка взбей вилкой — не до пены, около 15-20 движений.'
               '${omeletteFilling.isNotEmpty ? ' $omeletteFilling.' : ''}',
-          'Растопи кусочек сливочного масла на сковороде на среднем огне — масло должно пениться, но не темнеть. '
+          'Растопи $cookingFatText на сковороде на среднем огне — жир должен только пениться, но не темнеть. '
               'Влей яичную смесь и веди лопаткой по дну мелкими движениями непрерывно — 30-40 секунд.'
               '${secondary.isNotEmpty ? ' Выложи $secondary на одну половину.' : ''}',
           'Когда яйцо почти схватится, но середина ещё немного влажная, сверни омлет рулетом или пополам. '
@@ -1077,8 +1423,8 @@ class OfflineChefEngine {
         final butterEggFinish =
             secondary.isNotEmpty ? ' Подавай с $secondary.' : '';
         return [
-          'Растопи кусочек сливочного масла на сковороде на среднем огне. '
-              'Дождись, пока масло начнёт пениться, но не станет коричневым — это момент.',
+          'Прогрей $cookingFatText на сковороде на среднем огне. '
+              'Дождись, пока масло начнёт пениться — это нужный момент, и до коричневого цвета доводить не нужно.',
           'Разбей $anchor прямо в пенящееся масло. '
               'Немедленно убавь огонь до минимума и готовь 3-4 минуты, не трогая, '
               'пока белок станет непрозрачным, а желток — тёплым внутри, но текучим.'
@@ -1089,8 +1435,11 @@ class OfflineChefEngine {
         ];
 
       case ChefStepStyle.potatoPuree:
-        final cream =
-            secondary.isNotEmpty ? secondary : 'молоко и сливочное масло';
+        final cream = secondary.isNotEmpty
+            ? secondary
+            : (creamyPantryText.isNotEmpty
+                ? creamyPantryText
+                : 'горячую сливочную основу');
         return [
           'Очисти $anchor, нарежь равными кубиками 3-4 см — чтобы варились одинаково. '
               'Залей холодной подсоленной водой и вари 18-20 минут до полной мягкости.'
@@ -1108,12 +1457,12 @@ class OfflineChefEngine {
         final bread = secondary.isNotEmpty ? secondary : 'хлеб';
         return [
           'Нарежь $anchor тонкими полукольцами. '
-              'Растопи кусочек сливочного масла на сковороде на среднем огне, '
+              'Прогрей $cookingFatText на сковороде на среднем огне, '
               'добавь лук и перемешай. Убавь огонь до небольшого.'
               '${seasoningText.isNotEmpty ? ' Добавь $seasoningText.' : ''}',
           'Томи лук 18-20 минут, периодически помешивая — он должен постепенно темнеть '
               'и становиться янтарным, а не подгорать. '
-              'На последних 2 минутах добавь щепотку сахара — это ускорит карамелизацию.'
+              '${caramelSweetenerText.isNotEmpty ? 'На последних 2 минутах добавь $caramelSweetenerText — это ускорит карамелизацию.' : ''}'
               '${finishText.isNotEmpty ? ' Добавь $finishText для финального вкуса.' : ''}',
           'Поджарь $bread на сухой сковороде или в тостере. '
               'Выложи лук горкой сверху — он должен быть мягким и почти сладким. '
@@ -1128,8 +1477,8 @@ class OfflineChefEngine {
             ? ', добавь $secondary и обжарь ещё 3 минуты'
             : '';
         return [
-          'Разогрей масло на сковороде на среднем огне. '
-              'Добавь паприку и чеснок, обжарь 30 секунд — до аромата, не до горечи. '
+          'Разогрей $cookingFatText на сковороде на среднем огне. '
+              '${shakshukaSpiceText.isNotEmpty ? 'Добавь $shakshukaSpiceText, обжарь 30 секунд — до аромата, не до горечи. ' : ''}'
               'Добавь $sauce${extras.isNotEmpty ? extras : ''} и разомни лопаткой.'
               '${seasoningText.isNotEmpty ? ' Приправь: $seasoningText.' : ' Посоли.'}',
           'Туши соус 5-7 минут на среднем огне, пока он немного не загустеет. '
@@ -1147,7 +1496,7 @@ class OfflineChefEngine {
           'Вырежи кружок диаметром 6-7 см в центре ломтя $bread '
               '(стаканом или ножом). Вырезанный кружок сохраняй — поджаришь отдельно.'
               '${seasoningText.isNotEmpty ? ' Приправь: $seasoningText.' : ''}',
-          'Растопи кусочек сливочного масла на сковороде на среднем огне. '
+          'Прогрей $cookingFatText на сковороде на среднем огне. '
               'Выложи хлеб и вырезанный кружок. Сразу разбей $egg прямо в отверстие.',
           'Готовь 2-3 минуты, пока белок схватится снизу. '
               'Перевёрни аккуратно и готовь ещё 1 минуту — желток должен остаться живым. '
@@ -1163,7 +1512,7 @@ class OfflineChefEngine {
               'Вари $pasta по инструкции до al dente — сохрани 0.5 стакана воды от варки. '
               'Пока варится паста — тонко нарежь $garlic пластинками.'
               '${seasoningText.isNotEmpty ? ' Подготовь: $seasoningText.' : ''}',
-          'На среднем огне прогрей масло со сковороды. '
+          'На среднем огне прогрей $cookingFatText на сковороде. '
               'Добавь чеснок и томи 2-3 минуты до золотистого — чуть янтарного, не коричневого. '
               'Это весь вкус блюда — не спеши.',
           'Переложи горячую пасту к чесноку прямо на сковороду. '
@@ -1180,7 +1529,7 @@ class OfflineChefEngine {
               '${seasoningText.isNotEmpty ? ' Приготовь: $seasoningText.' : ''}',
           'Слей лишнюю жидкость. '
               'Добавь $dressing и перемешай аккуратно.'
-              '${finishText.isNotEmpty ? ' Добавь $finishText.' : ' Добавь укроп и чёрный перец — они здесь обязательны.'}',
+              '${finishText.isNotEmpty ? ' Добавь $finishText.' : (delicateFinishText.isNotEmpty ? ' Добавь $delicateFinishText.' : '')}',
           'Дай постоять 1-2 минуты и подавай. '
               'Это блюдо любит когда вкус самих огурцов слышен — '
               'не перебивай заправкой, только подчеркни.',
@@ -1193,11 +1542,11 @@ class OfflineChefEngine {
             support.isNotEmpty ? ', добавь $support и обжарь ещё 5 минут' : '';
         return [
           'Нарежь $potato кубиками 1.5 см — не мельчи, иначе не будет корочки. '
-              'Прогрей масло на сковороде до горячего. '
+              'Прогрей $cookingFatText на сковороде до горячего. '
               'Добавь картофель одним слоем и не трогай 4-5 минут.'
-              '${seasoningText.isNotEmpty ? ' Приправь: $seasoningText.' : ' Посоли и добавь паприку.'}',
+              '${seasoningWithoutOilText.isNotEmpty ? ' Приправь: $seasoningWithoutOilText.' : ' Посоли.'}',
           'Переверни кубики и обжаривай ещё 6-7 минут${extras.isNotEmpty ? extras : ''}, '
-              'пока со всех сторон не появится уверенная rumyянaya корочка.',
+              'пока со всех сторон не появится уверенная румяная корочка.',
           'Сдвинь картофель к краям, разбей $egg в центр сковороды. '
               'Готовь яйца 3-4 минуты до желаемой степени — текучий желток или полностью. '
               '${finishText.isNotEmpty ? 'Добавь $finishText.' : ''} Подавай прямо со сковороды.',
@@ -1212,7 +1561,8 @@ class OfflineChefEngine {
               '18 минут. Не открывай крышку — пар нужен для правильной текстуры.',
           'Сними с огня, дай постоять под крышкой ещё 5 минут. '
               '${secondary.isNotEmpty ? 'Добавь $secondary.' : ''}'
-              '${finishText.isNotEmpty ? ' Finиш: $finishText.' : ' Добавь кусочек масла и перемешай.'} Подавай горячим.',
+              '${finishText.isNotEmpty ? ' Финиш: $finishText.' : ''}'
+              '${secondary.isEmpty && finishText.isEmpty ? ' Распуши рис вилкой.' : ''} Подавай горячим.',
         ];
 
       case ChefStepStyle.stew:
@@ -1237,7 +1587,7 @@ class OfflineChefEngine {
         }
         return [
           'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ', а $aromaticsText прогрей в самом начале 4-5 минут'} и начни тушить самые плотные продукты на слабом огне.',
-          'Добавь остальные ингредиенты${support.isEmpty ? '' : ' и $support'}, периодически помешивая, и туши всё ещё ${_stewCookTiming(anchorCanonicals, secondaryCanonicals)}, пока текстура не станет густой и насыщенной.',
+          'Добавь остальные ингредиенты${support.isEmpty ? '' : ' и $support'}, прикрой крышкой, периодически помешивая, и туши всё ещё ${_stewCookTiming(anchorCanonicals, secondaryCanonicals)}, пока текстура не станет густой и насыщенной.',
           seasoningText.isEmpty && finishText.isEmpty
               ? 'Сними с огня, когда рагу станет мягким и собранным.'
               : 'В конце добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, затем дай блюду пару минут постоять перед подачей.',
@@ -1691,6 +2041,7 @@ class OfflineChefEngine {
       case ChefDishFamily.solyankaSoup:
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
+      case ChefDishFamily.savoryClosedPie:
       case ChefDishFamily.breakfast:
       case ChefDishFamily.panBatter:
       case ChefDishFamily.bliniPan:
@@ -2058,6 +2409,11 @@ class OfflineChefEngine {
         'лучше пустить в дело сейчас: ${urgentAnchors.take(2).map(inventory.displayName).join(', ')}',
       );
     }
+    if (starters.missingCanonicals.isNotEmpty) {
+      reasons.add(
+        'из базовых вещей пригодятся ${starters.missingCanonicals.map(inventory.displayName).join(', ')}',
+      );
+    }
     final supportHighlights = _dedupeEquivalentCanonicals([
       ...starters.availableCanonicals,
       ...chefSupport.aromaticCanonicals,
@@ -2067,11 +2423,6 @@ class OfflineChefEngine {
     if (supportHighlights.isNotEmpty) {
       reasons.add(
         'вкус собирают ${supportHighlights.take(3).map(inventory.displayName).join(', ')}',
-      );
-    }
-    if (starters.missingCanonicals.isNotEmpty) {
-      reasons.add(
-        'из базовых вещей пригодятся ${starters.missingCanonicals.map(inventory.displayName).join(', ')}',
       );
     }
     if (tasteAnalysis.reasons.isNotEmpty) {

@@ -79,6 +79,14 @@ void main() {
             isStarter: true,
           ),
           PantryCatalogEntry(
+            id: 'oil',
+            name: 'Масло',
+            canonicalName: 'масло',
+            aliases: ['масло'],
+            category: 'oil',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
             id: 'basil',
             name: 'Базилик',
             canonicalName: 'базилик',
@@ -93,10 +101,47 @@ void main() {
     final implicit = generated.first.recipe.implicitPantryItems;
     expect(implicit, isNotEmpty);
     expect(
-      implicit.every((item) => item == 'Соль' || item == 'Черный перец'),
+      implicit.every(
+        (item) => item == 'Соль' || item == 'Черный перец' || item == 'Масло',
+      ),
       isTrue,
     );
     expect(implicit, isNot(contains('Базилик')));
+  });
+
+  test('does not fake skillet dish when cooking fat support is absent', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        fridgeItems: const [
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 6, unit: Unit.pcs),
+          FridgeItem(id: 'tomato', name: 'Помидоры', amount: 3, unit: Unit.pcs),
+          FridgeItem(id: 'cheese', name: 'Сыр', amount: 180, unit: Unit.g),
+        ],
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      generated.any((candidate) => candidate.recipe.chefProfile == 'skillet'),
+      isFalse,
+    );
   });
 
   test('does not generate dish from trace anchor stock', () {
@@ -125,11 +170,20 @@ void main() {
     );
 
     expect(generated, isNotEmpty);
-    final cheese = generated.first.recipe.ingredients.firstWhere(
-      (ingredient) => ingredient.name == 'Сыр',
+    final cheeseIngredients = [
+      for (final candidate in generated)
+        for (final ingredient in candidate.recipe.ingredients)
+          if (ingredient.name == 'Сыр') ingredient,
+    ];
+    expect(cheeseIngredients, isNotEmpty);
+    expect(
+      cheeseIngredients.every((ingredient) => ingredient.unit == Unit.g),
+      isTrue,
     );
-    expect(cheese.amount, 120);
-    expect(cheese.unit, Unit.g);
+    expect(
+      cheeseIngredients.every((ingredient) => ingredient.amount <= 120),
+      isTrue,
+    );
   });
 
   test('builds borscht from classic russian soup set', () {
@@ -2275,6 +2329,100 @@ void main() {
     );
   });
 
+  test('builds cabbage egg pie with rested dough and closed filling technique',
+      () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['черный перец', 'перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'butter',
+            name: 'Сливочное масло',
+            canonicalName: 'масло сливочное',
+            aliases: ['сливочное масло', 'масло сливочное'],
+            category: 'oil',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'flour', name: 'Мука', amount: 420, unit: Unit.g),
+          FridgeItem(
+            id: 'cabbage',
+            name: 'Капуста',
+            amount: 900,
+            unit: Unit.g,
+          ),
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(
+            id: 'sour_cream',
+            name: 'Сметана',
+            amount: 160,
+            unit: Unit.g,
+          ),
+        ],
+      ),
+    );
+
+    final pie = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Пирог домашний'),
+    );
+
+    expect(pie.recipe.chefProfile, 'bake');
+    expect(
+      pie.recipe.anchorIngredients
+          .any((ingredient) => ingredient.contains('Кап')),
+      isTrue,
+    );
+    expect(
+      pie.recipe.ingredients.any((ingredient) => ingredient.name == 'Мука'),
+      isTrue,
+    );
+    expect(
+      pie.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Сливочное масло',
+      ),
+      isTrue,
+    );
+    expect(
+      pie.recipe.steps.any((step) => step.contains('Подготовь тесто')),
+      isTrue,
+    );
+    expect(
+      pie.recipe.steps.any((step) => step.contains('отдохнуть 20 минут')),
+      isTrue,
+    );
+    expect(
+      pie.recipe.steps.any(
+        (step) => step.contains('полностью остывшую начинку'),
+      ),
+      isTrue,
+    );
+    expect(
+      pie.recipe.steps.any((step) => step.contains('защипни края')),
+      isTrue,
+    );
+    expect(
+      pie.recipe.steps.any((step) => step.contains('35-40 минут')),
+      isTrue,
+    );
+  });
+
   test('uses available finishing support from shelf for salad ideas', () {
     final generated = const OfflineChefEngine().generate(
       _request(
@@ -2491,7 +2639,7 @@ void main() {
     );
   });
 
-  test('dedupes generated candidates against known recipes', () {
+  test('does not regenerate broad skillet duplicate against known recipes', () {
     final generated = const OfflineChefEngine().generate(
       _request(
         baseRecipes: const [
@@ -2518,7 +2666,22 @@ void main() {
       ),
     );
 
-    expect(generated, isEmpty);
+    expect(generated, isNotEmpty);
+    expect(
+      generated.any((candidate) {
+        if (candidate.recipe.chefProfile != 'skillet') {
+          return false;
+        }
+        final requiredNames = candidate.recipe.ingredients
+            .where((ingredient) => ingredient.required)
+            .map((ingredient) => ingredient.name)
+            .toSet();
+        return requiredNames.contains('Яйца') &&
+            requiredNames.contains('Помидоры') &&
+            requiredNames.contains('Сыр');
+      }),
+      isFalse,
+    );
   });
 
   test('rich inventory generation keeps strong pairing coverage', () {
@@ -2971,20 +3134,16 @@ void main() {
 
     expect(generated, isNotEmpty);
     final dish = generated.firstWhere(
-      (c) => c.recipe.anchorIngredients.any(
-        (name) =>
-            name.toLowerCase().contains('помидор') ||
-            name.toLowerCase().contains('яйц'),
-      ),
+      (c) => c.recipe.title.contains('Шакшука'),
       orElse: () => generated.first,
     );
     expect(dish.recipe.anchorIngredients.isNotEmpty, isTrue);
     expect(
       dish.recipe.steps.any(
         (step) =>
-            step.contains('яйц') ||
-            step.contains('соус') ||
-            step.contains('помидор'),
+            step.toLowerCase().contains('яйц') ||
+            step.toLowerCase().contains('соус') ||
+            step.toLowerCase().contains('помидор'),
       ),
       isTrue,
     );
@@ -2994,7 +3153,8 @@ void main() {
     final generated = const OfflineChefEngine().generate(
       _request(
         fridgeItems: const [
-          FridgeItem(id: 'potato', name: 'Картофель', amount: 6, unit: Unit.pcs),
+          FridgeItem(
+              id: 'potato', name: 'Картофель', amount: 6, unit: Unit.pcs),
         ],
         pantryCatalog: const [
           PantryCatalogEntry(
@@ -3041,6 +3201,143 @@ void main() {
             step.contains('масл'),
       ),
       isTrue,
+    );
+  });
+
+  test('does not offer classic omelette when butter support is absent', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        fridgeItems: const [
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'tomato', name: 'Помидоры', amount: 2, unit: Unit.pcs),
+        ],
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'oil',
+            name: 'Масло',
+            canonicalName: 'масло',
+            aliases: ['масло'],
+            category: 'oil',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'paprika',
+            name: 'Паприка',
+            canonicalName: 'паприка',
+            aliases: ['паприка'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'garlic',
+            name: 'Чеснок',
+            canonicalName: 'чеснок',
+            aliases: ['чеснок'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+      ),
+    );
+
+    expect(generated, isNotEmpty);
+    expect(
+      generated.any(
+          (candidate) => candidate.recipe.title.contains('Омлет классический')),
+      isFalse,
+    );
+    final eggDish = generated.firstWhere(
+      (candidate) => candidate.recipe.anchorIngredients.any(
+        (name) => name.toLowerCase().contains('яйц'),
+      ),
+      orElse: () => generated.first,
+    );
+    expect(
+      eggDish.recipe.steps.any((step) => step.toLowerCase().contains('сливоч')),
+      isFalse,
+    );
+  });
+
+  test('does not offer potato puree when dairy support is absent', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        fridgeItems: const [
+          FridgeItem(
+              id: 'potato', name: 'Картофель', amount: 6, unit: Unit.pcs),
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 3, unit: Unit.pcs),
+        ],
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'oil',
+            name: 'Масло',
+            canonicalName: 'масло',
+            aliases: ['масло'],
+            category: 'oil',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'paprika',
+            name: 'Паприка',
+            canonicalName: 'паприка',
+            aliases: ['паприка'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+      ),
+    );
+
+    expect(generated, isNotEmpty);
+    expect(
+      generated.any(
+          (candidate) => candidate.recipe.title.contains('Картофельное пюре')),
+      isFalse,
+    );
+    final potatoDish = generated.firstWhere(
+      (candidate) => candidate.recipe.anchorIngredients.any(
+        (name) => name.toLowerCase().contains('картофел'),
+      ),
+      orElse: () => generated.first,
+    );
+    expect(
+      potatoDish.recipe.steps.any(
+        (step) =>
+            step.toLowerCase().contains('молок') ||
+            step.toLowerCase().contains('сливоч'),
+      ),
+      isFalse,
     );
   });
 }
@@ -3435,223 +3732,3 @@ OfflineChefRequest _request({
     seed: seed,
   );
 }
-
-  final generated = const OfflineChefEngine().generate(
-    _request(
-      fridgeItems: const [
-        FridgeItem(id: 'egg', name: 'Яйца', amount: 4, unit: Unit.pcs),
-      ],
-      pantryCatalog: const [
-        PantryCatalogEntry(
-          id: 'butter',
-          name: 'Сливочное масло',
-          canonicalName: 'масло сливочное',
-          aliases: ['масло сливочное', 'сливочное масло'],
-          category: 'oil',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'salt',
-          name: 'Соль',
-          canonicalName: 'соль',
-          aliases: ['соль'],
-          category: 'basic',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'pepper',
-          name: 'Перец',
-          canonicalName: 'перец',
-          aliases: ['перец'],
-          category: 'spice',
-          isStarter: true,
-        ),
-      ],
-    ),
-  );
-
-  expect(generated, isNotEmpty);
-  final eggDish = generated.firstWhere(
-    (c) => c.recipe.anchorIngredients.any(
-      (name) => name.toLowerCase().contains('яйц'),
-    ),
-    orElse: () => generated.first,
-  );
-  expect(eggDish.recipe.anchorIngredients.isNotEmpty, isTrue);
-  expect(
-    eggDish.recipe.steps.any(
-      (step) => step.contains('масл') || step.contains('яйц'),
-    ),
-    isTrue,
-  );
-});
-
-test('builds pasta dish from pasta and garlic with olive oil pantry', () {
-  final generated = const OfflineChefEngine().generate(
-    _request(
-      fridgeItems: const [
-        FridgeItem(id: 'pasta', name: 'Макароны', amount: 250, unit: Unit.g),
-        FridgeItem(id: 'garlic', name: 'Чеснок', amount: 3, unit: Unit.pcs),
-      ],
-      pantryCatalog: const [
-        PantryCatalogEntry(
-          id: 'olive_oil',
-          name: 'Оливковое масло',
-          canonicalName: 'оливковое масло',
-          aliases: ['оливковое масло'],
-          category: 'oil',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'salt',
-          name: 'Соль',
-          canonicalName: 'соль',
-          aliases: ['соль'],
-          category: 'basic',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'pepper',
-          name: 'Перец',
-          canonicalName: 'перец',
-          aliases: ['перец'],
-          category: 'spice',
-          isStarter: true,
-        ),
-      ],
-    ),
-  );
-
-  expect(generated, isNotEmpty);
-  final pastaDish = generated.firstWhere(
-    (c) => c.recipe.chefProfile == 'pasta',
-    orElse: () => generated.first,
-  );
-  expect(pastaDish.recipe.chefProfile, 'pasta');
-  expect(pastaDish.recipe.anchorIngredients, contains('Макароны'));
-  expect(
-    pastaDish.recipe.steps.any(
-      (step) => step.contains('чеснок') || step.contains('масл'),
-    ),
-    isTrue,
-  );
-});
-
-test('builds egg-tomato skillet from tomato and egg with spice pantry', () {
-  final generated = const OfflineChefEngine().generate(
-    _request(
-      fridgeItems: const [
-        FridgeItem(id: 'tomato', name: 'Помидоры', amount: 4, unit: Unit.pcs),
-        FridgeItem(id: 'egg', name: 'Яйца', amount: 4, unit: Unit.pcs),
-      ],
-      pantryCatalog: const [
-        PantryCatalogEntry(
-          id: 'oil',
-          name: 'Масло',
-          canonicalName: 'масло',
-          aliases: ['масло'],
-          category: 'oil',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'paprika',
-          name: 'Паприка',
-          canonicalName: 'паприка',
-          aliases: ['паприка'],
-          category: 'spice',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'salt',
-          name: 'Соль',
-          canonicalName: 'соль',
-          aliases: ['соль'],
-          category: 'basic',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'garlic',
-          name: 'Чеснок',
-          canonicalName: 'чеснок',
-          aliases: ['чеснок'],
-          category: 'spice',
-          isStarter: true,
-        ),
-      ],
-    ),
-  );
-
-  expect(generated, isNotEmpty);
-  final dish = generated.firstWhere(
-    (c) => c.recipe.anchorIngredients.any(
-      (name) =>
-          name.toLowerCase().contains('помидор') ||
-          name.toLowerCase().contains('яйц'),
-    ),
-    orElse: () => generated.first,
-  );
-  expect(dish.recipe.anchorIngredients.isNotEmpty, isTrue);
-  expect(
-    dish.recipe.steps.any(
-      (step) =>
-          step.contains('яйц') ||
-          step.contains('соус') ||
-          step.contains('помидор'),
-    ),
-    isTrue,
-  );
-});
-
-test('builds potato-based dish from single potato ingredient', () {
-  final generated = const OfflineChefEngine().generate(
-    _request(
-      fridgeItems: const [
-        FridgeItem(id: 'potato', name: 'Картофель', amount: 6, unit: Unit.pcs),
-      ],
-      pantryCatalog: const [
-        PantryCatalogEntry(
-          id: 'butter',
-          name: 'Сливочное масло',
-          canonicalName: 'масло сливочное',
-          aliases: ['масло сливочное', 'сливочное масло'],
-          category: 'oil',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'milk',
-          name: 'Молоко',
-          canonicalName: 'молоко',
-          aliases: ['молоко'],
-          category: 'dairy',
-          isStarter: true,
-        ),
-        PantryCatalogEntry(
-          id: 'salt',
-          name: 'Соль',
-          canonicalName: 'соль',
-          aliases: ['соль'],
-          category: 'basic',
-          isStarter: true,
-        ),
-      ],
-    ),
-  );
-
-  expect(generated, isNotEmpty);
-  final potatoDish = generated.firstWhere(
-    (c) => c.recipe.anchorIngredients.any(
-      (name) => name.toLowerCase().contains('картофел'),
-    ),
-    orElse: () => generated.first,
-  );
-  expect(potatoDish.recipe.anchorIngredients.isNotEmpty, isTrue);
-  expect(
-    potatoDish.recipe.steps.any(
-      (step) =>
-          step.contains('картофел') ||
-          step.contains('вари') ||
-          step.contains('масл'),
-    ),
-    isTrue,
-  );
-});

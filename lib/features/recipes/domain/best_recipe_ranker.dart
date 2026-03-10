@@ -257,6 +257,8 @@ class BestRecipeRanker {
       totalRequired: totalRequired,
     );
     final effortFitScore = _effortFitScore(recipe);
+    final normalizedTags = recipe.tags.map((tag) => tag.toLowerCase()).toSet();
+    final isMinimal = normalizedTags.contains('minimal');
 
     var totalScore = (coverageScore * 0.35) +
         (pairAnalysis.score * 0.30) +
@@ -308,12 +310,15 @@ class BestRecipeRanker {
       totalScore = (totalScore + 0.02).clamp(0.0, 1.0);
     }
 
+    final minimumGeneratedCompleteness = isMinimal ? 0.32 : 0.45;
+    final minimumGeneratedChefScore = isMinimal ? 0.30 : 0.45;
+    final minimumGeneratedFlavorScore = isMinimal ? 0.18 : 0.32;
     if (candidate.source == RecipeMatchSource.generated &&
         (pairAnalysis.score < 0.18 ||
             pairAnalysis.forbiddenPairs > 0 ||
-            completenessScore < 0.45 ||
-            chefAssessment.score < 0.45 ||
-            chefAssessment.flavorScore < 0.32 ||
+            completenessScore < minimumGeneratedCompleteness ||
+            chefAssessment.score < minimumGeneratedChefScore ||
+            chefAssessment.flavorScore < minimumGeneratedFlavorScore ||
             personalAnalysis.score < 0.12)) {
       return null;
     }

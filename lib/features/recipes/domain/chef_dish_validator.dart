@@ -77,9 +77,9 @@ ChefDishValidationResult validateChefDish({
   switch (family) {
     case ChefDishFamily.eggSkillet:
       requireCanonical('яйцо', 'Для яичной сковороды обязательны яйца.');
-      requireAnyStep(
-        ['сковород', 'обжар'],
-        'Яичная сковорода должна готовиться на сковороде.',
+      _validateEggSkilletTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       forbidAnyStep(
         ['духовк', 'запекай'],
@@ -91,9 +91,9 @@ ChefDishValidationResult validateChefDish({
         'картофель',
         'Картофельная сковорода требует картофельной основы.',
       );
-      requireAnyStep(
-        ['сковород', 'обжар'],
-        'Картофельная сковорода должна идти через обжаривание.',
+      _validatePotatoSkilletTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       forbidAnyStep(
         ['духовк', 'запекай'],
@@ -231,20 +231,16 @@ ChefDishValidationResult validateChefDish({
         ['рис', 'гречка', 'кускус', 'перловка'],
         'Зерновая миска требует крупяную основу.',
       );
-      requireAnyStep(
-        ['вари', 'под крышкой', 'залей кипятком'],
-        'Крупяная основа должна быть доведена отдельной зерновой техникой.',
+      _validateGrainPanTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       break;
     case ChefDishFamily.pastaPan:
       requireCanonical('макароны', 'Паста требует макаронную основу.');
-      requireStepWithAll(
-        ['отвари', '8-10 минут'],
-        'Паста должна сначала отвариваться до нужной текстуры.',
-      );
-      requireAnyStep(
-        ['сковород', 'прогрей'],
-        'Паста должна коротко собираться с добавками на сковороде.',
+      _validatePastaPanTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       break;
     case ChefDishFamily.navyPasta:
@@ -397,9 +393,9 @@ ChefDishValidationResult validateChefDish({
       );
       break;
     case ChefDishFamily.bake:
-      requireAnyStep(
-        ['запекай', 'духовк'],
-        'Запеканка требует явной духовочной техники.',
+      _validateBakeTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       break;
     case ChefDishFamily.curdBake:
@@ -424,10 +420,40 @@ ChefDishValidationResult validateChefDish({
         'Творожная запеканка не должна превращаться в жареное блюдо.',
       );
       break;
+    case ChefDishFamily.savoryClosedPie:
+      _validateSavoryClosedPieTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireCanonical('мука', 'Закрытому пирогу нужна мучная оболочка.');
+      requireCanonical(
+        'капуста',
+        'Пирогу с капустой и яйцом нужна капустная начинка.',
+      );
+      requireCanonical(
+        'яйцо',
+        'Пирогу с капустой и яйцом нужны яйца для начинки и смазки.',
+      );
+      requireAnyCanonical(
+        [
+          'масло сливочное',
+          'масло',
+          'оливковое масло',
+          'сметана',
+          'кефир',
+          'молоко'
+        ],
+        'Закрытому пирогу нужна мягкая жировая или молочная опора для теста.',
+      );
+      forbidAnyStep(
+        ['вылей в форму', 'смешай всё и запекай', 'ровным слоем'],
+        'Пирог не должен собираться как наливная запеканка без раскатки и закрытия.',
+      );
+      break;
     case ChefDishFamily.breakfast:
-      requireAnyStep(
-        ['подавай сразу', 'спокойный домашний завтрак', 'лёгкость'],
-        'Завтрак должен сохранять мягкую подачу и лёгкую технику.',
+      _validateBreakfastTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       break;
     case ChefDishFamily.panBatter:
@@ -764,29 +790,120 @@ ChefDishValidationResult validateChefDish({
         ['фарш', 'говядина', 'свинина', 'курица'],
         'Котлеты требуют мясную основу.',
       );
-      requireAnyStep(
-        ['сформируй котлеты', '4-5 минут с каждой стороны'],
-        'Котлеты требуют формовки и обжаривания с двух сторон.',
+      _validateCutletTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       break;
     case ChefDishFamily.stew:
-      requireAnyStep(
-        ['туши', 'на слабом огне'],
-        'Рагу требует спокойного тушения.',
+      _validateStewTechnique(
+        violations: violations,
+        steps: normalizedSteps,
       );
       break;
-    // Minimalist dish families — no additional dish-specific constraints.
-    // The step generators enforce proper technique for these dishes.
     case ChefDishFamily.perfectOmeletteSkillet:
+      requireCanonical('яйцо', 'Классическому омлету нужна яичная основа.');
+      _validatePerfectOmeletteTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.butterEggSkillet:
+      requireCanonical(
+        'яйцо',
+        'Яйцам в сливочном масле нужна яичная основа.',
+      );
+      _validateButterEggTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.potatoPureeSide:
+      requireCanonical(
+          'картофель', 'Картофельному пюре нужна картофельная основа.');
+      _validatePotatoPureeTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.caramelizedOnionToast:
+      requireCanonical(
+        'лук',
+        'Тосту с карамелизированным луком нужна луковая основа.',
+      );
+      requireAnyCanonical(
+        ['хлеб', 'лаваш'],
+        'Тосту с карамелизированным луком нужна хлебная подача.',
+      );
+      _validateCaramelizedOnionToastTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.shakshukaSkillet:
+      requireCanonical('яйцо', 'Шакшуке нужны яйца.');
+      requireAnyCanonical(
+        ['помидор', 'томатная паста'],
+        'Шакшуке нужна томатная основа.',
+      );
+      _validateShakshukaTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.breadEggSkillet:
+      requireAnyCanonical(
+        ['хлеб', 'лаваш'],
+        'Яйцу в хлебе нужна хлебная основа.',
+      );
+      requireCanonical('яйцо', 'Яйцу в хлебе нужно яйцо.');
+      _validateBreadEggTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.aglioEOlioPasta:
+      requireCanonical(
+        'макароны',
+        'Aglio e olio требует макаронную основу.',
+      );
+      requireCanonical(
+        'чеснок',
+        'Aglio e olio требует чесночную основу.',
+      );
+      _validateAglioEOlioTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.cucumberSmetanaSalad:
+      requireCanonical('огурец', 'Огурцам со сметаной нужна огуречная основа.');
+      requireAnyCanonical(
+        ['сметана', 'йогурт', 'творог'],
+        'Огурцам со сметаной нужна мягкая молочная заправка.',
+      );
+      _validateCucumberSmetanaTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.potatoEggHash:
+      requireCanonical(
+        'картофель',
+        'Картофельному хэшу нужна картофельная основа.',
+      );
+      requireCanonical('яйцо', 'Картофельному хэшу нужно яйцо.');
+      _validatePotatoEggHashTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      break;
     case ChefDishFamily.simpleRiceKasha:
+      requireCanonical('рис', 'Простой рисовой каше нужна рисовая основа.');
+      _validateSimpleRiceKashaTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
       break;
   }
 
@@ -875,6 +992,238 @@ void _validateFreshSaladTechnique({
   }
   if (!_stepsContainAny(steps, ['подавай сразу', 'перед подачей заправь'])) {
     violations.add('Салат должен собираться непосредственно перед подачей.');
+  }
+}
+
+void _validateEggSkilletTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['сковород', 'обжар'])) {
+    violations.add('Яичная сковорода должна готовиться на сковороде.');
+  }
+  if (!_stepsContainAny(steps, ['слегка взбей', 'взбей'])) {
+    violations.add(
+      'Яичной сковороде нужна мягко собранная яичная масса, а не случайная подача сырого яйца.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['среднем огне', 'умеренном огне', 'добавкам схватиться'])) {
+    violations.add(
+      'Яичная сковорода требует умеренного огня и короткой подготовки добавок.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['ведя лопаткой от краев к центру', 'веди лопаткой'])) {
+    violations.add(
+      'Яичную сковороду нужно собирать лопаткой, чтобы текстура оставалась нежной.',
+    );
+  }
+  if (!_stepsContainAny(
+    steps,
+    [
+      'сними с огня',
+      'подавай сразу',
+      'затем дай блюду 1 минуту стабилизироваться и подавай'
+    ],
+  )) {
+    violations.add(
+      'Яичную сковороду нужно снимать вовремя и подавать сразу, пока она не пересохла.',
+    );
+  }
+  if (_stepsContainAny(
+      steps, ['сильном огне', 'румяной корочки', 'до корочки'])) {
+    violations.add(
+      'Яичная сковорода не должна зажариваться на сильном огне до грубой корочки.',
+    );
+  }
+}
+
+void _validatePotatoSkilletTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['сковород', 'обжар'])) {
+    violations.add('Картофельная сковорода должна идти через обжаривание.');
+  }
+  if (!_stepsContainAny(steps, ['одним слоем', 'золотистая корочка'])) {
+    violations.add(
+      'Картофельной сковороде нужен один слой и работа на корочку, а не хаотичное тушение.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['убавь огонь', 'без лишней влаги'])) {
+    violations.add(
+      'Картофельная сковорода должна после корочки спокойно дойти без лишней влаги.',
+    );
+  }
+  if (_stepsContainAny(steps, ['отвари картофель', 'пюре', 'вари картофель'])) {
+    violations.add(
+      'Картофельная сковорода не должна уходить в варёный картофель или пюре.',
+    );
+  }
+}
+
+void _validateGrainPanTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['вари', 'под крышкой', 'залей кипятком'])) {
+    violations.add(
+      'Крупяная основа должна быть доведена отдельной зерновой техникой.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['сначала прогрей добавки', 'вмешай основу', 'впитала вкус'])) {
+    violations.add(
+      'Зерновое блюдо должно сначала собрать ароматическую часть, а потом принять готовую крупу.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['1-2 минуты постоять', 'текстура и аромат стали собраннее'])) {
+    violations.add(
+      'Зерновому блюду нужен короткий отдых, чтобы крупа успела собрать вкус.',
+    );
+  }
+}
+
+void _validatePastaPanTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['отвари', '8-10 минут', 'al dente'])) {
+    violations.add('Паста должна сначала отвариваться до нужной текстуры.');
+  }
+  if (!_stepsContainAny(steps, ['воды от варки', 'сохрани несколько ложек'])) {
+    violations.add(
+      'Пасте полезно сохранять немного воды от варки, чтобы собрать соус, а не оставить её сухой.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['сковород', 'прогрей'])) {
+    violations.add('Паста должна коротко собираться с добавками на сковороде.');
+  }
+  if (!_stepsContainAny(
+      steps, ['2-3 минуты', 'покрыли пасту', 'обволокли пасту'])) {
+    violations.add(
+      'Паста должна недолго дойти с добавками, чтобы соки или соус покрыли её, а не стекли мимо.',
+    );
+  }
+  if (_stepsContainAny(steps, ['перевари', '15-20 минут на сковороде'])) {
+    violations
+        .add('Паста не должна перевариваться и долго тушиться после варки.');
+  }
+}
+
+void _validateBakeTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['запекай', 'духовк'])) {
+    violations.add('Запеканка требует явной духовочной техники.');
+  }
+  if (!_stepsContainAny(steps, ['в форму', 'ровным слоем'])) {
+    violations.add(
+      'Запечённое блюдо должно собираться в форме ровным слоем, а не хаотично.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['не пересохло', 'держало форму'])) {
+    violations.add(
+      'Запеканию нужна защита от сухости через связку, покрытие или контроль влаги.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['3-4 минуты', 'отдохнуть', 'перед подачей'])) {
+    violations.add(
+      'Запечённому блюду нужен короткий отдых после духовки, чтобы соки стабилизировались.',
+    );
+  }
+}
+
+void _validateSavoryClosedPieTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  final doughStep = steps.firstWhere(
+    (step) =>
+        step.contains('подготовь тесто') ||
+        step.contains('собери мягкое тесто') ||
+        step.contains('просей'),
+    orElse: () => '',
+  );
+  if (!_stepsContainAny(
+      steps, ['подготовь тесто', 'собери мягкое тесто', 'просей'])) {
+    violations.add(
+      'Закрытому пирогу нужно отдельно собрать тесто, а не превращать всё в запеканку.',
+    );
+  }
+  final hasDoughRest = doughStep.contains('отдох') ||
+      doughStep.contains('в холоде') ||
+      (doughStep.contains('20 минут') && doughStep.contains('тесто'));
+  if (!hasDoughRest) {
+    violations.add(
+      'Тесту для закрытого пирога нужен отдых перед раскаткой.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'подготовь начинку',
+    'прогрей её 8-10 минут',
+    'лишняя влага не уйдёт'
+  ])) {
+    violations.add(
+      'Начинку для пирога нужно отдельно приготовить и убрать лишнюю влагу.',
+    );
+  }
+  if (!_stepsContainAny(steps,
+      ['полностью остывшую начинку', 'остывшую начинку', 'холодную начинку'])) {
+    violations.add(
+      'Начинку в пирог нужно класть остывшей, иначе тесто размокнет.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['раскатай нижний пласт', 'вторым пластом'])) {
+    violations.add(
+      'Закрытый пирог требует нижний и верхний пласт теста, а не открытый хаос.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['защипни края', 'запечатай шов'])) {
+    violations.add(
+      'Закрытому пирогу нужно хорошо защипнуть края, чтобы начинка не вытекала.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['отверстия для выхода пара', '2-3 отверстия', 'надрез'])) {
+    violations.add(
+      'У закрытого пирога должен быть выход пара, иначе верх намокнет и лопнет.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['выпекай пирог', '35-40 минут', '180-190'])) {
+    violations.add(
+      'Пирогу нужна явная духовочная выпечка с понятным временем и температурой.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['12-15 минут', 'затем нарежь', 'подавай'])) {
+    violations.add(
+      'После духовки пирогу нужен отдых, чтобы начинка и соки стабилизировались.',
+    );
+  }
+}
+
+void _validateBreakfastTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps,
+      ['мягкой ровной текстуры', 'мягкую ровную текстуру', 'под крышкой'])) {
+    violations.add(
+      'Завтрак должен собираться в мягкую текстуру, а не быть грубо пересушенным.',
+    );
+  }
+  if (!_stepsContainAny(steps,
+      ['подавай сразу', 'спокойный домашний завтрак', '1 минуту собраться'])) {
+    violations.add(
+      'Завтрак должен подаваться сразу, пока текстура остаётся лёгкой и живой.',
+    );
+  }
+  if (_stepsContainAny(steps, ['сильном огне до корочки', 'долго туши'])) {
+    violations
+        .add('Завтрак не должен уходить в тяжёлую или агрессивную технику.');
   }
 }
 
@@ -989,6 +1338,311 @@ void _validatePotatoFritterTechnique({
   }
   if (!_stepsContainAny(steps, ['небольшие порции', 'небольшими порциями'])) {
     violations.add('Драники должны жариться небольшими порциями.');
+  }
+}
+
+void _validatePerfectOmeletteTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['не до пены', 'слегка взбей'])) {
+    violations.add(
+        'Классическому омлету нужно мягко взбить яйца, не загоняя их в пену.');
+  }
+  if (!_stepsContainAny(steps, [
+    'пениться, но не темнеть',
+    'пениться но не темнеть',
+    'должен только пениться',
+    'жир должен пениться',
+  ])) {
+    violations.add(
+        'Для классического омлета масло должно только пениться, а не темнеть.');
+  }
+  if (!_stepsContainAny(
+      steps, ['веди лопаткой', 'мелкими движениями непрерывно'])) {
+    violations.add(
+        'Классический омлет требует постоянного движения лопаткой по дну сковороды.');
+  }
+  if (!_stepsContainAny(steps,
+      ['середина еще немного влажная', 'середина еще немного влажная'])) {
+    violations.add(
+        'Классический омлет нельзя пересушивать до полной сухости в центре.');
+  }
+  if (!_stepsContainAny(steps, ['сверни омлет', 'рулетом', 'пополам'])) {
+    violations.add(
+        'Классический омлет должен собираться в складку или рулет, а не жариться плоско до конца.');
+  }
+  if (!_stepsContainAny(steps, ['подавай сразу', 'это блюдо не ждет'])) {
+    violations.add(
+        'Классический омлет нужно подавать сразу, пока текстура еще нежная.');
+  }
+  if (_stepsContainAny(
+      steps, ['сильном огне', 'зажарь до корочки', 'румяной корочки'])) {
+    violations.add(
+        'Классический омлет не должен жариться на сильном огне до корочки.');
+  }
+}
+
+void _validateButterEggTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps,
+      ['масло начнет пениться', 'жир начнет пениться', 'пенящееся масло'])) {
+    violations.add(
+        'Яйца в сливочном масле требуют правильного момента пенящегося масла.');
+  }
+  if (!_stepsContainAny(steps, ['убавь огонь до минимума', 'убавь огонь'])) {
+    violations
+        .add('Яйца в сливочном масле требуют тихого огня после посадки яиц.');
+  }
+  if (!_stepsContainAny(steps, ['желток', 'текуч'])) {
+    violations.add(
+        'Яйца в сливочном масле должны сохранять текучий или живой желток.');
+  }
+  if (_stepsContainAny(steps, ['взбей', 'болтун', 'омлет'])) {
+    violations.add(
+        'Яйца в сливочном масле не должны уходить в технику болтуньи или омлета.');
+  }
+}
+
+void _validatePotatoPureeTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(
+      steps, ['холодной подсоленной водой', 'залей холодной'])) {
+    violations.add(
+        'Картофельное пюре должно начинаться из холодной подсоленной воды.');
+  }
+  if (!_stepsContainAny(steps, ['слей воду полностью', 'слей воду'])) {
+    violations.add(
+        'Картофельному пюре нужно полностью слить воду перед разминанием.');
+  }
+  if (!_stepsContainAny(steps, ['разомни картофель', 'толкушкой'])) {
+    violations
+        .add('Картофельное пюре нужно разминать, пока картофель горячий.');
+  }
+  if (!_stepsContainAny(steps, ['горячим', 'не холодным'])) {
+    violations.add(
+        'В пюре молочную или масляную часть нужно вводить горячей, а не холодной.');
+  }
+  if (!_stepsContainAny(
+      steps, ['шелковистой текстуры', 'лишняя влага уйдет'])) {
+    violations.add(
+        'Картофельному пюре нужна работа на сухую и шелковистую текстуру.');
+  }
+  if (_stepsContainAny(steps, ['блендер', 'измельчи в блендере'])) {
+    violations.add(
+        'Картофельное пюре не должно идти через блендер и клейкую текстуру.');
+  }
+}
+
+void _validateCaramelizedOnionToastTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['убавь огонь', 'небольшого'])) {
+    violations
+        .add('Карамелизированному луку нужен слабый огонь, а не быстрый жар.');
+  }
+  if (!_stepsContainAny(steps, ['18-20 минут', 'томи лук'])) {
+    violations.add(
+        'Карамелизированный лук требует долгого томления, а не быстрой обжарки.');
+  }
+  if (!_stepsContainAny(steps, ['янтарным', 'не подгорать'])) {
+    violations.add(
+        'Карамелизированный лук должен уходить в янтарную сладость, а не в подгар.');
+  }
+  if (!_stepsContainAny(steps, ['поджарь', 'хлеб хрустит'])) {
+    violations.add(
+        'Тост с карамелизированным луком требует отдельно поджаренный хлеб.');
+  }
+}
+
+void _validateShakshukaTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['5-7 минут', 'загустеет'])) {
+    violations.add(
+        'Шакшуке нужно сначала собрать и немного загустить томатный соус.');
+  }
+  if (!_stepsContainAny(steps, ['углубления ложкой', 'углубления'])) {
+    violations.add('Шакшука должна делать углубления в соусе под яйца.');
+  }
+  if (!_stepsContainAny(steps, ['разбей', 'яйцу'])) {
+    violations.add(
+        'Шакшука должна разбивать яйца прямо в соус, а не вмешивать их в него.');
+  }
+  if (!_stepsContainAny(steps, ['накрой крышкой'])) {
+    violations.add('Шакшуке нужна короткая доводка под крышкой.');
+  }
+  if (!_stepsContainAny(steps, [
+    'желток остаться текучим',
+    'снимай с огня до полной готовности желтка'
+  ])) {
+    violations.add('Шакшука не должна высушивать желток до полной жесткости.');
+  }
+  if (_stepsContainAny(
+      steps, ['взбей яйца', 'перемешай яйца с соусом', 'болтун'])) {
+    violations.add(
+        'Шакшука не должна превращаться в яичную болтунью в томатном соусе.');
+  }
+}
+
+void _validateBreadEggTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['вырежи кружок', 'в центре ломтя'])) {
+    violations.add('Яйцу в хлебе нужно отверстие в хлебной основе.');
+  }
+  if (!_stepsContainAny(steps, ['в отверстие', 'прямо в отверстие'])) {
+    violations.add('Яйцо в хлебе должно жариться прямо в отверстии хлеба.');
+  }
+  if (!_stepsContainAny(steps, ['хлеб хрустит', 'подавай сразу'])) {
+    violations
+        .add('Яйцо в хлебе нужно подавать сразу, пока хлеб держит хруст.');
+  }
+  if (_stepsContainAny(steps, ['взбей яйца', 'болтун'])) {
+    violations
+        .add('Яйцо в хлебе не должно превращаться в взбитую яичную массу.');
+  }
+}
+
+void _validateAglioEOlioTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps,
+      ['al dente', 'сохрани 0 5 стакана воды от варки', 'воды от варки'])) {
+    violations.add(
+        'Aglio e olio требует сохранить крахмальную воду от варки для эмульсии.');
+  }
+  if (!_stepsContainAny(steps, ['чуть янтарного', 'не коричневого'])) {
+    violations.add(
+        'Чеснок для aglio e olio должен стать только золотистым, а не коричневым и горьким.');
+  }
+  if (!_stepsContainAny(steps, ['перемешивай интенсивно', 'обволочет'])) {
+    violations.add(
+        'Aglio e olio требует собрать эмульсию на сковороде, а не просто полить пасту маслом.');
+  }
+  if (_stepsContainAny(steps, ['сливки', 'майонез'])) {
+    violations
+        .add('Aglio e olio не должен уходить в сливочный или майонезный соус.');
+  }
+}
+
+void _validateCucumberSmetanaTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['оставь на 5 минут', 'отдаст лишнюю воду'])) {
+    violations
+        .add('Огурцам со сметаной нужно кратко отдать лишнюю воду после соли.');
+  }
+  if (!_stepsContainAny(steps, ['слей лишнюю жидкость', 'слей лишнюю'])) {
+    violations
+        .add('Огурцам со сметаной нужно слить лишнюю влагу перед заправкой.');
+  }
+  if (!_stepsContainAny(steps, ['перемешай аккуратно', 'добавь'])) {
+    violations.add('Огурцы со сметаной нужно собирать мягко, не ломая хруст.');
+  }
+  if (_stepsContainAny(steps, ['запекай', 'обжарь'])) {
+    violations.add('Огурцы со сметаной не должны уходить в горячую технику.');
+  }
+}
+
+void _validatePotatoEggHashTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['кубиками 1 5 см', 'одним слоем'])) {
+    violations.add(
+        'Картофельному хэшу нужен кубик и один слой для уверенной корочки.');
+  }
+  if (!_stepsContainAny(steps, ['не трогай 4-5 минут', 'корочка'])) {
+    violations.add(
+        'Картофельному хэшу нужно дать корочке собраться до первого переворота.');
+  }
+  if (!_stepsContainAny(steps, ['сдвинь картофель к краям', 'разбей'])) {
+    violations.add(
+        'Картофельный хэш должен доводить яйцо отдельно в центре сковороды.');
+  }
+  if (_stepsContainAny(steps, ['отвари картофель', 'пюре'])) {
+    violations.add(
+        'Картофельный хэш не должен уходить в вареный картофель или пюре.');
+  }
+}
+
+void _validateSimpleRiceKashaTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['промой', 'до чистой воды'])) {
+    violations.add('Простой рисовой каше нужно промыть рис до чистой воды.');
+  }
+  if (!_stepsContainAny(steps, ['закрой крышкой', '18 минут'])) {
+    violations.add(
+        'Простая рисовая каша должна доходить под крышкой без лишнего вмешательства.');
+  }
+  if (!_stepsContainAny(steps, ['дай постоять под крышкой', '5 минут'])) {
+    violations.add(
+        'Простой рисовой каше нужен короткий отдых под крышкой после огня.');
+  }
+}
+
+void _validateCutletTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['плотную мясную массу', 'собери плотную'])) {
+    violations.add(
+      'Котлетам нужна собранная мясная масса, а не рыхлая случайная смесь.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['сформируй котлеты', '4-5 минут с каждой стороны'])) {
+    violations.add('Котлеты требуют формовки и обжаривания с двух сторон.');
+  }
+  if (!_stepsContainAny(steps, ['доведи до готовности', 'более мягком огне'])) {
+    violations.add(
+      'Котлеты нужно не только обжарить, но и спокойно довести до готовности.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['соки внутри успеют стабилизироваться', '1-2 минуты'])) {
+    violations.add(
+      'Котлетам нужен короткий отдых перед подачей, чтобы соки внутри не убежали.',
+    );
+  }
+}
+
+void _validateStewTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['слабом огне', 'туши'])) {
+    violations.add('Рагу требует спокойного тушения.');
+  }
+  if (!_stepsContainAny(
+      steps, ['прогрей в самом начале', 'самые плотные продукты'])) {
+    violations.add(
+      'Рагу должно начинаться с базы и самых плотных продуктов, а не сваливаться в одну фазу.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['под крышкой', 'густой и насыщенной'])) {
+    violations.add(
+      'Рагу должно доходить под крышкой до густой, собранной текстуры.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['пару минут постоять', 'сними с огня'])) {
+    violations.add('Рагу нужно дать коротко успокоиться перед подачей.');
+  }
+  if (_stepsContainAny(
+      steps, ['хрустящей корочки', 'сильном огне до корочки'])) {
+    violations.add('Рагу не должно уходить в жёсткую жарку вместо тушения.');
   }
 }
 

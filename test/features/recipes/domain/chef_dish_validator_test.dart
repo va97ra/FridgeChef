@@ -819,6 +819,500 @@ void main() {
     expect(result.isValid, isTrue);
     expect(result.violations, isEmpty);
   });
+
+  test('rejects perfect omelette browned on hard heat', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('perfect_omelette'),
+      recipe: const Recipe(
+        id: 'perfect-omelette-browned',
+        title: 'Омлет классический',
+        timeMin: 8,
+        tags: ['breakfast', 'minimal'],
+        servingsBase: 1,
+        ingredients: [
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+        ],
+        steps: [
+          'Сильно взбей яйца до пены.',
+          'Жарь омлет на сильном огне до румяной корочки.',
+          'Оставь на столе и подай позже.',
+        ],
+      ),
+      recipeCanonicals: const {'яйцо'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Классическому омлету нужно мягко взбить яйца, не загоняя их в пену.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+          'Классический омлет не должен жариться на сильном огне до корочки.'),
+    );
+  });
+
+  test('accepts proper perfect omelette technique', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('perfect_omelette'),
+      recipe: const Recipe(
+        id: 'perfect-omelette-valid',
+        title: 'Омлет классический',
+        timeMin: 8,
+        tags: ['breakfast', 'minimal'],
+        servingsBase: 1,
+        ingredients: [
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+        ],
+        steps: [
+          'Разбей яйца в миску и слегка взбей вилкой — не до пены.',
+          'Растопи масло на сковороде: оно должно пениться, но не темнеть. Влей яичную смесь и веди лопаткой по дну мелкими движениями непрерывно.',
+          'Когда середина еще немного влажная, сверни омлет рулетом и подавай сразу.',
+        ],
+      ),
+      recipeCanonicals: const {'яйцо'},
+    );
+
+    expect(result.isValid, isTrue);
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects aglio e olio without emulsion and gentle garlic', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('aglio_e_olio'),
+      recipe: const Recipe(
+        id: 'aglio-flat',
+        title: 'Паста с чесноком и маслом',
+        timeMin: 12,
+        tags: ['minimal', 'pasta'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Макароны', amount: 200, unit: Unit.g),
+          RecipeIngredient(name: 'Чеснок', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Оливковое масло', amount: 25, unit: Unit.ml),
+        ],
+        steps: [
+          'Отвари макароны и слей воду.',
+          'Обжарь чеснок до коричневого цвета.',
+          'Смешай пасту с маслом и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'макароны', 'чеснок', 'оливковое масло'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Aglio e olio требует сохранить крахмальную воду от варки для эмульсии.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Чеснок для aglio e olio должен стать только золотистым, а не коричневым и горьким.',
+      ),
+    );
+  });
+
+  test('rejects potato puree blended with cold dairy', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('potato_puree'),
+      recipe: const Recipe(
+        id: 'potato-puree-wrong',
+        title: 'Картофельное пюре',
+        timeMin: 18,
+        tags: ['minimal'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Картофель', amount: 700, unit: Unit.g),
+          RecipeIngredient(name: 'Молоко', amount: 120, unit: Unit.ml),
+        ],
+        steps: [
+          'Залей картофель горячей водой и отвари до мягкости.',
+          'Пробей картофель блендером с холодным молоком.',
+          'Подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'картофель', 'молоко'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Картофельное пюре должно начинаться из холодной подсоленной воды.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Картофельное пюре не должно идти через блендер и клейкую текстуру.',
+      ),
+    );
+  });
+
+  test('accepts proper cucumber salad with sour cream handling', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('cucumber_smetana'),
+      recipe: const Recipe(
+        id: 'cucumber-smetana-valid',
+        title: 'Огурцы со сметаной',
+        timeMin: 5,
+        tags: ['minimal', 'salad'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Огурцы', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 120, unit: Unit.g),
+          RecipeIngredient(name: 'Укроп', amount: 10, unit: Unit.g),
+        ],
+        steps: [
+          'Нарежь огурцы, посоли и оставь на 5 минут — так они отдадут лишнюю воду.',
+          'Слей лишнюю жидкость, добавь сметану и укроп, перемешай аккуратно.',
+          'Дай постоять 1-2 минуты и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'огурец', 'сметана', 'укроп'},
+    );
+
+    expect(result.isValid, isTrue);
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects shakshuka that scrambles eggs into the sauce', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('shakshuka_light'),
+      recipe: const Recipe(
+        id: 'shakshuka-scrambled',
+        title: 'Шакшука',
+        timeMin: 12,
+        tags: ['minimal', 'one_pan'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Помидоры', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Паприка', amount: 4, unit: Unit.g),
+        ],
+        steps: [
+          'Обжарь томаты с паприкой 2 минуты.',
+          'Взбей яйца и перемешай яйца с соусом прямо на сковороде.',
+          'Жарь до полной сухости и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'помидор', 'яйцо', 'паприка'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Шакшука не должна превращаться в яичную болтунью в томатном соусе.',
+      ),
+    );
+  });
+
+  test('rejects egg skillet fried hard into crust', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('egg_skillet'),
+      recipe: const Recipe(
+        id: 'egg-skillet-hard',
+        title: 'Яичная сковорода',
+        timeMin: 10,
+        tags: ['breakfast', 'one_pan'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Помидоры', amount: 2, unit: Unit.pcs),
+        ],
+        steps: [
+          'Разбей яйца на сковороду.',
+          'Жарь на сильном огне до румяной корочки.',
+          'Подавай позже.',
+        ],
+      ),
+      recipeCanonicals: const {'яйцо', 'помидор'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Яичная сковорода не должна зажариваться на сильном огне до грубой корочки.',
+      ),
+    );
+  });
+
+  test('rejects potato skillet without one-layer crust logic', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('potato_skillet'),
+      recipe: const Recipe(
+        id: 'potato-skillet-flat',
+        title: 'Румяный картофель',
+        timeMin: 18,
+        tags: ['one_pan'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Картофель', amount: 600, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Нарежь картофель и лук.',
+          'Сложи всё в сковороду и мешай до мягкости.',
+          'Подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'картофель', 'лук'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Картофельной сковороде нужен один слой и работа на корочку, а не хаотичное тушение.',
+      ),
+    );
+  });
+
+  test('accepts generic pasta pan with reserved cooking water', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('pasta_pan'),
+      recipe: const Recipe(
+        id: 'pasta-pan-valid',
+        title: 'Макароны на скорую руку',
+        timeMin: 14,
+        tags: ['pasta'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Макароны', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Чеснок', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Помидоры', amount: 2, unit: Unit.pcs),
+        ],
+        steps: [
+          'Отвари макароны 8-10 минут до al dente и сохрани несколько ложек воды от варки.',
+          'Соедини пасту с чесноком и помидорами на сковороде, добавь немного воды от варки и быстро прогрей всё 2-3 минуты, чтобы соки покрыли пасту.',
+          'Оставь на минуту после выключения огня и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'макароны', 'чеснок', 'помидор'},
+    );
+
+    expect(result.isValid, isTrue);
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects generic bake that has no moisture protection', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('bake'),
+      recipe: const Recipe(
+        id: 'bake-dry',
+        title: 'Запеканка',
+        timeMin: 35,
+        tags: ['bake'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Курица', amount: 300, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 400, unit: Unit.g),
+        ],
+        steps: [
+          'Сложи курицу и картофель в форму.',
+          'Запекай до готовности.',
+          'Сразу режь и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'курица', 'картофель'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Запеканию нужна защита от сухости через связку, покрытие или контроль влаги.',
+      ),
+    );
+  });
+
+  test('rejects cabbage egg pie without rested dough', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('cabbage_egg_pie'),
+      recipe: const Recipe(
+        id: 'pie-rushed-dough',
+        title: 'Пирог домашний: Капуста, Яйца',
+        timeMin: 48,
+        tags: ['oven', 'pie'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Мука', amount: 260, unit: Unit.g),
+          RecipeIngredient(name: 'Капуста', amount: 450, unit: Unit.g),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сливочное масло', amount: 70, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь начинку: тонко нашинкуй капусту и мелко нарежь лук. Спокойно прогрей её на сливочном масле 8-10 минут, пока лишняя влага не уйдёт; отдельно отвари яйца 8-9 минут, остуди, мелко поруби и вмешай в полностью остывшую начинку, доведя её через соль и перец.',
+          'Подготовь тесто: просей муку, быстро вработай сливочное масло до влажной крошки и часть яйца, чтобы собрать мягкое тесто.',
+          'Раздели тесто на две части, раскатай нижний пласт и выложи его в форму. Сверху разложи холодную начинку, накрой вторым пластом, защипни края, запечатай шов и сделай 2-3 отверстия для выхода пара.',
+          'Выпекай пирог в духовке 35-40 минут при 180-190°C до ровной золотистой корочки. Дай ему отдохнуть 12-15 минут, затем нарежь и подавай тёплым.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'мука',
+        'капуста',
+        'яйцо',
+        'лук',
+        'масло сливочное',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains('Тесту для закрытого пирога нужен отдых перед раскаткой.'),
+    );
+  });
+
+  test('rejects cabbage egg pie with raw filling and no steam vent', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('cabbage_egg_pie'),
+      recipe: const Recipe(
+        id: 'pie-raw-filling',
+        title: 'Пирог домашний: Капуста, Яйца',
+        timeMin: 44,
+        tags: ['oven', 'pie'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Мука', amount: 260, unit: Unit.g),
+          RecipeIngredient(name: 'Капуста', amount: 450, unit: Unit.g),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 120, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь тесто: просей муку, добавь часть яйца и сметану и быстро собери мягкое тесто. Не вымешивай долго; заверни тесто и дай ему отдохнуть 20 минут в холоде.',
+          'Смешай сырую капусту с рублеными яйцами и сразу разложи начинку на тесто.',
+          'Раздели тесто на две части, раскатай нижний пласт и выложи его в форму. Сверху разложи начинку, накрой вторым пластом и защипни края.',
+          'Выпекай пирог в духовке 35-40 минут при 180-190°C до корочки. Дай ему отдохнуть 12-15 минут, затем нарежь и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'мука', 'капуста', 'яйцо', 'сметана'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Начинку для пирога нужно отдельно приготовить и убрать лишнюю влагу.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'У закрытого пирога должен быть выход пара, иначе верх намокнет и лопнет.',
+      ),
+    );
+  });
+
+  test('accepts valid cabbage egg pie with closed-pie technique', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('cabbage_egg_pie'),
+      recipe: const Recipe(
+        id: 'pie-valid',
+        title: 'Пирог домашний: Капуста, Яйца',
+        timeMin: 72,
+        tags: ['oven', 'pie'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Мука', amount: 260, unit: Unit.g),
+          RecipeIngredient(name: 'Капуста', amount: 450, unit: Unit.g),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сливочное масло', amount: 70, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь начинку: тонко нашинкуй капусту и мелко нарежь лук. Спокойно прогрей её на сливочном масле 8-10 минут, пока лишняя влага не уйдёт; отдельно отвари яйца 8-9 минут, остуди, мелко поруби и вмешай в полностью остывшую начинку, доведя её через соль и перец.',
+          'Подготовь тесто: просей муку, быстро вработай сливочное масло до влажной крошки и часть яйца, чтобы собрать мягкое тесто. Не вымешивай долго; заверни тесто и дай ему отдохнуть 20 минут в холоде.',
+          'Раздели тесто на две части, раскатай нижний пласт и выложи его в форму или на противень. Сверху разложи холодную начинку, накрой вторым пластом, защипни края, запечатай шов, сделай 2-3 отверстия для выхода пара и, если часть яйца осталась, смажь верх.',
+          'Выпекай пирог в духовке 35-40 минут при 180-190°C до ровной золотистой корочки. Дай ему отдохнуть 12-15 минут, затем нарежь и подавай тёплым.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'мука',
+        'капуста',
+        'яйцо',
+        'лук',
+        'масло сливочное',
+      },
+    );
+
+    expect(result.isValid, isTrue);
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects generic cutlets without gentle finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('kotlet_dinner'),
+      recipe: const Recipe(
+        id: 'cutlets-flat',
+        title: 'Домашние котлеты',
+        timeMin: 24,
+        tags: ['cutlets'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Фарш', amount: 500, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Картофель', amount: 5, unit: Unit.pcs),
+        ],
+        steps: [
+          'Подготовь картофель как простой гарнир.',
+          'Смешай фарш с луком.',
+          'Сформируй котлеты и жарь 4-5 минут с каждой стороны.',
+          'Подавай вместе с гарниром.',
+        ],
+      ),
+      recipeCanonicals: const {'фарш', 'лук', 'картофель'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Котлетам нужна мягкая доводка и короткий отдых перед подачей.',
+      ),
+    );
+  });
+
+  test('rejects generic stew without covered slow finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('stew'),
+      recipe: const Recipe(
+        id: 'stew-flat',
+        title: 'Домашнее рагу',
+        timeMin: 28,
+        tags: ['stew'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Говядина', amount: 400, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 400, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Сложи всё сразу в кастрюлю.',
+          'Туши до готовности.',
+          'Подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'говядина', 'картофель', 'лук'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Рагу должно начинаться с базы и самых плотных продуктов, а не сваливаться в одну фазу.',
+      ),
+    );
+  });
 }
 
 ChefBlueprint _blueprint(String id) {

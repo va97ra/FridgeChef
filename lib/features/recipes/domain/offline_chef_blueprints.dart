@@ -11,6 +11,7 @@ enum ChefStepStyle {
   pastaPan,
   soup,
   bake,
+  closedPie,
   breakfast,
   panBatter,
   fritterBatter,
@@ -52,6 +53,7 @@ enum ChefDishFamily {
   solyankaSoup,
   bake,
   curdBake,
+  savoryClosedPie,
   breakfast,
   panBatter,
   bliniPan,
@@ -153,6 +155,8 @@ class ChefBlueprint {
         return ChefDishFamily.soup;
       case ChefStepStyle.bake:
         return ChefDishFamily.bake;
+      case ChefStepStyle.closedPie:
+        return ChefDishFamily.savoryClosedPie;
       case ChefStepStyle.breakfast:
         return ChefDishFamily.breakfast;
       case ChefStepStyle.panBatter:
@@ -227,7 +231,7 @@ const chefBlueprints = <ChefBlueprint>[
     tags: ['quick', 'breakfast', 'one_pan', 'no_oven', 'generated_local'],
     anchorSlot: 'base',
     secondaryAnchorSlot: 'addons',
-    preferredStarters: ['соль', 'перец', 'масло', 'паприка'],
+    preferredStarters: ['масло', 'соль', 'перец', 'паприка'],
     titleStyle: ChefTitleStyle.anchorWithSecondary,
     stepStyle: ChefStepStyle.eggSkillet,
     slots: [
@@ -265,7 +269,7 @@ const chefBlueprints = <ChefBlueprint>[
     tags: ['one_pan', 'no_oven', 'generated_local'],
     anchorSlot: 'base',
     secondaryAnchorSlot: 'addons',
-    preferredStarters: ['соль', 'перец', 'масло', 'паприка', 'чеснок'],
+    preferredStarters: ['масло', 'соль', 'перец', 'паприка', 'чеснок'],
     titleStyle: ChefTitleStyle.anchorWithSecondary,
     stepStyle: ChefStepStyle.potatoSkillet,
     slots: [
@@ -985,6 +989,57 @@ const chefBlueprints = <ChefBlueprint>[
         candidates: ['сметана', 'молоко', 'яблоко', 'банан', 'корица'],
         minCount: 1,
         maxCount: 2,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'cabbage_egg_pie',
+    profile: DishProfile.bake,
+    titlePrefix: 'Пирог домашний',
+    description:
+        'Закрытый русский пирог, где мягкое тесто держит отдельно приготовленную капустно-яичную начинку без лишней влаги.',
+    timeMin: 72,
+    servingsBase: 4,
+    tags: ['oven', 'pie', 'russian_classic', 'generated_local'],
+    anchorSlot: 'filling',
+    secondaryAnchorSlot: 'binder',
+    supportSlot: 'dough',
+    preferredStarters: ['соль', 'масло сливочное'],
+    maxImplicitPantryStarters: 2,
+    titleStyle: ChefTitleStyle.anchorWithFocus,
+    stepStyle: ChefStepStyle.closedPie,
+    family: ChefDishFamily.savoryClosedPie,
+    slots: [
+      ChefSlot(
+        key: 'filling',
+        candidates: ['капуста'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'binder',
+        candidates: ['яйцо'],
+        minCount: 1,
+        maxCount: 1,
+      ),
+      ChefSlot(
+        key: 'dough',
+        candidates: ['мука'],
+        minCount: 1,
+        maxCount: 1,
+      ),
+      ChefSlot(
+        key: 'aromatic',
+        candidates: ['лук'],
+        minCount: 0,
+        maxCount: 1,
+      ),
+      ChefSlot(
+        key: 'softener',
+        candidates: ['сметана', 'кефир', 'молоко'],
+        minCount: 0,
+        maxCount: 1,
       ),
     ],
   ),
