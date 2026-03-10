@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/tokens.dart';
-import '../../../../core/widgets/section_surface.dart';
 
 class HomeActionButton extends StatefulWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final Color accentColor;
+  final LinearGradient gradient;
   final VoidCallback onTap;
   final bool isPrimary;
   final String? metaLabel;
@@ -20,6 +20,7 @@ class HomeActionButton extends StatefulWidget {
     required this.subtitle,
     required this.icon,
     required this.accentColor,
+    required this.gradient,
     required this.onTap,
     this.isPrimary = false,
     this.metaLabel,
@@ -40,9 +41,9 @@ class _HomeActionButtonState extends State<HomeActionButton>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 120),
+      duration: const Duration(milliseconds: 110),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.985).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.975).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
   }
@@ -77,94 +78,14 @@ class _HomeActionButtonState extends State<HomeActionButton>
           onTapCancel: _handleTapCancel,
           child: ScaleTransition(
             scale: _scaleAnimation,
-            child: SectionSurface(
-              tone: widget.isPrimary
-                  ? SectionSurfaceTone.primarySoft
-                  : SectionSurfaceTone.base,
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: widget.accentColor.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(AppTokens.r16),
-                    ),
-                    child: Icon(
-                      widget.icon,
-                      color: widget.accentColor,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: AppTokens.p16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                widget.title,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                              ),
-                            ),
-                            if ((widget.metaLabel ?? '').isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppTokens.p8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: widget.accentColor.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    AppTokens.pill,
-                                  ),
-                                ),
-                                child: Text(
-                                  widget.metaLabel!,
-                                  style: TextStyle(
-                                    color: widget.accentColor,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.subtitle,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppTokens.p12),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppTokens.surface,
-                      borderRadius: BorderRadius.circular(AppTokens.r12),
-                      border: Border.all(color: AppTokens.border),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: AppTokens.textLight,
-                      size: 18,
-                    ),
-                  ),
-                ],
-              ),
+            child: _CardBody(
+              gradient: widget.gradient,
+              isPrimary: widget.isPrimary,
+              accentColor: widget.accentColor,
+              icon: widget.icon,
+              title: widget.title,
+              subtitle: widget.subtitle,
+              metaLabel: widget.metaLabel,
             ),
           ),
         ),
@@ -178,5 +99,153 @@ class _HomeActionButtonState extends State<HomeActionButton>
       return '${widget.title}. ${widget.subtitle}';
     }
     return '${widget.title}. $meta. ${widget.subtitle}';
+  }
+}
+
+class _CardBody extends StatelessWidget {
+  final LinearGradient gradient;
+  final bool isPrimary;
+  final Color accentColor;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? metaLabel;
+
+  const _CardBody({
+    required this.gradient,
+    required this.isPrimary,
+    required this.accentColor,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.metaLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 130),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(AppTokens.r24),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: isPrimary ? 0.22 : 0.12),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Декоративный круг-подсветка в правом верхнем углу
+          Positioned(
+            top: -20,
+            right: -20,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.07),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppTokens.p20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Иконка — крупная, белая, полупрозрачный фон
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(AppTokens.r20),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Colors.white,
+                    size: isPrimary ? 30 : 28,
+                  ),
+                ),
+                const SizedBox(width: AppTokens.p16),
+                // Текст
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontSize: isPrimary ? 19 : 17,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              height: 1.1,
+                            ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        subtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w500,
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppTokens.p12),
+                // Правая часть: счётчик + стрелка
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if ((metaLabel ?? '').isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTokens.p8,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.22),
+                          borderRadius: BorderRadius.circular(AppTokens.pill),
+                        ),
+                        child: Text(
+                          metaLabel!,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(AppTokens.r12),
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

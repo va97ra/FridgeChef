@@ -295,8 +295,15 @@ class BestRecipeRanker {
     } else if (chefAssessment.techniqueScore >= 0.72) {
       totalScore = (totalScore + 0.02).clamp(0.0, 1.0);
     }
+    if (chefAssessment.balanceScore < 0.34) {
+      totalScore *= 0.86;
+    } else if (chefAssessment.balanceScore >= 0.72) {
+      totalScore = (totalScore + 0.03).clamp(0.0, 1.0);
+    }
     if (chefAssessment.flavorScore < 0.34) {
       totalScore *= 0.84;
+    } else if (chefAssessment.flavorScore >= 0.88) {
+      totalScore = (totalScore + 0.06).clamp(0.0, 1.0);
     } else if (chefAssessment.flavorScore >= 0.72) {
       totalScore = (totalScore + 0.02).clamp(0.0, 1.0);
     }

@@ -6,7 +6,6 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/empty_state_panel.dart';
-import '../../../core/widgets/section_surface.dart';
 import '../data/fridge_photo_import_coordinator.dart';
 import '../data/photo_input_service.dart';
 import '../domain/fridge_item.dart';
@@ -23,9 +22,82 @@ class FridgeListScreen extends ConsumerStatefulWidget {
   ConsumerState<FridgeListScreen> createState() => _FridgeListScreenState();
 }
 
+// Категории для фильтрации — ключевые слова сгруппированы по смыслу
+enum _FridgeCategory {
+  all,
+  dairy,
+  meat,
+  veggies,
+  grains,
+  eggs,
+  other,
+}
+
+extension _FridgeCategoryExt on _FridgeCategory {
+  String get label => switch (this) {
+        _FridgeCategory.all => 'Все',
+        _FridgeCategory.dairy => '🥛 Молочное',
+        _FridgeCategory.meat => '🥩 Мясо',
+        _FridgeCategory.veggies => '🥦 Овощи',
+        _FridgeCategory.grains => '🌾 Крупы',
+        _FridgeCategory.eggs => '🥚 Яйца',
+        _FridgeCategory.other => '📦 Прочее',
+      };
+
+  bool matches(String name) {
+    final n = name.toLowerCase();
+    return switch (this) {
+      _FridgeCategory.all => true,
+      _FridgeCategory.dairy => n.contains('молок') ||
+          n.contains('кефир') ||
+          n.contains('йогурт') ||
+          n.contains('сыр') ||
+          n.contains('творог') ||
+          n.contains('сметан') ||
+          n.contains('ряженк') ||
+          n.contains('масл') && !n.contains('подсолн') && !n.contains('оливк'),
+      _FridgeCategory.meat => n.contains('куриц') ||
+          n.contains('фарш') ||
+          n.contains('сосиск') ||
+          n.contains('мяс') ||
+          n.contains('свинин') ||
+          n.contains('говядин') ||
+          n.contains('колбас') ||
+          n.contains('рыб') ||
+          n.contains('тефтел'),
+      _FridgeCategory.veggies => n.contains('помид') ||
+          n.contains('огур') ||
+          n.contains('морков') ||
+          n.contains('капуст') ||
+          n.contains('кабач') ||
+          n.contains('картош') ||
+          n.contains('лук') ||
+          n.contains('чеснок') ||
+          n.contains('перец') ||
+          n.contains('баклажан') ||
+          n.contains('свёкл') ||
+          n.contains('свекл') ||
+          n.contains('зелен'),
+      _FridgeCategory.grains => n.contains('рис') ||
+          n.contains('греч') ||
+          n.contains('макарон') ||
+          n.contains('кускус') ||
+          n.contains('овсян') ||
+          n.contains('пшен') ||
+          n.contains('хлеб') ||
+          n.contains('мука') ||
+          n.contains('батон'),
+      _FridgeCategory.eggs => n.contains('яйц'),
+      _FridgeCategory.other =>
+        true, // показывается только когда ни одна другая не совпала
+    };
+  }
+}
+
 class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
   late final TextEditingController _searchController;
   String _query = '';
+  _FridgeCategory _categoryFilter = _FridgeCategory.all;
 
   @override
   void initState() {
@@ -83,47 +155,37 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _MetricPanel(
-                  icon: Icons.inventory_2_outlined,
-                  label: 'Всего продуктов',
-                  value: '${items.length}',
-                ),
-              ),
-              const SizedBox(width: AppTokens.p12),
-              Expanded(
-                child: _MetricPanel(
-                  icon: Icons.schedule_rounded,
-                  label: 'Скоро использовать',
-                  value: '$expiringSoon',
-                  tone: expiringSoon == 0
-                      ? SectionSurfaceTone.base
-                      : SectionSurfaceTone.warnSoft,
-                ),
-              ),
-            ],
-          ),
+          // Компактная строка статистики
+          _StatRow(total: items.length, expiringSoon: expiringSoon),
           const SizedBox(height: AppTokens.p12),
-          TextField(
-            controller: _searchController,
-            onChanged: (value) => setState(() => _query = value),
-            decoration: InputDecoration(
-              hintText: 'Поиск продукта',
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: _query.isEmpty
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() => _query = '');
-                      },
-                    ),
+          // Горизонтальные фильтры по категориям
+          if (items.isNotEmpty)
+            _CategoryFilterBar(
+              selected: _categoryFilter,
+              items: items,
+              onChanged: (cat) => setState(() => _categoryFilter = cat),
             ),
-          ),
-          const SizedBox(height: AppTokens.p12),
+          if (items.isNotEmpty) const SizedBox(height: AppTokens.p12),
+          // Поиск — только когда продуктов >= 6
+          if (items.length >= 6)
+            TextField(
+              controller: _searchController,
+              onChanged: (value) => setState(() => _query = value),
+              decoration: InputDecoration(
+                hintText: 'Поиск продукта',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _query.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      ),
+              ),
+            ),
+          if (items.length >= 6) const SizedBox(height: AppTokens.p12),
           Expanded(
             child: items.isEmpty
                 ? EmptyStatePanel(
@@ -141,7 +203,7 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
                         icon: Icons.search_off_rounded,
                         title: 'Ничего не найдено',
                         description:
-                            'Попробуй другое название или очисти поиск, чтобы увидеть все продукты.',
+                            'Попробуй другое название, другую категорию или очисти фильтры.',
                         iconColor: AppTokens.info,
                         iconBackground: AppTokens.infoSoft,
                       )
@@ -180,9 +242,6 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
                                   page: FridgeAddEditScreen(itemToEdit: item),
                                 ),
                               ),
-                              onDelete: () => ref
-                                  .read(fridgeListProvider.notifier)
-                                  .removeItem(item.id),
                             ),
                           );
                         },
@@ -201,11 +260,34 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
   }
 
   List<FridgeItem> _filterItems(List<FridgeItem> items, String query) {
+    var result = items;
+
+    // Фильтр по категории
+    if (_categoryFilter != _FridgeCategory.all) {
+      if (_categoryFilter == _FridgeCategory.other) {
+        // «Прочее» — то, что не попало ни в одну из известных категорий
+        final known = [
+          _FridgeCategory.dairy,
+          _FridgeCategory.meat,
+          _FridgeCategory.veggies,
+          _FridgeCategory.grains,
+          _FridgeCategory.eggs,
+        ];
+        result = result
+            .where((item) => !known.any((cat) => cat.matches(item.name)))
+            .toList();
+      } else {
+        result =
+            result.where((item) => _categoryFilter.matches(item.name)).toList();
+      }
+    }
+
+    // Фильтр по поисковому запросу
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) {
-      return items;
+      return result;
     }
-    return items
+    return result
         .where((item) => item.name.toLowerCase().contains(normalized))
         .toList();
   }
@@ -233,8 +315,9 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
     }
 
     _showLoadingDialog();
-    final attempt =
-        await ref.read(photoImportStateProvider.notifier).importFromPhoto(source);
+    final attempt = await ref
+        .read(photoImportStateProvider.notifier)
+        .importFromPhoto(source);
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pop();
     }
@@ -370,7 +453,8 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
     if (source == PhotoSource.camera) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Камера недоступна. Можно выбрать фото из галереи.'),
+          content:
+              const Text('Камера недоступна. Можно выбрать фото из галереи.'),
           action: SnackBarAction(
             label: 'Галерея',
             onPressed: () => _runPhotoImport(PhotoSource.gallery),
@@ -389,8 +473,9 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
 
   Future<void> _runPhotoImport(PhotoSource source) async {
     _showLoadingDialog();
-    final attempt =
-        await ref.read(photoImportStateProvider.notifier).importFromPhoto(source);
+    final attempt = await ref
+        .read(photoImportStateProvider.notifier)
+        .importFromPhoto(source);
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pop();
     }
@@ -449,50 +534,145 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
 
 enum _PhotoPermissionAction { retryCamera, gallery, openSettings }
 
-class _MetricPanel extends StatelessWidget {
+/// Компактная строка со статистикой — заменяет два больших MetricPanel
+class _StatRow extends StatelessWidget {
+  final int total;
+  final int expiringSoon;
+
+  const _StatRow({required this.total, required this.expiringSoon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _StatChip(
+          icon: Icons.inventory_2_outlined,
+          label: '$total продуктов',
+          color: AppTokens.textLight,
+          background: AppTokens.surfaceVariant,
+        ),
+        if (expiringSoon > 0) ...[] else const SizedBox.shrink(),
+        if (expiringSoon > 0) ...[
+          const SizedBox(width: AppTokens.p8),
+          _StatChip(
+            icon: Icons.schedule_rounded,
+            label: '$expiringSoon скоро',
+            color: AppTokens.warn,
+            background: AppTokens.warnSoft,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String value;
-  final SectionSurfaceTone tone;
+  final Color color;
+  final Color background;
 
-  const _MetricPanel({
+  const _StatChip({
     required this.icon,
     required this.label,
-    required this.value,
-    this.tone = SectionSurfaceTone.base,
+    required this.color,
+    required this.background,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SectionSurface(
-      tone: tone,
+    return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.p16,
-        vertical: AppTokens.p12,
+        horizontal: AppTokens.p12,
+        vertical: AppTokens.p8,
+      ),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(AppTokens.pill),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppTokens.textLight, size: 18),
-          const SizedBox(width: AppTokens.p8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
                 ),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Горизонтальный скролл с фильтрами по категориям продуктов
+class _CategoryFilterBar extends StatelessWidget {
+  final _FridgeCategory selected;
+  final List<FridgeItem> items;
+  final ValueChanged<_FridgeCategory> onChanged;
+
+  const _CategoryFilterBar({
+    required this.selected,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Показываем только те категории, в которых есть продукты
+    final presentCategories = _FridgeCategory.values.where((cat) {
+      if (cat == _FridgeCategory.all) return true;
+      if (cat == _FridgeCategory.other) {
+        final known = [
+          _FridgeCategory.dairy,
+          _FridgeCategory.meat,
+          _FridgeCategory.veggies,
+          _FridgeCategory.grains,
+          _FridgeCategory.eggs,
+        ];
+        return items.any((item) => !known.any((c) => c.matches(item.name)));
+      }
+      return items.any((item) => cat.matches(item.name));
+    }).toList();
+
+    return SizedBox(
+      height: 36,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: presentCategories.length,
+        separatorBuilder: (_, __) => const SizedBox(width: AppTokens.p8),
+        itemBuilder: (context, index) {
+          final cat = presentCategories[index];
+          final isSelected = cat == selected;
+          return GestureDetector(
+            onTap: () => onChanged(cat),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTokens.p12,
+                vertical: AppTokens.p8,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected ? AppTokens.primary : AppTokens.surface,
+                borderRadius: BorderRadius.circular(AppTokens.pill),
+                border: Border.all(
+                  color: isSelected ? AppTokens.primary : AppTokens.border,
+                ),
+              ),
+              child: Text(
+                cat.label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isSelected ? Colors.white : AppTokens.textLight,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

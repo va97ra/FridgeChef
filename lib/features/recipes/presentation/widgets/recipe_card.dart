@@ -5,11 +5,13 @@ import '../../../../core/utils/units.dart';
 import '../../../../core/widgets/section_surface.dart';
 import '../../domain/recipe.dart';
 import '../../domain/recipe_match.dart';
+import '../../domain/recipe_nutrition.dart';
 import '../recipe_ui_meta.dart';
 import 'match_bar.dart';
 
 class RecipeCard extends StatelessWidget {
   final RecipeMatch match;
+  final RecipeNutritionEstimate? nutritionEstimate;
   final VoidCallback onTap;
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
@@ -17,6 +19,7 @@ class RecipeCard extends StatelessWidget {
   const RecipeCard({
     super.key,
     required this.match,
+    this.nutritionEstimate,
     required this.onTap,
     this.onRename,
     this.onDelete,
@@ -66,6 +69,15 @@ class RecipeCard extends StatelessWidget {
                               background: AppTokens.insetSurface,
                               borderColor: AppTokens.insetBorder,
                             ),
+                            if (nutritionEstimate?.hasData ?? false)
+                              _MiniTag(
+                                icon: Icons.local_fire_department_outlined,
+                                label:
+                                    '~${nutritionEstimate!.total.calories.round()} ккал',
+                                color: AppTokens.warn,
+                                background: AppTokens.warnSoft,
+                                borderColor: AppTokens.insetBorder,
+                              ),
                             for (final badge in moodBadges.take(3))
                               _MiniTag(
                                 icon: _iconForBadge(badge),

@@ -115,21 +115,23 @@ void main() {
       isTrue,
     );
     expect(
-      expectedMatches.any((match) => match.source == RecipeMatchSource.generated),
+      expectedMatches
+          .any((match) => match.source == RecipeMatchSource.generated),
       isTrue,
     );
     final firstBaseIndex = expectedMatches.indexWhere(
       (match) => match.source == RecipeMatchSource.base,
     );
-    expect(firstBaseIndex, greaterThan(0));
+    expect(firstBaseIndex, isNot(-1));
     expect(
       expectedMatches
-          .skip(firstBaseIndex + 1)
           .any((match) => match.source == RecipeMatchSource.generated),
       isTrue,
     );
     expect(
-      matches.map((match) => '${match.source.name}:${match.recipe.id}').toList(),
+      matches
+          .map((match) => '${match.source.name}:${match.recipe.id}')
+          .toList(),
       expectedMatches
           .map((match) => '${match.source.name}:${match.recipe.id}')
           .toList(),

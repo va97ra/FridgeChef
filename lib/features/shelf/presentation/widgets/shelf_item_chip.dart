@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/theme/tokens.dart';
-import '../../domain/pantry_catalog_entry.dart';
 import '../../domain/shelf_item.dart';
 
-const _cardTextureAsset = 'assets/images/card_board_texture.png';
-
-class ShelfItemChip extends StatelessWidget {
+class ShelfItemChip extends StatefulWidget {
   final ShelfItem item;
   final VoidCallback onToggle;
   final VoidCallback onLongPress;
@@ -19,112 +17,81 @@ class ShelfItemChip extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final background = item.inStock
-        ? AppTokens.surfaceRaised
-        : AppTokens.surfaceVariant.withValues(alpha: 0.92);
-    final border = AppTokens.border;
-    final textColor = AppTokens.text;
-    final categoryLabel = pantryCategoryLabel(item.category);
-    final statusLabel = item.inStock ? 'Есть дома' : 'Нет';
-    final statusBackground = item.inStock
-        ? AppTokens.surface.withValues(alpha: 0.82)
-        : AppTokens.surfaceVariant.withValues(alpha: 0.92);
-    final statusColor = item.inStock ? AppTokens.text : AppTokens.textLight;
-    final statusDotColor =
-        item.inStock ? AppTokens.success : AppTokens.textMuted;
+  State<ShelfItemChip> createState() => _ShelfItemChipState();
+}
 
-    return InkWell(
-      onTap: onToggle,
-      onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(AppTokens.r16),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: background,
-          image: const DecorationImage(
-            image: AssetImage(_cardTextureAsset),
-            fit: BoxFit.cover,
-            opacity: 0.34,
-            filterQuality: FilterQuality.high,
-          ),
-          borderRadius: BorderRadius.circular(AppTokens.r16),
-          border: Border.all(color: border, width: 1),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  item.inStock ? Icons.check_rounded : Icons.add_rounded,
-                  size: 16,
-                  color: item.inStock ? AppTokens.success : AppTokens.textLight,
+class _ShelfItemChipState extends State<ShelfItemChip> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final inStock = widget.item.inStock;
+
+    final chipColor = inStock ? AppTokens.accentSoft : AppTokens.surfaceVariant;
+    final borderColor =
+        inStock ? AppTokens.accent.withValues(alpha: 0.55) : AppTokens.border;
+    final dotColor = inStock ? AppTokens.success : AppTokens.textMuted;
+    final textColor = inStock ? AppTokens.text : AppTokens.textLight;
+
+    return Semantics(
+      button: true,
+      toggled: inStock,
+      label:
+          '${widget.item.name}. ${inStock ? 'Есть дома. Нажми чтобы убрать' : 'Нет. Нажми чтобы отметить как есть'}. Долгое нажатие — редактировать.',
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) {
+            setState(() => _pressed = false);
+            HapticFeedback.selectionClick();
+            widget.onToggle();
+          },
+          onTapCancel: () => setState(() => _pressed = false),
+          onLongPress: () {
+            HapticFeedback.mediumImpact();
+            widget.onLongPress();
+          },
+          child: AnimatedScale(
+            scale: _pressed ? 0.94 : 1.0,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: chipColor,
+                borderRadius: BorderRadius.circular(AppTokens.r12),
+                border: Border.all(
+                  color: borderColor,
+                  width: inStock ? 1.5 : 1.0,
                 ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    item.name,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Цветная точка-индикатор наличия
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: dotColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    widget.item.name,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: textColor,
                           fontWeight: FontWeight.w700,
                         ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusBackground,
-                    borderRadius: BorderRadius.circular(AppTokens.pill),
-                    border: Border.all(color: AppTokens.border),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: statusDotColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        statusLabel,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.w800,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-              decoration: BoxDecoration(
-                color: AppTokens.surfaceRaised.withValues(alpha: 0.84),
-                borderRadius: BorderRadius.circular(AppTokens.pill),
-                border: Border.all(color: AppTokens.border),
-              ),
-              child: Text(
-                categoryLabel,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTokens.textLight,
-                      fontWeight: FontWeight.w700,
-                    ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

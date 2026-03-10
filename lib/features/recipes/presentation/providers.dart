@@ -5,6 +5,7 @@ import '../../fridge/presentation/providers.dart';
 import '../../shelf/data/pantry_catalog_repo.dart';
 import '../../shelf/presentation/providers.dart';
 import '../data/recipe_interaction_history_repo.dart';
+import '../data/recipe_nutrition_reference_repo.dart';
 import '../data/recipes_repo.dart';
 import '../data/recipe_feedback_repo.dart';
 import '../domain/best_recipe_ranker.dart';
@@ -13,6 +14,7 @@ import '../domain/offline_chef_engine.dart';
 import '../domain/recipe.dart';
 import '../domain/recipe_interaction_event.dart';
 import '../domain/recipe_match.dart';
+import '../domain/recipe_nutrition_estimator.dart';
 import '../domain/taste_profile.dart';
 
 final recipesProvider = FutureProvider<List<Recipe>>((ref) async {
@@ -26,6 +28,25 @@ final productCatalogProvider = FutureProvider((ref) async {
 final pantryCatalogProvider = FutureProvider((ref) async {
   return ref.watch(pantryCatalogRepoProvider).loadCatalog();
 });
+final recipeNutritionCatalogProvider = FutureProvider((ref) async {
+  return ref.watch(recipeNutritionReferenceRepoProvider).loadCatalog();
+});
+
+final recipeNutritionEstimatorProvider = Provider<RecipeNutritionEstimator?>(
+  (ref) {
+    final catalog = ref.watch(productCatalogProvider).valueOrNull;
+    final nutritionCatalog =
+        ref.watch(recipeNutritionCatalogProvider).valueOrNull;
+    if (catalog == null || nutritionCatalog == null) {
+      return null;
+    }
+
+    return RecipeNutritionEstimator(
+      catalog: catalog,
+      references: nutritionCatalog,
+    );
+  },
+);
 
 final cookFiltersProvider = StateProvider<Set<CookFilter>>((ref) => {});
 final cookQueryProvider = StateProvider<String>((ref) => '');

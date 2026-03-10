@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/routes.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_text_field.dart';
-import '../../../core/widgets/app_icon_button.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/empty_state_panel.dart';
 import '../../../core/widgets/section_surface.dart';
@@ -44,20 +43,17 @@ class _ShelfListScreenState extends ConsumerState<ShelfListScreen> {
 
     return AppScaffold(
       title: 'Полка',
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: AppIconButton(
-            icon: Icons.add_rounded,
-            onPressed: () => Navigator.push(
-              context,
-              AppRoutes.fadeThroughRoute(page: const ShelfAddEditScreen()),
-            ),
-            tone: AppIconButtonTone.primary,
-            tooltip: 'Добавить на полку',
-          ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(
+          context,
+          AppRoutes.fadeThroughRoute(page: const ShelfAddEditScreen()),
         ),
-      ],
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Добавить'),
+        backgroundColor: AppTokens.secondaryDark,
+        foregroundColor: Colors.white,
+        elevation: 4,
+      ),
       body: items.isEmpty
           ? const _ShelfEmptyState()
           : SingleChildScrollView(
@@ -66,23 +62,21 @@ class _ShelfListScreenState extends ConsumerState<ShelfListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: AppTokens.p8),
+                  // Компактная строка статистики
                   Row(
                     children: [
-                      Expanded(
-                        child: _ShelfMetric(
-                          icon: Icons.spa_outlined,
-                          label: 'В наличии',
-                          value: '$inStock',
-                        ),
+                      _ShelfStatChip(
+                        icon: Icons.spa_outlined,
+                        label: '$inStock в наличии',
+                        color: AppTokens.accent,
+                        background: AppTokens.accentSoft,
                       ),
-                      const SizedBox(width: AppTokens.p12),
-                      Expanded(
-                        child: _ShelfMetric(
-                          icon: Icons.inventory_2_outlined,
-                          label: 'Всего позиций',
-                          value: '${items.length}',
-                          tone: SectionSurfaceTone.base,
-                        ),
+                      const SizedBox(width: AppTokens.p8),
+                      _ShelfStatChip(
+                        icon: Icons.inventory_2_outlined,
+                        label: 'всего ${items.length}',
+                        color: AppTokens.textLight,
+                        background: AppTokens.surfaceVariant,
                       ),
                     ],
                   ),
@@ -129,6 +123,16 @@ class _ShelfListScreenState extends ConsumerState<ShelfListScreen> {
                           },
                         ),
                         const SizedBox(height: AppTokens.p12),
+                        // Лейбл — Фильтр по наличию
+                        Text(
+                          'Наличие',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTokens.textMuted,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(height: AppTokens.p8),
                         Wrap(
                           spacing: AppTokens.p8,
                           runSpacing: AppTokens.p8,
@@ -172,6 +176,16 @@ class _ShelfListScreenState extends ConsumerState<ShelfListScreen> {
                           ],
                         ),
                         const SizedBox(height: AppTokens.p12),
+                        // Лейбл — Фильтр по категории
+                        Text(
+                          'Категория',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppTokens.textMuted,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                        const SizedBox(height: AppTokens.p8),
                         Wrap(
                           spacing: AppTokens.p8,
                           runSpacing: AppTokens.p8,
@@ -445,45 +459,42 @@ class _ShelfCategoryFilterChip extends StatelessWidget {
   }
 }
 
-class _ShelfMetric extends StatelessWidget {
+/// Компактный стат-чип для полки (заменяет _ShelfMetric)
+class _ShelfStatChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String value;
-  final SectionSurfaceTone tone;
+  final Color color;
+  final Color background;
 
-  const _ShelfMetric({
+  const _ShelfStatChip({
     required this.icon,
     required this.label,
-    required this.value,
-    this.tone = SectionSurfaceTone.base,
+    required this.color,
+    required this.background,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SectionSurface(
-      tone: tone,
+    return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.p16,
-        vertical: AppTokens.p12,
+        horizontal: AppTokens.p12,
+        vertical: AppTokens.p8,
+      ),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(AppTokens.pill),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: AppTokens.textLight),
-          const SizedBox(width: AppTokens.p8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                      ),
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
                 ),
-                Text(label, style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
           ),
         ],
       ),

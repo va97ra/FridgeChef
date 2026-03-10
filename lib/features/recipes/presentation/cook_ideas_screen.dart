@@ -12,6 +12,7 @@ import '../domain/cook_filter.dart';
 import '../domain/recipe.dart';
 import '../domain/recipe_interaction_event.dart';
 import '../domain/recipe_match.dart';
+import '../domain/recipe_nutrition.dart';
 import 'providers.dart';
 import 'recipe_detail_screen.dart';
 import 'widgets/rename_recipe_dialog.dart';
@@ -48,6 +49,7 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
         ref.watch(pantryCatalogProvider).isLoading;
     final selectedFilters = ref.watch(cookFiltersProvider);
     final query = ref.watch(cookQueryProvider);
+    final nutritionEstimator = ref.watch(recipeNutritionEstimatorProvider);
     final bestMatch = matches.isNotEmpty ? matches.first : null;
     final remainingMatches =
         matches.length > 1 ? matches.sublist(1) : const <RecipeMatch>[];
@@ -168,6 +170,8 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
                             const SizedBox(height: 12),
                             _BestRecipeHero(
                               match: bestMatch,
+                              nutritionEstimate: nutritionEstimator
+                                  ?.estimate(bestMatch.recipe),
                               onTap: () => _openRecipe(bestMatch),
                             ),
                             const SizedBox(height: 20),
@@ -195,6 +199,10 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
                                   padding: const EdgeInsets.only(bottom: 16),
                                   child: RecipeCard(
                                     match: match,
+                                    nutritionEstimate:
+                                        nutritionEstimator?.estimate(
+                                      match.recipe,
+                                    ),
                                     onTap: () => _openRecipe(match),
                                     onRename: match.recipe.isUserEditable
                                         ? () => _renameRecipe(match.recipe)
@@ -219,6 +227,8 @@ class _CookIdeasScreenState extends ConsumerState<CookIdeasScreen> {
                                 padding: const EdgeInsets.only(bottom: 16),
                                 child: RecipeCard(
                                   match: match,
+                                  nutritionEstimate: nutritionEstimator
+                                      ?.estimate(match.recipe),
                                   onTap: () => _openRecipe(match),
                                   onRename: match.recipe.isUserEditable
                                       ? () => _renameRecipe(match.recipe)
@@ -472,10 +482,12 @@ class _InlineInfoCard extends StatelessWidget {
 
 class _BestRecipeHero extends StatelessWidget {
   final RecipeMatch match;
+  final RecipeNutritionEstimate? nutritionEstimate;
   final VoidCallback onTap;
 
   const _BestRecipeHero({
     required this.match,
+    this.nutritionEstimate,
     required this.onTap,
   });
 
@@ -545,6 +557,12 @@ class _BestRecipeHero extends StatelessWidget {
                       icon: Icons.checklist_rounded,
                       label: '${match.matchedCount}/${match.totalCount}',
                     ),
+                    if (nutritionEstimate?.hasData ?? false)
+                      _HeroInfoPill(
+                        icon: Icons.local_fire_department_outlined,
+                        label:
+                            '~${nutritionEstimate!.total.calories.round()} ккал',
+                      ),
                   ],
                 ),
                 if (match.why.isNotEmpty) ...[

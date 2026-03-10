@@ -9,6 +9,7 @@ import '../domain/taste_profile.dart';
 import '../data/user_recipes_repo.dart';
 import '../domain/recipe.dart';
 import '../domain/recipe_interaction_event.dart';
+import '../domain/recipe_nutrition.dart';
 import 'providers.dart';
 import 'recipe_ui_meta.dart';
 import 'save_generated_recipe_flow.dart';
@@ -48,6 +49,8 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     final ratio = _targetServings / _recipe.servingsBase;
     final moodBadges = buildRecipeMoodBadges(_recipe);
     final feedback = ref.watch(recipeFeedbackProvider)[_recipe.id];
+    final estimator = ref.watch(recipeNutritionEstimatorProvider);
+    final nutritionEstimate = estimator?.estimate(_recipe).scale(ratio);
 
     return AppScaffold(
       title: _recipe.title,
@@ -145,6 +148,12 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             ),
           ),
           const SizedBox(height: AppTokens.p20),
+          if (nutritionEstimate?.hasData ?? false) ...[
+            _buildSectionTitle(context, 'Пищевая ценность'),
+            const SizedBox(height: AppTokens.p12),
+            _buildNutritionCard(context, nutritionEstimate!),
+            const SizedBox(height: AppTokens.p20),
+          ],
           _buildSectionTitle(context, 'О блюде'),
           const SizedBox(height: AppTokens.p12),
           _buildDescriptionCard(context),
@@ -268,6 +277,63 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     color: AppTokens.text,
                   ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutritionCard(
+    BuildContext context,
+    RecipeNutritionEstimate estimate,
+  ) {
+    return SectionSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Примерно на $_targetServings '
+            '${_targetServings == 1 ? 'порцию' : _portionWord(_targetServings)}.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTokens.textLight,
+                ),
+          ),
+          const SizedBox(height: AppTokens.p12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _NutritionTile(
+                label: 'Ккал',
+                value: '~${estimate.total.calories.round()}',
+                tone: _NutritionTileTone.accent,
+              ),
+              _NutritionTile(
+                label: 'Белки',
+                value: '${_fmtNutritionValue(estimate.total.protein)} г',
+                tone: _NutritionTileTone.base,
+              ),
+              _NutritionTile(
+                label: 'Жиры',
+                value: '${_fmtNutritionValue(estimate.total.fat)} г',
+                tone: _NutritionTileTone.base,
+              ),
+              _NutritionTile(
+                label: 'Углеводы',
+                value: '${_fmtNutritionValue(estimate.total.carbs)} г',
+                tone: _NutritionTileTone.base,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTokens.p12),
+          Text(
+            'Оценка по ${estimate.matchedIngredients} из '
+            '${estimate.totalIngredients} ингредиентов. '
+            'Цифры примерные и не влияют на выбор шефа.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTokens.textLight,
+                  height: 1.4,
+                ),
           ),
         ],
       ),
@@ -701,6 +767,25 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
 
   static String _fmtNum(double v) =>
       v.truncateToDouble() == v ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
+
+  static String _fmtNutritionValue(double value) {
+    if (value >= 10 || value.truncateToDouble() == value) {
+      return value.toStringAsFixed(0);
+    }
+    return value.toStringAsFixed(1);
+  }
+
+  static String _portionWord(int value) {
+    final mod10 = value % 10;
+    final mod100 = value % 100;
+    if (mod10 == 1 && mod100 != 11) {
+      return 'порцию';
+    }
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return 'порции';
+    }
+    return 'порций';
+  }
 }
 
 String? _chefProfileLabel(String? raw) {
@@ -853,6 +938,59 @@ class _ChefContextRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+enum _NutritionTileTone { accent, base }
+
+class _NutritionTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final _NutritionTileTone tone;
+
+  const _NutritionTile({
+    required this.label,
+    required this.value,
+    required this.tone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final background = tone == _NutritionTileTone.accent
+        ? AppTokens.accentSoft
+        : AppTokens.insetSurface;
+    final valueColor =
+        tone == _NutritionTileTone.accent ? AppTokens.accent : AppTokens.text;
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 112),
+      padding: const EdgeInsets.all(AppTokens.p12),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(AppTokens.r16),
+        border: Border.all(color: AppTokens.insetBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTokens.textLight,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: valueColor,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }

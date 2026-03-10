@@ -98,6 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 : '${fridgeItems.length} продуктов, $expiringSoon скоро использовать',
             icon: Icons.kitchen_outlined,
             accentColor: AppTokens.accent,
+            gradient: AppTokens.fridgeGradient,
             metaLabel: fridgeItems.isEmpty ? 'Пусто' : '${fridgeItems.length}',
             semanticLabel: 'Открыть раздел Мой холодильник. '
                 '${fridgeItems.isEmpty ? 'Пусто' : '${fridgeItems.length} продуктов'}. '
@@ -112,6 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 : '$inStockShelf позиций в наличии для усиления вкуса',
             icon: Icons.spa_outlined,
             accentColor: AppTokens.secondaryDark,
+            gradient: AppTokens.shelfGradient,
             metaLabel: inStockShelf == 0 ? 'Нужно' : '$inStockShelf',
             semanticLabel: 'Открыть раздел Полка. '
                 '${inStockShelf == 0 ? 'Нужно' : '$inStockShelf позиций'}. '
@@ -126,6 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 : 'Сейчас лучший вариант: ${bestMatch.recipe.title}',
             icon: Icons.restaurant_menu_rounded,
             accentColor: AppTokens.primary,
+            gradient: AppTokens.primaryGradient,
             metaLabel: bestMatch == null
                 ? 'Оффлайн'
                 : '${(bestMatch.score * 100).round()}%',

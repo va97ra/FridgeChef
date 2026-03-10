@@ -9,6 +9,7 @@
   {"id":"sour_cream","name":"Сметана","canonicalName":"Сметана","synonyms":["сметана","сметана 15","сметана 20"],"defaultUnit":"g"},
   {"id":"yogurt","name":"Йогурт","canonicalName":"Йогурт","synonyms":["йогурт","натуральный йогурт","греческий йогурт","yogurt"],"defaultUnit":"g"},
   {"id":"kefir","name":"Кефир","canonicalName":"Кефир","synonyms":["кефир"],"defaultUnit":"l"},
+  {"id":"kvass","name":"Квас","canonicalName":"Квас","synonyms":["квас","домашний квас","окрошечный квас"],"defaultUnit":"l"},
   {"id":"chicken","name":"Курица","canonicalName":"Курица","synonyms":["курица","куриное филе","куриная грудка","грудка куриная","филе курицы","куриное мясо","chicken"],"defaultUnit":"g"},
   {"id":"beef","name":"Говядина","canonicalName":"Говядина","synonyms":["говядина","beef"],"defaultUnit":"g"},
   {"id":"pork","name":"Свинина","canonicalName":"Свинина","synonyms":["свинина","pork"],"defaultUnit":"g"},

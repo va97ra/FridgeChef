@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:help_to_cook/core/utils/units.dart';
+import 'package:help_to_cook/features/fridge/domain/product_catalog_entry.dart';
 import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
 import 'package:help_to_cook/features/recipes/data/recipe_interaction_history_repo.dart';
 import 'package:help_to_cook/features/recipes/data/user_recipes_repo.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_interaction_event.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_nutrition.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_nutrition_estimator.dart';
 import 'package:help_to_cook/features/recipes/presentation/recipe_detail_screen.dart';
 import 'package:help_to_cook/features/recipes/presentation/providers.dart';
 
@@ -79,6 +82,12 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Сохранить в мои рецепты'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
 
     expect(find.text('Сохранить в мои рецепты'), findsOneWidget);
     expect(find.text('Что учёл шеф'), findsOneWidget);
@@ -86,6 +95,53 @@ void main() {
     expect(find.text('Яйца'), findsWidgets);
     expect(find.text('Базовые мелочи'), findsOneWidget);
     expect(find.text('Соль'), findsOneWidget);
+  });
+
+  testWidgets('shows nutrition estimate and updates it for servings',
+      (tester) async {
+    final recipe = Recipe(
+      id: 'nutrition_recipe',
+      title: 'Омлет',
+      timeMin: 10,
+      tags: const ['quick'],
+      servingsBase: 2,
+      ingredients: const [
+        RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+        RecipeIngredient(name: 'Молоко', amount: 100, unit: Unit.ml),
+      ],
+      steps: const ['Смешать', 'Пожарить'],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          recipeNutritionEstimatorProvider.overrideWith(
+            (ref) => _buildNutritionEstimator(),
+          ),
+        ],
+        child: MaterialApp(
+          home: RecipeDetailScreen(recipe: recipe),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Пищевая ценность'), findsOneWidget);
+    expect(find.text('~208'), findsOneWidget);
+    expect(find.text('15 г'), findsOneWidget);
+    expect(find.text('13 г'), findsOneWidget);
+    expect(find.text('5.9 г'), findsOneWidget);
+    expect(
+        find.textContaining('Оценка по 2 из 2 ингредиентов'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ChoiceChip, '4'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('~416'), findsOneWidget);
+    expect(find.text('31 г'), findsOneWidget);
+    expect(find.text('26 г'), findsOneWidget);
+    expect(find.text('12 г'), findsOneWidget);
   });
 
   testWidgets('exposes recipe steps through semantics', (tester) async {
@@ -319,6 +375,12 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Сохранить в мои рецепты'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Сохранить в мои рецепты'));
     await tester.pumpAndSettle();
 
@@ -433,4 +495,49 @@ class _FakeRecipeInteractionHistoryRepo extends RecipeInteractionHistoryRepo {
       );
     }
   }
+}
+
+RecipeNutritionEstimator _buildNutritionEstimator() {
+  return RecipeNutritionEstimator(
+    catalog: const [
+      ProductCatalogEntry(
+        id: 'egg',
+        name: 'Яйца',
+        canonicalName: 'Яйцо',
+        synonyms: ['яйцо', 'яйца'],
+        defaultUnit: Unit.pcs,
+      ),
+      ProductCatalogEntry(
+        id: 'milk',
+        name: 'Молоко',
+        canonicalName: 'Молоко',
+        synonyms: ['молоко'],
+        defaultUnit: Unit.l,
+      ),
+    ],
+    references: const [
+      NutritionReferenceEntry(
+        canonicalName: 'яйцо',
+        baseUnitKey: 'pcs',
+        baseAmount: 1,
+        nutrition: NutritionPerAmount(
+          calories: 78,
+          protein: 6.3,
+          fat: 5.3,
+          carbs: 0.6,
+        ),
+      ),
+      NutritionReferenceEntry(
+        canonicalName: 'молоко',
+        baseUnitKey: 'ml',
+        baseAmount: 100,
+        nutrition: NutritionPerAmount(
+          calories: 52,
+          protein: 2.8,
+          fat: 2.5,
+          carbs: 4.7,
+        ),
+      ),
+    ],
+  );
 }

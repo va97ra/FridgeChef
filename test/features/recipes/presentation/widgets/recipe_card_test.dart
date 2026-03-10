@@ -4,6 +4,7 @@ import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_ingredient.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_match.dart';
+import 'package:help_to_cook/features/recipes/domain/recipe_nutrition.dart';
 import 'package:help_to_cook/features/recipes/presentation/widgets/recipe_card.dart';
 
 void main() {
@@ -32,6 +33,11 @@ void main() {
         home: Scaffold(
           body: RecipeCard(
             match: match,
+            nutritionEstimate: const RecipeNutritionEstimate(
+              total: NutritionPerAmount(calories: 420),
+              matchedIngredients: 2,
+              totalIngredients: 2,
+            ),
             onTap: () {},
             onRename: () {},
             onDelete: () {},
@@ -44,6 +50,7 @@ void main() {
     expect(find.text('Завтрак'), findsOneWidget);
     expect(find.text('Легко'), findsOneWidget);
     expect(find.text('все продукты есть дома'), findsOneWidget);
+    expect(find.text('~420 ккал'), findsOneWidget);
     expect(find.byIcon(Icons.more_vert_rounded), findsOneWidget);
     expect(find.byTooltip('Действия рецепта Шеф-омлет'), findsOneWidget);
   });
