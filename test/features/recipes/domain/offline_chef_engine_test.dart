@@ -2423,6 +2423,157 @@ void main() {
     );
   });
 
+  test('builds chicken shawarma with cold sauce and sealed seam finish', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'oil',
+            name: 'Масло',
+            canonicalName: 'масло',
+            aliases: ['масло'],
+            category: 'oil',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'paprika',
+            name: 'Паприка',
+            canonicalName: 'паприка',
+            aliases: ['паприка'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'garlic',
+            name: 'Чеснок',
+            canonicalName: 'чеснок',
+            aliases: ['чеснок'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'lavash', name: 'Лаваш', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'chicken', name: 'Курица', amount: 420, unit: Unit.g),
+          FridgeItem(id: 'cabbage', name: 'Капуста', amount: 400, unit: Unit.g),
+          FridgeItem(id: 'cucumber', name: 'Огурцы', amount: 2, unit: Unit.pcs),
+          FridgeItem(id: 'tomato', name: 'Помидоры', amount: 2, unit: Unit.pcs),
+          FridgeItem(
+            id: 'sour_cream',
+            name: 'Сметана',
+            amount: 160,
+            unit: Unit.g,
+          ),
+        ],
+      ),
+    );
+
+    final shawarma = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Шаурма домашняя'),
+    );
+
+    expect(shawarma.recipe.chefProfile, 'skillet');
+    expect(
+      shawarma.recipe.ingredients.any((ingredient) => ingredient.name == 'Лаваш'),
+      isTrue,
+    );
+    expect(
+      shawarma.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Чеснок',
+      ),
+      isTrue,
+    );
+    expect(
+      shawarma.recipe.steps.any(
+        (step) => step.contains('очень горячей сковороде'),
+      ),
+      isTrue,
+    );
+    expect(
+      shawarma.recipe.steps.any((step) => step.contains('густой холодный соус')),
+      isTrue,
+    );
+    expect(
+      shawarma.recipe.steps.any((step) => step.contains('швом вниз')),
+      isTrue,
+    );
+  });
+
+  test('does not build shawarma when searing fat is absent', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'paprika',
+            name: 'Паприка',
+            canonicalName: 'паприка',
+            aliases: ['паприка'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'garlic',
+            name: 'Чеснок',
+            canonicalName: 'чеснок',
+            aliases: ['чеснок'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'lavash', name: 'Лаваш', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'chicken', name: 'Курица', amount: 420, unit: Unit.g),
+          FridgeItem(id: 'cabbage', name: 'Капуста', amount: 400, unit: Unit.g),
+          FridgeItem(id: 'cucumber', name: 'Огурцы', amount: 2, unit: Unit.pcs),
+          FridgeItem(id: 'tomato', name: 'Помидоры', amount: 2, unit: Unit.pcs),
+          FridgeItem(
+            id: 'sour_cream',
+            name: 'Сметана',
+            amount: 160,
+            unit: Unit.g,
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      generated.any((candidate) => candidate.recipe.title.contains('Шаурма')),
+      isFalse,
+    );
+  });
+
   test('uses available finishing support from shelf for salad ideas', () {
     final generated = const OfflineChefEngine().generate(
       _request(

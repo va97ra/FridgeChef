@@ -695,6 +695,7 @@ class OfflineChefEngine {
       case ChefDishFamily.cucumberSmetanaSalad:
       case ChefDishFamily.simpleRiceKasha:
       case ChefDishFamily.savoryClosedPie:
+      case ChefDishFamily.shawarmaWrap:
         return true;
       case ChefDishFamily.freshSalad:
       case ChefDishFamily.coldSoup:
@@ -713,7 +714,6 @@ class OfflineChefEngine {
       case ChefDishFamily.solyankaSoup:
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
-      case ChefDishFamily.savoryClosedPie:
       case ChefDishFamily.breakfast:
       case ChefDishFamily.panBatter:
       case ChefDishFamily.bliniPan:
@@ -768,6 +768,10 @@ class OfflineChefEngine {
           'кефир',
           'молоко',
         });
+      case ChefDishFamily.shawarmaWrap:
+        return hasAny(const {'масло', 'оливковое масло'}) &&
+            hasAny(const {'сметана', 'йогурт'}) &&
+            hasAny(const {'лаваш'});
       default:
         return true;
     }
@@ -860,6 +864,24 @@ class OfflineChefEngine {
           default:
             return _defaultAmountFor(canonical);
         }
+      case ChefDishFamily.shawarmaWrap:
+        switch (canonical) {
+          case 'курица':
+            return 280;
+          case 'лаваш':
+            return 1;
+          case 'капуста':
+            return 160;
+          case 'огурец':
+          case 'помидор':
+          case 'лук':
+            return 1;
+          case 'сметана':
+          case 'йогурт':
+            return 90;
+          default:
+            return _defaultAmountFor(canonical);
+        }
       default:
         return _defaultAmountFor(canonical);
     }
@@ -869,6 +891,15 @@ class OfflineChefEngine {
     switch (blueprint.dishFamily) {
       case ChefDishFamily.savoryClosedPie:
         return _defaultUnitFor(canonical);
+      case ChefDishFamily.shawarmaWrap:
+        switch (canonical) {
+          case 'лаваш':
+            return Unit.pcs;
+          case 'йогурт':
+            return Unit.ml;
+          default:
+            return _defaultUnitFor(canonical);
+        }
       default:
         return _defaultUnitFor(canonical);
     }
@@ -890,6 +921,22 @@ class OfflineChefEngine {
           default:
             return _supportAmountFor(canonical);
         }
+      case ChefDishFamily.shawarmaWrap:
+        switch (canonical) {
+          case 'масло':
+          case 'оливковое масло':
+            return 15;
+          case 'соль':
+            return 3;
+          case 'перец':
+            return 2;
+          case 'паприка':
+            return 2;
+          case 'чеснок':
+            return 2;
+          default:
+            return _supportAmountFor(canonical);
+        }
       default:
         return _supportAmountFor(canonical);
     }
@@ -902,6 +949,16 @@ class OfflineChefEngine {
           case 'масло':
           case 'оливковое масло':
             return Unit.ml;
+          default:
+            return _supportUnitFor(canonical);
+        }
+      case ChefDishFamily.shawarmaWrap:
+        switch (canonical) {
+          case 'масло':
+          case 'оливковое масло':
+            return Unit.ml;
+          case 'чеснок':
+            return Unit.pcs;
           default:
             return _supportUnitFor(canonical);
         }
@@ -1315,6 +1372,74 @@ class OfflineChefEngine {
           doughAssemblyStep,
           'Раздели тесто на две части, раскатай нижний пласт и выложи его в форму или на противень. Сверху разложи холодную начинку, накрой вторым пластом, защипни края, запечатай шов, сделай 2-3 отверстия для выхода пара и, если часть $pieBinderText осталась, смажь верх.',
           'Выпекай пирог в духовке 35-40 минут при 180-190°C до ровной золотистой корочки. Дай ему отдохнуть 12-15 минут, затем нарежь и подавай тёплым.',
+        ];
+      case ChefStepStyle.shawarmaWrap:
+        final shawarmaProtein = _sentenceIngredientText(
+          anchor.isNotEmpty ? anchor : 'курицу',
+        );
+        final shawarmaWrap = _sentenceIngredientText(
+          secondary.isNotEmpty ? secondary : 'лаваш',
+        );
+        final shawarmaFresh = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['fresh'] ?? const <String>[],
+            inventory,
+            limit: 4,
+          ),
+        );
+        final shawarmaSauceBase = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['sauce'] ?? const <String>[],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final shawarmaGarlic = _sentenceIngredientText(
+          _displayList(
+            _dedupeCanonicals([
+              for (final canonical in [
+                ...starters.includedCanonicals,
+                ...chefSupport.aromaticCanonicals,
+                ...chefSupport.seasoningCanonicals,
+              ])
+                if (canonical == 'чеснок') canonical,
+            ]),
+            inventory,
+            limit: 1,
+          ),
+        );
+        final shawarmaSeasoningCanonicals = {
+          ...starters.includedCanonicals,
+          ...chefSupport.seasoningCanonicals,
+        };
+        final shawarmaSpiceParts = <String>[
+          if (shawarmaSeasoningCanonicals.contains('паприка')) 'паприкой',
+          if (shawarmaSeasoningCanonicals.contains('соль')) 'солью',
+          if (shawarmaSeasoningCanonicals.contains('перец')) 'перцем',
+        ];
+        final shawarmaSpiceText = shawarmaSpiceParts.isEmpty
+            ? 'по вкусу'
+            : shawarmaSpiceParts.length == 1
+                ? shawarmaSpiceParts.first
+                : shawarmaSpiceParts.length == 2
+                    ? '${shawarmaSpiceParts[0]} и ${shawarmaSpiceParts[1]}'
+                    : '${shawarmaSpiceParts[0]}, ${shawarmaSpiceParts[1]} и ${shawarmaSpiceParts[2]}';
+        final sauceStep = shawarmaGarlic.isEmpty
+            ? 'Смешай $shawarmaSauceBase в густой холодный соус и попробуй на соль.'
+            : 'Смешай $shawarmaSauceBase с чесноком в густой холодный соус.';
+        return [
+          'Нарежь $shawarmaProtein тонкими полосками. '
+              'Приправь $shawarmaSpiceText и оставь на 8-10 минут. '
+              'Прогрей $cookingFatText на очень горячей сковороде и быстро обжарь курицу 6-7 минут до уверенной румяной корочки, не перегружая дно. '
+              'Переложи мясо и дай ему 2 минуты отдохнуть.',
+          'Тонко нашинкуй $shawarmaFresh и держи свежую часть отдельно от горячего мяса. '
+              'Если огурец или помидор дают лишнюю влагу, слегка посоли их и промокни сок, чтобы начинка не текла. '
+              '$sauceStep '
+              'Коротко прогрей $shawarmaWrap 10-15 секунд, чтобы он стал гибким, но не пересох.',
+          'Разложи $shawarmaWrap, смажь середину соусом, сверху собери курицу и свежую часть, оставив сухой край 2-3 см для шва. '
+              'Подверни боковые края и плотно сверни шаурму конвертом. '
+              'Верни её на сковороду швом вниз и обжарь по 1-2 минуты с каждой стороны, чтобы шов запечатался, а лаваш стал хрустящим. '
+              'Подавай сразу.',
         ];
       case ChefStepStyle.breakfast:
         return [
@@ -2042,6 +2167,7 @@ class OfflineChefEngine {
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
       case ChefDishFamily.savoryClosedPie:
+      case ChefDishFamily.shawarmaWrap:
       case ChefDishFamily.breakfast:
       case ChefDishFamily.panBatter:
       case ChefDishFamily.bliniPan:

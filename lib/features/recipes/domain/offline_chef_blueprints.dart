@@ -12,6 +12,7 @@ enum ChefStepStyle {
   soup,
   bake,
   closedPie,
+  shawarmaWrap,
   breakfast,
   panBatter,
   fritterBatter,
@@ -54,6 +55,7 @@ enum ChefDishFamily {
   bake,
   curdBake,
   savoryClosedPie,
+  shawarmaWrap,
   breakfast,
   panBatter,
   bliniPan,
@@ -157,6 +159,8 @@ class ChefBlueprint {
         return ChefDishFamily.bake;
       case ChefStepStyle.closedPie:
         return ChefDishFamily.savoryClosedPie;
+      case ChefStepStyle.shawarmaWrap:
+        return ChefDishFamily.shawarmaWrap;
       case ChefStepStyle.breakfast:
         return ChefDishFamily.breakfast;
       case ChefStepStyle.panBatter:
@@ -2070,6 +2074,54 @@ const chefBlueprints = <ChefBlueprint>[
         key: 'finish',
         candidates: ['сыр', 'зелень', 'помидор'],
         minCount: 0,
+        maxCount: 1,
+      ),
+    ],
+  ),
+
+  ChefBlueprint(
+    id: 'chicken_shawarma_wrap',
+    profile: DishProfile.skillet,
+    titlePrefix: 'Шаурма домашняя',
+    description:
+        'Курица, быстро обжаренная до корочки, хрустящая свежая часть, '
+        'холодный соус и лаваш, который запечатывается швом на сковороде. '
+        'Шаурма как у профи, а не случайный рулет.',
+    timeMin: 24,
+    servingsBase: 2,
+    tags: ['quick', 'street_food', 'generated_local'],
+    anchorSlot: 'protein',
+    secondaryAnchorSlot: 'wrap',
+    supportSlot: 'fresh',
+    preferredStarters: ['масло', 'паприка', 'чеснок', 'соль', 'перец'],
+    maxImplicitPantryStarters: 5,
+    titleStyle: ChefTitleStyle.anchorWithSecondary,
+    stepStyle: ChefStepStyle.shawarmaWrap,
+    family: ChefDishFamily.shawarmaWrap,
+    slots: [
+      ChefSlot(
+        key: 'protein',
+        candidates: ['курица'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'wrap',
+        candidates: ['лаваш'],
+        minCount: 1,
+        maxCount: 1,
+      ),
+      ChefSlot(
+        key: 'fresh',
+        candidates: ['капуста', 'огурец', 'помидор', 'лук'],
+        minCount: 2,
+        maxCount: 4,
+      ),
+      ChefSlot(
+        key: 'sauce',
+        candidates: ['сметана', 'йогурт'],
+        minCount: 1,
         maxCount: 1,
       ),
     ],

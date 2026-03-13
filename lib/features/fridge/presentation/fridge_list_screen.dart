@@ -242,6 +242,11 @@ class _FridgeListScreenState extends ConsumerState<FridgeListScreen> {
                                   page: FridgeAddEditScreen(itemToEdit: item),
                                 ),
                               ),
+                              onDelete: () {
+                                ref
+                                    .read(fridgeListProvider.notifier)
+                                    .removeItem(item.id);
+                              },
                             ),
                           );
                         },

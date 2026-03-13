@@ -8,11 +8,13 @@ import '../../domain/fridge_item.dart';
 class FridgeItemCard extends StatelessWidget {
   final FridgeItem item;
   final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   const FridgeItemCard({
     super.key,
     required this.item,
     required this.onTap,
+    required this.onDelete,
   });
 
   @override
@@ -20,121 +22,145 @@ class FridgeItemCard extends StatelessWidget {
     final visual = _visualFor(item.name);
     final expiryState = _expiryState(item.expiresAt);
 
-    return Semantics(
-      button: true,
-      label: _openSemanticLabel(expiryState.$2),
-      child: ExcludeSemantics(
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppTokens.r20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppTokens.surface,
-              borderRadius: BorderRadius.circular(AppTokens.r20),
-              border: Border.all(
-                color: expiryState.$1 ?? AppTokens.border,
-              ),
-              boxShadow: AppTokens.cardShadow,
-            ),
-            padding: const EdgeInsets.all(AppTokens.p16),
-            child: Row(
-              children: [
-                // Аватар-иконка продукта
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: visual.$2,
-                    borderRadius: BorderRadius.circular(AppTokens.r16),
-                  ),
-                  child: Icon(visual.$1, color: visual.$3, size: 26),
-                ),
-                const SizedBox(width: AppTokens.p16),
-                // Информация о продукте
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTokens.surface,
+        borderRadius: BorderRadius.circular(AppTokens.r20),
+        border: Border.all(
+          color: expiryState.$1 ?? AppTokens.border,
+        ),
+        boxShadow: AppTokens.cardShadow,
+      ),
+      padding: const EdgeInsets.all(AppTokens.p16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Semantics(
+              button: true,
+              label: _openSemanticLabel(expiryState.$2),
+              child: ExcludeSemantics(
+                child: InkWell(
+                  onTap: onTap,
+                  borderRadius: BorderRadius.circular(AppTokens.r20),
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                          ),
-                          if (expiryState.$2 != null) ...[
-                            const SizedBox(width: 8),
-                            _TinyBadge(
-                              text: expiryState.$2!,
-                              color: expiryState.$3!,
-                              background: expiryState.$4!,
-                            ),
-                          ],
-                        ],
+                      // Аватар-иконка продукта
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: visual.$2,
+                          borderRadius: BorderRadius.circular(AppTokens.r16),
+                        ),
+                        child: Icon(visual.$1, color: visual.$3, size: 26),
                       ),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          _TinyBadge(
-                            text: '${_fmtNum(item.amount)} ${item.unit.label}',
-                            color: AppTokens.text,
-                            background: AppTokens.surfaceVariant,
-                          ),
-                          if (item.calories != null)
-                            _TinyBadge(
-                              text: '${item.calories} ккал',
-                              color: AppTokens.secondaryDark,
-                              background: AppTokens.secondarySoft,
-                            ),
-                        ],
-                      ),
-                      if (item.expiresAt != null) ...[
-                        const SizedBox(height: 6),
-                        Row(
+                      const SizedBox(width: AppTokens.p16),
+                      // Информация о продукте
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.schedule_rounded,
-                              size: 12,
-                              color: expiryState.$3 ?? AppTokens.textMuted,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Срок: ${Formatters.formatDate(item.expiresAt!)}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color:
-                                        expiryState.$3 ?? AppTokens.textLight,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    item.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                        ),
                                   ),
+                                ),
+                                if (expiryState.$2 != null) ...[
+                                  const SizedBox(width: 8),
+                                  _TinyBadge(
+                                    text: expiryState.$2!,
+                                    color: expiryState.$3!,
+                                    background: expiryState.$4!,
+                                  ),
+                                ],
+                              ],
                             ),
+                            const SizedBox(height: 6),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                _TinyBadge(
+                                  text:
+                                      '${_fmtNum(item.amount)} ${item.unit.label}',
+                                  color: AppTokens.text,
+                                  background: AppTokens.surfaceVariant,
+                                ),
+                                if (item.calories != null)
+                                  _TinyBadge(
+                                    text: '${item.calories} ккал',
+                                    color: AppTokens.secondaryDark,
+                                    background: AppTokens.secondarySoft,
+                                  ),
+                              ],
+                            ),
+                            if (item.expiresAt != null) ...[
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.schedule_rounded,
+                                    size: 12,
+                                    color:
+                                        expiryState.$3 ?? AppTokens.textMuted,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Срок: ${Formatters.formatDate(item.expiresAt!)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: expiryState.$3 ??
+                                              AppTokens.textLight,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
-                      ],
+                      ),
+                      const SizedBox(width: AppTokens.p8),
+                      // Стрелка редактирования
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppTokens.textMuted,
+                        size: 20,
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(width: AppTokens.p8),
-                // Стрелка редактирования
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppTokens.textMuted,
-                  size: 20,
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(width: AppTokens.p8),
+          Semantics(
+            button: true,
+            label: 'Удалить продукт ${item.name}',
+            child: ExcludeSemantics(
+              child: IconButton(
+                tooltip: 'Удалить продукт ${item.name}',
+                onPressed: onDelete,
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppTokens.textMuted,
+                ),
+                splashRadius: 20,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

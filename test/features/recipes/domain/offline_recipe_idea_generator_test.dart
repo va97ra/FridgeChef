@@ -18,6 +18,7 @@ void main() {
       ],
       shelfItems: const [
         ShelfItem(id: 's1', name: 'Соль', inStock: true),
+        ShelfItem(id: 's3', name: 'Масло', inStock: true),
         ShelfItem(id: 's2', name: 'Паприка', inStock: true),
       ],
       pantryCatalog: const [
@@ -35,6 +36,14 @@ void main() {
           canonicalName: 'паприка',
           aliases: ['паприка'],
           category: 'spice',
+          isStarter: true,
+        ),
+        PantryCatalogEntry(
+          id: 'oil',
+          name: 'Масло',
+          canonicalName: 'масло',
+          aliases: ['масло'],
+          category: 'oil',
           isStarter: true,
         ),
       ],
@@ -73,6 +82,13 @@ void main() {
           canonicalName: 'паприка',
           synonyms: [],
           defaultUnit: Unit.g,
+        ),
+        ProductCatalogEntry(
+          id: 'oil',
+          name: 'Масло',
+          canonicalName: 'масло',
+          synonyms: [],
+          defaultUnit: Unit.ml,
         ),
       ],
     );

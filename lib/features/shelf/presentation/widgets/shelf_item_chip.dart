@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/tokens.dart';
+import '../../domain/pantry_catalog_entry.dart';
 import '../../domain/shelf_item.dart';
 
 class ShelfItemChip extends StatefulWidget {
@@ -26,6 +27,8 @@ class _ShelfItemChipState extends State<ShelfItemChip> {
   @override
   Widget build(BuildContext context) {
     final inStock = widget.item.inStock;
+    final categoryLabel = pantryCategoryLabel(widget.item.category);
+    final stockLabel = inStock ? 'Есть дома' : 'Нет дома';
 
     final chipColor = inStock ? AppTokens.accentSoft : AppTokens.surfaceVariant;
     final borderColor =
@@ -69,6 +72,7 @@ class _ShelfItemChipState extends State<ShelfItemChip> {
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Цветная точка-индикатор наличия
                   AnimatedContainer(
@@ -81,12 +85,33 @@ class _ShelfItemChipState extends State<ShelfItemChip> {
                     ),
                   ),
                   const SizedBox(width: 7),
-                  Text(
-                    widget.item.name,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: textColor,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.item.name,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: textColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        categoryLabel,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: textColor.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                      Text(
+                        stockLabel,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: textColor.withValues(alpha: 0.8),
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -1249,6 +1249,132 @@ void main() {
     expect(result.violations, isEmpty);
   });
 
+  test('rejects shawarma built from boiled chicken without sealed finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('chicken_shawarma_wrap'),
+      recipe: const Recipe(
+        id: 'shawarma-flat',
+        title: 'Шаурма домашняя',
+        timeMin: 18,
+        tags: ['street_food', 'wrap'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Курица', amount: 280, unit: Unit.g),
+          RecipeIngredient(name: 'Лаваш', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Огурцы', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Помидоры', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 90, unit: Unit.g),
+          RecipeIngredient(name: 'Чеснок', amount: 2, unit: Unit.pcs),
+        ],
+        steps: [
+          'Отвари курицу до готовности и нарежь кусочками.',
+          'Смешай сметану с чесноком.',
+          'Выложи курицу, огурцы и помидоры на холодный лаваш и сверни рулетом.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'курица',
+        'лаваш',
+        'огурец',
+        'помидор',
+        'сметана',
+        'чеснок',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Шаурма не должна строиться на варёной курице без жареной корочки.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Шаурме нужна финишная обжарка швом вниз, чтобы запечатать рулет и дать хруст.',
+      ),
+    );
+  });
+
+  test('rejects shawarma without cold sauce and enough fresh structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('chicken_shawarma_wrap'),
+      recipe: const Recipe(
+        id: 'shawarma-dry',
+        title: 'Шаурма домашняя',
+        timeMin: 16,
+        tags: ['street_food', 'wrap'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Курица', amount: 280, unit: Unit.g),
+          RecipeIngredient(name: 'Лаваш', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Капуста', amount: 160, unit: Unit.g),
+        ],
+        steps: [
+          'Быстро обжарь курицу на горячей сковороде до корочки.',
+          'Нашинкуй капусту и заверни всё в лаваш.',
+          'Сразу ешь.',
+        ],
+      ),
+      recipeCanonicals: const {'курица', 'лаваш', 'капуста'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Шаурме нужен отдельный холодный соус на сметане или йогурте.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Шаурме нужна свежая часть минимум из двух компонентов, чтобы вкус не был плоским и сухим.',
+      ),
+    );
+  });
+
+  test('accepts shawarma with seared chicken and sealed wrap technique', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('chicken_shawarma_wrap'),
+      recipe: const Recipe(
+        id: 'shawarma-valid',
+        title: 'Шаурма домашняя',
+        timeMin: 24,
+        tags: ['street_food', 'wrap'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Курица', amount: 280, unit: Unit.g),
+          RecipeIngredient(name: 'Лаваш', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Капуста', amount: 160, unit: Unit.g),
+          RecipeIngredient(name: 'Огурцы', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Помидоры', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 90, unit: Unit.g),
+          RecipeIngredient(name: 'Чеснок', amount: 2, unit: Unit.pcs),
+        ],
+        steps: [
+          'Нарежь курицу тонкими полосками, приправь паприкой, солью и перцем. Прогрей масло на очень горячей сковороде и быстро обжарь курицу 6-7 минут до уверенной румяной корочки, затем дай мясу 2 минуты отдохнуть.',
+          'Тонко нашинкуй капусту, огурцы и помидоры и держи свежую часть отдельно. Если помидоры дают лишнюю влагу, промокни сок. Смешай сметану с чесноком в густой холодный соус. Коротко прогрей лаваш 10-15 секунд.',
+          'Разложи лаваш, смажь середину соусом, сверху собери курицу и свежую часть, оставив сухой край 2-3 см для шва. Подверни боковые края и плотно сверни шаурму конвертом.',
+          'Верни шаурму на сковороду швом вниз и обжарь 1-2 минуты с каждой стороны, чтобы рулет запечатался. Подавай сразу.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'курица',
+        'лаваш',
+        'капуста',
+        'огурец',
+        'помидор',
+        'сметана',
+        'чеснок',
+      },
+    );
+
+    expect(result.isValid, isTrue);
+    expect(result.violations, isEmpty);
+  });
+
   test('rejects generic cutlets without gentle finish', () {
     final result = validateChefDish(
       blueprint: _blueprint('kotlet_dinner'),

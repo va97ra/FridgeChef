@@ -450,6 +450,31 @@ ChefDishValidationResult validateChefDish({
         'Пирог не должен собираться как наливная запеканка без раскатки и закрытия.',
       );
       break;
+    case ChefDishFamily.shawarmaWrap:
+      requireCanonical('курица', 'Шаурме нужна куриная мясная часть.');
+      requireCanonical('лаваш', 'Шаурме нужен лаваш для правильной сборки.');
+      requireAnyCanonical(
+        ['сметана', 'йогурт'],
+        'Шаурме нужен отдельный холодный соус на сметане или йогурте.',
+      );
+      final freshCount = ['капуста', 'огурец', 'помидор', 'лук']
+          .where((canonical) => _containsCanonical(canonicals, canonical))
+          .length;
+      if (freshCount < 2) {
+        violations.add(
+          'Шаурме нужна свежая часть минимум из двух компонентов, чтобы вкус не был плоским и сухим.',
+        );
+      }
+      _validateShawarmaWrapTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+        requiresGarlicInSauce: _containsCanonical(canonicals, 'чеснок'),
+      );
+      forbidAnyStep(
+        ['духовк', 'запекай'],
+        'Шаурма не должна уходить в духовочную технику вместо горячей сковороды.',
+      );
+      break;
     case ChefDishFamily.breakfast:
       _validateBreakfastTechnique(
         violations: violations,
@@ -1201,6 +1226,103 @@ void _validateSavoryClosedPieTechnique({
   if (!_stepsContainAny(steps, ['12-15 минут', 'затем нарежь', 'подавай'])) {
     violations.add(
       'После духовки пирогу нужен отдых, чтобы начинка и соки стабилизировались.',
+    );
+  }
+}
+
+void _validateShawarmaWrapTechnique({
+  required List<String> violations,
+  required List<String> steps,
+  required bool requiresGarlicInSauce,
+}) {
+  if (!_stepsContainAny(steps, [
+    'очень горячей сковороде',
+    'горячей сковороде',
+    'румяной корочки',
+    'уверенной корочки',
+  ])) {
+    violations.add(
+      'Шаурме нужно быстро обжарить курицу на горячей сковороде до уверенной корочки.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'дай ему 2 минуты отдохнуть',
+    'дай мясу 2 минуты отдохнуть',
+    'короткий отдых',
+  ])) {
+    violations.add(
+      'После жарки курице в шаурме нужен короткий отдых, чтобы сок остался внутри.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'тонко нашинкуй',
+    'свежую часть отдельно',
+    'держи свежую часть отдельно',
+  ])) {
+    violations.add(
+      'Шаурме нужна отдельная свежая часть, а не беспорядочная общая смесь.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['лишнюю влагу', 'промокни сок', 'не текла'])) {
+    violations.add(
+      'В шаурме нужно контролировать влагу свежей части, иначе лаваш размокнет.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'густой холодный соус',
+    'смажь середину соусом',
+    'смешай сметану',
+    'смешай йогурт',
+  ])) {
+    violations.add(
+      'Шаурме нужен отдельный холодный соус, а не сухая сборка.',
+    );
+  }
+  if (requiresGarlicInSauce &&
+      !_stepsContainAny(steps, ['с чесноком', 'чесноч'])) {
+    violations.add(
+      'Если в шаурме есть чеснок, он должен уйти в холодный соус, а не потеряться в фоне.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'прогрей лаваш',
+    'подогрей лаваш',
+    '10-15 секунд',
+  ])) {
+    violations.add(
+      'Перед сборкой шаурме нужно коротко прогреть лаваш, чтобы он не рвался.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'оставив сухой край',
+    'подверни боковые края',
+    'плотно сверни',
+    'конвертом',
+  ])) {
+    violations.add(
+      'Шаурму нужно плотно свернуть с сухим краем под шов.',
+    );
+  }
+  if (!_stepsContainAny(steps, [
+    'швом вниз',
+    '1-2 минуты с каждой стороны',
+    'запечатался',
+  ])) {
+    violations.add(
+      'Шаурме нужна финишная обжарка швом вниз, чтобы запечатать рулет и дать хруст.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['подавай сразу', 'ешь сразу', 'немедленно'])) {
+    violations.add(
+      'Шаурму нужно подавать сразу после финишной обжарки.',
+    );
+  }
+  if (_stepsContainAny(
+    steps,
+    ['отвари курицу', 'вари курицу', 'залей курицу водой'],
+  )) {
+    violations.add(
+      'Шаурма не должна строиться на варёной курице без жареной корочки.',
     );
   }
 }

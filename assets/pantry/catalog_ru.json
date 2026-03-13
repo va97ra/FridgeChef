@@ -345,7 +345,8 @@
     "canonicalName": "масло сливочное",
     "aliases": ["сливочное масло", "масло сливочное"],
     "category": "oil",
-    "supportCanonicals": ["жирная связка", "мягкая связка"]
+    "supportCanonicals": ["жирная связка", "мягкая связка"],
+    "isStarter": true
   },
   {
     "id": "tomato_paste",
@@ -580,7 +581,17 @@
     "canonicalName": "молоко",
     "aliases": ["молоко"],
     "category": "dairy",
-    "supportCanonicals": ["мягкая связка"]
+    "supportCanonicals": ["мягкая связка"],
+    "isStarter": true
+  },
+  {
+    "id": "nutmeg",
+    "name": "Мускатный орех",
+    "canonicalName": "мускатный орех",
+    "aliases": ["мускатный орех", "мускат"],
+    "category": "spice",
+    "supportCanonicals": ["тёплая специя", "мягкая связка"],
+    "isStarter": true
   },
   {
     "id": "honey",
