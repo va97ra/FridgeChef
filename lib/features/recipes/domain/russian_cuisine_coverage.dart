@@ -104,7 +104,8 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
     status: RussianCuisineCoverageStatus.covered,
     blueprintId: 'green_shchi_sorrel',
     familyId: 'greenShchiSorrelSoup',
-    continuationNote: 'Implemented in this batch as separate hot sorrel soup family.',
+    continuationNote:
+        'Implemented in this batch as separate hot sorrel soup family.',
   ),
   RussianCuisineCoverageEntry(
     id: 'svekolnik',
@@ -112,7 +113,8 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
     status: RussianCuisineCoverageStatus.covered,
     blueprintId: 'svekolnik',
     familyId: 'svekolnikColdSoup',
-    continuationNote: 'Implemented in this batch as separate cold beet soup family.',
+    continuationNote:
+        'Implemented in this batch as separate cold beet soup family.',
   ),
   RussianCuisineCoverageEntry(
     id: 'makarony_po_flotski',
@@ -192,8 +194,9 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
     title: 'Рисовая каша',
     status: RussianCuisineCoverageStatus.covered,
     blueprintId: 'rice_kasha',
-    familyId: 'simpleRiceKasha',
-    continuationNote: 'Covered with dedicated rice kasha technique.',
+    familyId: 'porridge',
+    continuationNote:
+        'Covered within porridge family with explicit blueprint mapping.',
   ),
   RussianCuisineCoverageEntry(
     id: 'manna_kasha',
@@ -279,10 +282,11 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'classic_golubtsy',
     title: 'Классические голубцы',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'classic_golubtsy',
     familyId: 'classicGolubtsy',
     continuationNote:
-        'Next high-priority missing family after this batch. Needs leaf wrapping, stuffing, braise logic, and tests.',
+        'Implemented as wrapped cabbage-roll family with dedicated braise, validator, and comparison tests.',
   ),
   RussianCuisineCoverageEntry(
     id: 'mushroom_soup',
@@ -290,7 +294,7 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
     status: RussianCuisineCoverageStatus.missing,
     familyId: 'mushroomSoup',
     continuationNote:
-        'Planned next in hot soups batch after classical golubtsy.',
+        'Next missing hot family after classic golubtsy. Needs mushroom-broth reasoning and anti-collapse tests against generic soup.',
   ),
   RussianCuisineCoverageEntry(
     id: 'pea_smoked_soup',

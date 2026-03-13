@@ -2915,6 +2915,8 @@ _FlavorAnalysis _analyzeFlavor({
       }
       switch (soupKind) {
         case _SoupKind.greenShchi:
+          final hasSoftGreenFinish = recipeCanonicals.contains('сметана') ||
+              recipeCanonicals.contains('укроп');
           if ((freshness >= 0.12 || acidity >= 0.10) &&
               (creaminess >= 0.10 || herbiness >= 0.08)) {
             score += 0.10;
@@ -2923,7 +2925,21 @@ _FlavorAnalysis _analyzeFlavor({
             addWarning('щавелевым щам не хватает мягкого зелёного баланса');
             hardPenalty *= 0.84;
           }
-          if (sweetness >= 0.18) {
+          if (recipeCanonicals.contains('яйцо') && hasSoftGreenFinish) {
+            score += 0.08;
+            addReason('яйцо и мягкий финиш собирают зелёную щавелевую кислоту');
+          } else if (!hasSoftGreenFinish) {
+            score -= 0.04;
+          }
+          if (recipeCanonicals.contains('лук') &&
+              recipeCanonicals.contains('морковь')) {
+            score += 0.06;
+            addReason('луково-морковная база смягчает зелёную кислоту щей');
+          }
+          if (sweetness >= 0.18 &&
+              herbiness < 0.10 &&
+              creaminess < 0.12 &&
+              acidity < 0.16) {
             addWarning(
                 'сладость спорит с зелёной кислой природой щавелевых щей');
             hardPenalty *= 0.88;
@@ -3833,10 +3849,6 @@ _StewDishKind _detectStewDishKind(
   }
   if (ingredientCanonicals.contains('капуста') &&
       _containsAny(ingredientCanonicals, const {'лук', 'морковь'}) &&
-      _containsAny(
-        ingredientCanonicals,
-        const {'томатная паста', 'колбаса', 'сосиски', 'курица', 'свинина'},
-      ) &&
       !ingredientCanonicals.contains('рис') &&
       !ingredientCanonicals.contains('фарш')) {
     return _StewDishKind.stewedCabbage;

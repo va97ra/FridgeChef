@@ -2374,18 +2374,26 @@ class OfflineChefEngine {
               : 'В конце доведи бефстроганов${stroganoffSeasoning.isEmpty ? '' : ' через $stroganoffSeasoning'}${stroganoffFinish.isEmpty ? '' : ' и заверши $stroganoffFinish'}, затем дай соусу спокойно собраться 1-2 минуты и остаться гладким.',
         ];
       case ChefDishFamily.stewedCabbageStew:
-        final cabbageVegetables = _sentenceIngredientText(
+        final cabbageAromatics = _sentenceIngredientText(
           _displayList(
             [
               ...(selectedBySlot['veg'] ?? const <String>[]),
               for (final canonical in supportCanonicals)
-                if (canonical == 'лук' ||
-                    canonical == 'морковь' ||
-                    canonical == 'томатная паста')
-                  canonical,
+                if (canonical == 'лук' || canonical == 'морковь') canonical,
             ],
             inventory,
-            limit: 3,
+            limit: 2,
+          ),
+        );
+        final cabbageDepth = _sentenceIngredientText(
+          _displayList(
+            [
+              ...(selectedBySlot['depth'] ?? const <String>[]),
+              for (final canonical in supportCanonicals)
+                if (canonical == 'томатная паста') canonical,
+            ],
+            inventory,
+            limit: 1,
           ),
         );
         final cabbageProtein = _sentenceIngredientText(
@@ -2416,8 +2424,8 @@ class OfflineChefEngine {
                 ),
         );
         return [
-          'Нарежь $anchor тонкими полосками${cabbageVegetables.isEmpty ? '' : ', а $cabbageVegetables мягко прогрей 4-5 минут'}${cabbageProtein.isEmpty ? '' : ' и подготовь $cabbageProtein для более сытной подложки'}.',
-          'Добавь капусту${cabbageProtein.isEmpty ? '' : ' и $cabbageProtein'}${support.isEmpty ? '' : ', вмешай $support'} и туши капусту под крышкой 20-25 минут на спокойном огне, пока она не станет мягкой, но не расползётся в пюре.',
+          'Нарежь $anchor тонкими полосками${cabbageAromatics.isEmpty ? '' : ', а $cabbageAromatics сначала мягко прогрей 4-5 минут'}${cabbageProtein.isEmpty ? '' : ' и подготовь $cabbageProtein для более сытной подложки'}.',
+          'Добавь капусту${cabbageProtein.isEmpty ? '' : ' и $cabbageProtein'}${cabbageDepth.isEmpty ? '' : ', вмешай $cabbageDepth'}${support.isEmpty ? '' : ', затем добавь $support'} и туши капусту под крышкой 20-25 минут на спокойном огне, пока она не станет мягкой, но не расползётся в пюре.',
           cabbageSeasoning.isEmpty && cabbageFinish.isEmpty
               ? 'Сними тушёную капусту с огня, дай ей постоять 2-3 минуты и подавай горячей.'
               : 'В конце доведи тушёную капусту${cabbageSeasoning.isEmpty ? '' : ' через $cabbageSeasoning'}${cabbageFinish.isEmpty ? '' : ' и заверши $cabbageFinish'}, затем дай ей постоять 2-3 минуты перед подачей.',
@@ -2554,18 +2562,26 @@ class OfflineChefEngine {
               : 'В конце аккуратно доведи вкус${shchiSeasoning.isEmpty ? '' : ' через $shchiSeasoning'}${shchiHomeFinish.isEmpty ? '' : ', а подай щи со $shchiHomeFinish'}, затем дай супу настояться 3-4 минуты.',
         ];
       case ChefDishFamily.greenShchiSorrelSoup:
-        final sorrelVegetables = _sentenceIngredientText(
+        final sorrelRootBase = _sentenceIngredientText(
           _displayList(
             [
               ...(selectedBySlot['veg'] ?? const <String>[]),
               for (final canonical in supportCanonicals)
-                if (canonical == 'картофель' ||
-                    canonical == 'лук' ||
-                    canonical == 'морковь')
-                  canonical,
+                if (canonical == 'картофель') canonical,
             ],
             inventory,
-            limit: 3,
+            limit: 1,
+          ),
+        );
+        final sorrelAromatics = _sentenceIngredientText(
+          _displayList(
+            [
+              ...(selectedBySlot['aromatic'] ?? const <String>[]),
+              for (final canonical in supportCanonicals)
+                if (canonical == 'лук' || canonical == 'морковь') canonical,
+            ],
+            inventory,
+            limit: 2,
           ),
         );
         final sorrelProtein = _sentenceIngredientText(
@@ -2594,11 +2610,11 @@ class OfflineChefEngine {
         );
         final sorrelSeasoning = _sentenceIngredientText(seasoningText);
         return [
-          'Подготовь $anchor${sorrelVegetables.isEmpty ? '' : ', $sorrelVegetables'}${sorrelProtein.isEmpty ? '' : ', а $sorrelProtein держи для более сытной основы'}${aromaticsText.isEmpty ? '' : ', сначала мягко прогрей $aromaticsText 4-5 минут'}.',
-          'Влей воду${sorrelVegetables.isEmpty ? '' : ' и вари овощную основу 16-18 минут'}${sorrelProtein.isEmpty ? '' : ', затем добавь $sorrelProtein на оставшееся время'}, а в последние 2-3 минуты добавь щавель, чтобы суп сохранил свежую кислоту.',
+          'Подготовь $anchor${sorrelRootBase.isEmpty ? '' : ', $sorrelRootBase'}${sorrelProtein.isEmpty ? '' : ', а $sorrelProtein держи для более сытной основы'}${sorrelAromatics.isEmpty ? (aromaticsText.isEmpty ? '' : ', сначала мягко прогрей $aromaticsText 4-5 минут, чтобы суп не вышел плоским') : ', сначала мягко прогрей $sorrelAromatics 4-5 минут, чтобы суп не вышел плоским'}.',
+          'Влей воду${sorrelRootBase.isEmpty ? '' : ' и вари картофельную основу 16-18 минут'}${sorrelProtein.isEmpty ? '' : ', затем добавь $sorrelProtein на оставшееся время'}, а в последние 2-3 минуты добавь щавель, чтобы суп сохранил свежую кислоту.',
           sorrelSeasoning.isEmpty && sorrelFinish.isEmpty
               ? 'Сними щавелевые щи с огня, дай им постоять 2-3 минуты и подавай горячими.'
-              : 'В конце доведи щавелевые щи${sorrelSeasoning.isEmpty ? '' : ' через $sorrelSeasoning'}${sorrelFinish.isEmpty ? '' : ' и подай со $sorrelFinish'}, затем дай супу постоять 2-3 минуты.',
+              : 'Сними щавелевые щи с огня${sorrelSeasoning.isEmpty ? '' : ', аккуратно доведи их через $sorrelSeasoning'}${sorrelFinish.isEmpty ? '' : ' и подай со $sorrelFinish'}, затем дай супу постоять 2-3 минуты.',
         ];
       case ChefDishFamily.borschtSoup:
         final borschtTomatoText = _sentenceIngredientText(
