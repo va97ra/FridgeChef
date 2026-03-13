@@ -1439,6 +1439,292 @@ void main() {
       ),
     );
   });
+
+  test('accepts green shchi with late sorrel finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('green_shchi_sorrel'),
+      recipe: const Recipe(
+        id: 'green-shchi-valid',
+        title: 'Щавелевые щи',
+        timeMin: 32,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Щавель', amount: 140, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 60, unit: Unit.g),
+          RecipeIngredient(name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь щавель, картофель, яйца, лук и морковь, сначала мягко прогрей лук и морковь 4-5 минут.',
+          'Влей воду и вари основу 16-18 минут, затем добавь яйца, а в последние 2-3 минуты добавь щавель.',
+          'Сними с огня, доведи вкус и подай со сметаной и укропом.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'щавель',
+        'картофель',
+        'яйцо',
+        'лук',
+        'морковь',
+        'сметана',
+        'укроп',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects green shchi when sorrel is boiled from the start', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('green_shchi_sorrel'),
+      recipe: const Recipe(
+        id: 'green-shchi-flat',
+        title: 'Щавелевые щи',
+        timeMin: 30,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Щавель', amount: 140, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 60, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь щавель, картофель, яйца и лук.',
+          'Влей воду, добавь щавель сразу и вари основу 18 минут.',
+          'Сними с огня и подай со сметаной.',
+        ],
+      ),
+      recipeCanonicals: const {'щавель', 'картофель', 'яйцо', 'лук', 'сметана'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Щавелевые щи должны добавлять щавель в самом конце, чтобы сохранить свежую кислоту.',
+      ),
+    );
+  });
+
+  test('accepts svekolnik with chilled beet base', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('svekolnik'),
+      recipe: const Recipe(
+        id: 'svekolnik-valid',
+        title: 'Свекольник холодный',
+        timeMin: 28,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Свекла', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Кефир', amount: 700, unit: Unit.ml),
+          RecipeIngredient(name: 'Картофель', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Огурцы', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+        steps: [
+          'Отвари свеклу, картофель и яйца 10-12 минут, затем полностью остуди свекольную основу и остальные продукты.',
+          'Нарежь свеклу, картофель, яйца, огурцы и укроп, сложи всё в большую миску.',
+          'Влей кефир, доведи вкус и дай свекольнику постоять в холоде 5-7 минут, затем подавай охлаждённым.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'свекла',
+        'кефир',
+        'картофель',
+        'яйцо',
+        'огурец',
+        'укроп',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects svekolnik without chilled beet base', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('svekolnik'),
+      recipe: const Recipe(
+        id: 'svekolnik-hot-base',
+        title: 'Свекольник холодный',
+        timeMin: 24,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Свекла', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Кефир', amount: 700, unit: Unit.ml),
+          RecipeIngredient(name: 'Картофель', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Огурцы', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+        steps: [
+          'Отвари свеклу, картофель и яйца 10-12 минут.',
+          'Нарежь всё и сложи в миску.',
+          'Влей кефир и сразу подавай холодным.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'свекла',
+        'кефир',
+        'картофель',
+        'яйцо',
+        'огурец',
+        'укроп',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Свекольник требует отдельно сварить и полностью остудить свекольную основу.',
+      ),
+    );
+  });
+
+  test('accepts buckwheat rustic bowl with aromatic assembly', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('grechka_rustic'),
+      recipe: const Recipe(
+        id: 'grechka-valid',
+        title: 'Гречка по-домашнему',
+        timeMin: 24,
+        tags: ['grain'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Гречка', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Грибы', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Укроп', amount: 10, unit: Unit.g),
+        ],
+        steps: [
+          'Промой крупу и вари гречку 15-18 минут под крышкой, сначала прогрей добавки 4-5 минут.',
+          'Добавь грибы к луку и моркови, затем вмешай основу, чтобы гречка впитала вкус.',
+          'Дай блюду 1-2 минуты постоять и подавай горячим с укропом.',
+        ],
+      ),
+      recipeCanonicals: const {'гречка', 'грибы', 'лук', 'морковь', 'укроп'},
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects buckwheat rustic bowl without aromatic assembly', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('grechka_rustic'),
+      recipe: const Recipe(
+        id: 'grechka-flat',
+        title: 'Гречка по-домашнему',
+        timeMin: 14,
+        tags: ['grain'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Гречка', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Грибы', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Свари гречку.',
+          'Сложи грибы и лук сверху.',
+          'Подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'гречка', 'грибы', 'лук'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Гречка по-домашнему должна собираться через вмешивание готовой крупы в ароматическую базу.',
+      ),
+    );
+  });
+
+  test('accepts stewed cabbage with tomato depth and covered finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('stewed_cabbage'),
+      recipe: const Recipe(
+        id: 'stewed-cabbage-valid',
+        title: 'Тушёная капуста',
+        timeMin: 28,
+        tags: ['stew'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Капуста', amount: 800, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Колбаса', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Томатная паста', amount: 45, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь капусту, лук и морковь, прогрей в самом начале лук и морковь 4-5 минут.',
+          'Добавь томатную пасту и колбасу, затем туши капусту на слабом огне под крышкой 20-25 минут, пока текстура не станет густой и насыщенной.',
+          'Сними с огня, дай блюду пару минут постоять и подавай горячим.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'капуста',
+        'лук',
+        'морковь',
+        'колбаса',
+        'томатная паста',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects stewed cabbage that drifts into cold mayo dish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('stewed_cabbage'),
+      recipe: const Recipe(
+        id: 'stewed-cabbage-cold',
+        title: 'Тушёная капуста',
+        timeMin: 12,
+        tags: ['stew'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Капуста', amount: 800, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Колбаса', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Майонез', amount: 40, unit: Unit.g),
+        ],
+        steps: [
+          'Смешай капусту с луком, морковью, колбасой и майонезом.',
+          'Подавай холодной.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'капуста',
+        'лук',
+        'морковь',
+        'колбаса',
+        'майонез',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains('Тушёная капуста не должна уходить в майонезную логику салата.'),
+    );
+    expect(
+      result.violations,
+      contains(
+          'Тушёная капуста не должна уходить в холодную подачу или запекание.'),
+    );
+  });
 }
 
 ChefBlueprint _blueprint(String id) {

@@ -68,6 +68,7 @@ void main() {
     expect(canonicalizer.canonicalize('Зеленый горошек'), 'горошек');
     expect(canonicalizer.canonicalize('Домашний квас'), 'квас');
     expect(canonicalizer.canonicalize('Вареная свекла'), 'свекла');
+    expect(canonicalizer.canonicalize('Щавель листовой'), 'щавель');
     expect(canonicalizer.canonicalize('Перловая крупа'), 'перловка');
     expect(canonicalizer.canonicalize('Маслины'), 'оливки');
     expect(canonicalizer.canonicalize('Копченая колбаса'), 'колбаса');

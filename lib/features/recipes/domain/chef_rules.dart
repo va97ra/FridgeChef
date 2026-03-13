@@ -78,6 +78,7 @@ DishProfile inferDishProfile({
 
   if (normalizedTitle.contains('суп') ||
       normalizedTitle.contains('щи') ||
+      normalizedTitle.contains('свекольник') ||
       normalizedTitle.contains('борщ') ||
       normalizedTitle.contains('уха') ||
       normalizedTitle.contains('рассольник') ||
@@ -280,7 +281,9 @@ double _scoreStructure({
   final hasCreamy = _containsAny(matchedCanonicals, _creamyCanonicals);
   final hasAromatics = supportPlan.aromaticCanonicals.isNotEmpty;
   final ingredientCount = recipeCanonicals.length;
+  final isSvekolnik = _isSvekolnikDish(recipeCanonicals);
   final friedDishKind = _detectFriedDishKind(profile, recipeCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, recipeCanonicals);
   final soupKind = _detectSoupKind(recipeCanonicals);
   final stewDishKind = _detectStewDishKind(profile, recipeCanonicals);
 
@@ -301,7 +304,35 @@ double _scoreStructure({
       if (ingredientCount >= 3 && ingredientCount <= 8) {
         score += 0.08;
       }
+      if (isSvekolnik) {
+        if (matchedCanonicals.contains('свекла') &&
+            matchedCanonicals.contains('картофель') &&
+            matchedCanonicals.contains('огурец')) {
+          score += 0.18;
+        }
+        if (matchedCanonicals.contains('яйцо')) {
+          score += 0.08;
+        }
+        if (_containsAny(matchedCanonicals, _coldSoupBaseCanonicals)) {
+          score += 0.08;
+        }
+        if (hasCreamy || _containsAny(matchedCanonicals, _herbCanonicals)) {
+          score += 0.06;
+        }
+        break;
+      }
       switch (soupKind) {
+        case _SoupKind.greenShchi:
+          if (matchedCanonicals.contains('щавель') && matchedVegetables >= 2) {
+            score += 0.16;
+          }
+          if (_containsAny(matchedCanonicals, const {'яйцо', 'курица'})) {
+            score += 0.08;
+          }
+          if (hasCreamy || _containsAny(matchedCanonicals, _herbCanonicals)) {
+            score += 0.06;
+          }
+          break;
         case _SoupKind.shchi:
           if (matchedCanonicals.contains('капуста') && matchedVegetables >= 2) {
             score += 0.14;
@@ -396,6 +427,21 @@ double _scoreStructure({
       if (ingredientCount >= 3 && ingredientCount <= 7) {
         score += 0.08;
       }
+      if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+        if (matchedCanonicals.contains('гречка') &&
+            _containsAny(
+              matchedCanonicals,
+              const {'грибы', 'лук', 'морковь'},
+            )) {
+          score += 0.18;
+        }
+        if (_containsAny(
+          matchedCanonicals,
+          const {'грибы', 'курица', 'говядина', 'сосиски'},
+        )) {
+          score += 0.08;
+        }
+      }
       break;
     case DishProfile.breakfast:
       switch (friedDishKind) {
@@ -472,6 +518,22 @@ double _scoreStructure({
         score += 0.08;
       }
       switch (stewDishKind) {
+        case _StewDishKind.stewedCabbage:
+          if (matchedCanonicals.contains('капуста') &&
+              _containsAny(matchedCanonicals, const {'лук', 'морковь'})) {
+            score += 0.24;
+          }
+          if (_containsAny(
+            matchedCanonicals,
+            const {'томатная паста', 'колбаса', 'сосиски', 'курица', 'свинина'},
+          )) {
+            score += 0.10;
+          }
+          if (hasAromatics ||
+              _containsAny(matchedCanonicals, _herbCanonicals)) {
+            score += 0.06;
+          }
+          break;
         case _StewDishKind.lazyCabbageRolls:
           if (matchedCanonicals.contains('фарш') &&
               matchedCanonicals.contains('рис') &&
@@ -787,7 +849,9 @@ _TechniqueAnalysis _analyzeTechnique({
       !(profile == DishProfile.breakfast &&
           _isSweetBreakfast(recipeCanonicals));
   final isColdSoup = _isColdSoupDish(recipeCanonicals);
+  final isSvekolnik = _isSvekolnikDish(recipeCanonicals);
   final friedDishKind = _detectFriedDishKind(profile, recipeCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, recipeCanonicals);
   final soupKind = _detectSoupKind(recipeCanonicals);
   final stewDishKind = _detectStewDishKind(profile, recipeCanonicals);
   final isPanBatter = friedDishKind == _FriedDishKind.blini;
@@ -847,6 +911,31 @@ _TechniqueAnalysis _analyzeTechnique({
           addWarning('холодный суп нельзя кипятить после сборки');
           hardPenalty *= 0.74;
         }
+        if (isSvekolnik) {
+          if (_containsAnyKeyword(
+                stepText,
+                const ['остуди', 'полностью остуди', 'охлади'],
+              ) &&
+              _containsKeyword(stepText, 'свекл')) {
+            score += 0.10;
+            addReason('свекольная основа охлаждается отдельно и не мутнеет');
+          } else {
+            addWarning('свекольнику нужно отдельно остудить свекольную основу');
+            hardPenalty *= 0.82;
+          }
+          if ((_containsKeyword(stepText, 'влей') &&
+                  _containsAnyKeyword(stepText, const ['кефир', 'квас'])) ||
+              (_containsAnyKeyword(stepText, const ['кефир', 'квас']) &&
+                  hasColdAssembly)) {
+            score += 0.08;
+            addReason(
+                'свекольник собирается на холодной базе, а не как горячий суп');
+          } else {
+            addWarning(
+                'свекольник должен собираться на холодной базе после охлаждения');
+            hardPenalty *= 0.84;
+          }
+        }
         break;
       }
       if (_containsAny(recipeCanonicals, _aromaticCanonicals)) {
@@ -880,6 +969,23 @@ _TechniqueAnalysis _analyzeTechnique({
             'суп доводится ярким акцентом в конце, а не теряет его в варке');
       }
       switch (soupKind) {
+        case _SoupKind.greenShchi:
+          if (_containsAnyKeyword(
+                stepText,
+                const ['в конце', 'за 2-3 минуты', 'в последние 2-3 минуты'],
+              ) &&
+              _containsKeyword(stepText, 'щавел')) {
+            score += 0.12;
+            addReason('щавель входит в суп поздно и сохраняет свежую кислоту');
+          } else {
+            addWarning('щавелевые щи требуют позднего добавления щавеля');
+            hardPenalty *= 0.82;
+          }
+          if (_containsAnyKeyword(stepText, const ['сметан', 'укроп', 'яйц'])) {
+            score += 0.06;
+            addReason('щавелевые щи получают мягкий домашний финиш');
+          }
+          break;
         case _SoupKind.shchi:
           if (recipeCanonicals.contains('капуста') && hasGentleHeat) {
             score += 0.08;
@@ -1020,6 +1126,35 @@ _TechniqueAnalysis _analyzeTechnique({
       } else {
         addWarning('блюдо из крупы не собирается в цельную подачу');
       }
+      if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+        if ((_containsKeyword(stepText, 'вари') &&
+                _containsKeyword(stepText, 'гречк')) ||
+            _containsAnyKeyword(
+                stepText, const ['15-18 минут', 'под крышкой'])) {
+          score += 0.10;
+          addReason('гречка варится отдельно до рассыпчатой текстуры');
+        } else {
+          addWarning(
+              'гречке по-домашнему нужна отдельная варка до рассыпчатости');
+          hardPenalty *= 0.82;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const [
+            'вмешай гречку',
+            'собери ароматическую базу',
+            'прогрей все вместе'
+          ],
+        )) {
+          score += 0.10;
+          addReason(
+              'гречка вмешивается в ароматическую базу, а не подаётся отдельно');
+        } else {
+          addWarning(
+              'гречка по-домашнему должна собираться через вмешивание готовой крупы');
+          hardPenalty *= 0.82;
+        }
+      }
       break;
     case DishProfile.breakfast:
       if (isPanBatter) {
@@ -1146,6 +1281,38 @@ _TechniqueAnalysis _analyzeTechnique({
       break;
     case DishProfile.stew:
       switch (stewDishKind) {
+        case _StewDishKind.stewedCabbage:
+          if (_containsAnyKeyword(
+                stepText,
+                const ['под крышкой', '20-25 минут', 'туши капусту'],
+              ) &&
+              (_containsKeyword(stepText, 'туш') ||
+                  (hasHeat && hasGentleHeat))) {
+            score += 0.16;
+            addReason('капуста спокойно доходит под крышкой и не пересыхает');
+          } else {
+            addWarning(
+                'тушёной капусте нужно спокойное тушение под крышкой 20-25 минут');
+            hardPenalty *= 0.78;
+          }
+          if (_containsAnyKeyword(
+            stepText,
+            const ['томатн', 'колбас', 'сосиск', 'лавров'],
+          )) {
+            score += 0.10;
+            addReason(
+                'домашняя база капусты получает томатную или мясную глубину');
+          } else {
+            addWarning(
+                'тушёной капусте не хватает томатной или мясной глубины');
+            hardPenalty *= 0.84;
+          }
+          if (_containsAnyKeyword(stepText, const ['майонез', 'холодн'])) {
+            addWarning(
+                'тушёная капуста не должна уходить в майонезную или холодную подачу');
+            hardPenalty *= 0.78;
+          }
+          break;
         case _StewDishKind.lazyCabbageRolls:
           if (hasMix &&
               _containsAnyKeyword(
@@ -1817,7 +1984,9 @@ _BalanceAnalysis _analyzeBalance({
   final isSweetBreakfast =
       profile == DishProfile.breakfast && _isSweetBreakfast(recipeCanonicals);
   final isColdSoup = _isColdSoupDish(recipeCanonicals);
+  final isSvekolnik = _isSvekolnikDish(recipeCanonicals);
   final friedDishKind = _detectFriedDishKind(profile, recipeCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, recipeCanonicals);
   final soupKind = _detectSoupKind(recipeCanonicals);
   final stewDishKind = _detectStewDishKind(profile, recipeCanonicals);
   final isPanBatter = friedDishKind == _FriedDishKind.blini;
@@ -1872,6 +2041,19 @@ _BalanceAnalysis _analyzeBalance({
         if (hasFinishingSupport || hasBrightFinish) {
           score += 0.08;
         }
+        if (isSvekolnik) {
+          if (recipeCanonicals.contains('свекла') &&
+              (hasCreamy || hasAcid) &&
+              (hasHerbs || hasFinishingSupport)) {
+            score += 0.10;
+            addReason(
+                'свекольник держит холодную свекольную базу собранной и свежей');
+          } else {
+            addWarning(
+                'свекольнику не хватает холодного свекольного баланса и зелёного финиша');
+            hardPenalty *= 0.84;
+          }
+        }
         break;
       }
       if (hasAromatics) {
@@ -1908,6 +2090,18 @@ _BalanceAnalysis _analyzeBalance({
         score += 0.10;
       }
       switch (soupKind) {
+        case _SoupKind.greenShchi:
+          if ((hasAcid || hasBrightFinish || hasHerbs) &&
+              (hasCreamy || hasFinishingSupport)) {
+            score += 0.10;
+            addReason(
+                'щавелевая кислота удерживается сметанным или травяным финишем');
+          } else {
+            addWarning(
+                'щавелевым щам не хватает мягкого финиша к зелёной кислоте');
+            hardPenalty *= 0.84;
+          }
+          break;
         case _SoupKind.shchi:
           if (freshCount > 0 ||
               _containsAny(recipeCanonicals, _herbCanonicals)) {
@@ -2027,6 +2221,25 @@ _BalanceAnalysis _analyzeBalance({
       } else {
         addWarning('не хватает контраста или свежего акцента');
       }
+      if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+        if (_containsAny(
+          recipeCanonicals,
+          const {'грибы', 'курица', 'говядина', 'сосиски'},
+        )) {
+          score += 0.10;
+          addReason(
+              'гречневая база получает сытный акцент и не кажется пустой');
+        } else {
+          addWarning(
+              'гречке по-домашнему не хватает грибного или мясного акцента');
+          hardPenalty *= 0.84;
+        }
+        if (hasCreamy || hasFat || hasFinishingSupport) {
+          score += 0.08;
+        } else {
+          addWarning('гречке по-домашнему не хватает мягкой домашней опоры');
+        }
+      }
       break;
     case DishProfile.breakfast:
       if (isPanBatter) {
@@ -2139,6 +2352,31 @@ _BalanceAnalysis _analyzeBalance({
       break;
     case DishProfile.stew:
       switch (stewDishKind) {
+        case _StewDishKind.stewedCabbage:
+          if (hasAromatics) {
+            score += 0.18;
+            addReason('капуста опирается на луково-морковную домашнюю базу');
+          } else {
+            addWarning(
+                'тушёной капусте не хватает домашней ароматической базы');
+            hardPenalty *= 0.82;
+          }
+          if (hasTomatoDepth ||
+              _containsAny(
+                matchedCanonicals,
+                const {'колбаса', 'сосиски', 'курица', 'свинина'},
+              )) {
+            score += 0.16;
+            addReason('тушёная капуста получает томатную или мясную глубину');
+          } else {
+            addWarning(
+                'тушёной капусте не хватает томатной или мясной глубины');
+            hardPenalty *= 0.82;
+          }
+          if (hasFinishingSupport || hasHerbs || hasCreamy) {
+            score += 0.08;
+          }
+          break;
         case _StewDishKind.lazyCabbageRolls:
           if (hasAromatics) {
             score += 0.18;
@@ -2547,7 +2785,9 @@ _FlavorAnalysis _analyzeFlavor({
   final hasTomatoDepth = _containsAny(availableSet, _tomatoDepthCanonicals);
   final hasBrightFinish = _containsAny(availableSet, _brightFinishCanonicals);
   final isColdSoup = _isColdSoupDish(recipeCanonicals);
+  final isSvekolnik = _isSvekolnikDish(recipeCanonicals);
   final friedDishKind = _detectFriedDishKind(profile, recipeCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, recipeCanonicals);
   final soupKind = _detectSoupKind(recipeCanonicals);
   final stewDishKind = _detectStewDishKind(profile, recipeCanonicals);
   final isPanBatter = friedDishKind == _FriedDishKind.blini;
@@ -2624,6 +2864,23 @@ _FlavorAnalysis _analyzeFlavor({
           addWarning(
               'холодному супу не хватает опоры, чтобы вкус не был водянистым');
         }
+        if (isSvekolnik) {
+          if (recipeCanonicals.contains('свекла') &&
+              (freshness >= 0.14 || acidity >= 0.10) &&
+              (creaminess >= 0.10 || herbiness >= 0.08)) {
+            score += 0.10;
+            addReason(
+                'свекольник держит холодную свекольную свежесть без водянистости');
+          } else {
+            addWarning(
+                'свекольнику не хватает свекольной свежести и мягкого финиша');
+            hardPenalty *= 0.84;
+          }
+          if (spice >= 0.14) {
+            addWarning('свекольник перегружается лишней пряностью');
+            hardPenalty *= 0.88;
+          }
+        }
         break;
       }
       if (umami >= 0.20) {
@@ -2657,6 +2914,21 @@ _FlavorAnalysis _analyzeFlavor({
         }
       }
       switch (soupKind) {
+        case _SoupKind.greenShchi:
+          if ((freshness >= 0.12 || acidity >= 0.10) &&
+              (creaminess >= 0.10 || herbiness >= 0.08)) {
+            score += 0.10;
+            addReason('щавелевые щи держат зелёную кислоту мягкой и собранной');
+          } else {
+            addWarning('щавелевым щам не хватает мягкого зелёного баланса');
+            hardPenalty *= 0.84;
+          }
+          if (sweetness >= 0.18) {
+            addWarning(
+                'сладость спорит с зелёной кислой природой щавелевых щей');
+            hardPenalty *= 0.88;
+          }
+          break;
         case _SoupKind.shchi:
           if (freshness >= 0.12 && (creaminess >= 0.12 || herbiness >= 0.10)) {
             score += 0.08;
@@ -2727,7 +2999,31 @@ _FlavorAnalysis _analyzeFlavor({
     case DishProfile.grainBowl:
     case DishProfile.skillet:
     case DishProfile.general:
-      if (isPotatoFritter) {
+      if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+        if (umami >= 0.16) {
+          score += 0.18;
+          addReason('грибы или мясной акцент дают гречке домашнюю глубину');
+        } else {
+          addWarning(
+              'гречке по-домашнему не хватает грибной или мясной насыщенности');
+          hardPenalty *= 0.86;
+        }
+        if (fat >= 0.10 || creaminess >= 0.10) {
+          score += 0.12;
+        } else {
+          addWarning('гречке по-домашнему не хватает мягкой жирной опоры');
+        }
+        if (freshness >= 0.06 || herbiness >= 0.08 || acidity >= 0.06) {
+          score += 0.08;
+        } else {
+          addWarning(
+              'гречке по-домашнему не хватает свежего или травяного акцента');
+        }
+        if (sweetness >= 0.18) {
+          addWarning('сладость спорит с домашним savoury-профилем гречки');
+          hardPenalty *= 0.86;
+        }
+      } else if (isPotatoFritter) {
         if (umami >= 0.12 || spice >= 0.06) {
           score += 0.14;
           addReason('картофель и лук дают драникам домашнюю насыщенность');
@@ -2780,6 +3076,39 @@ _FlavorAnalysis _analyzeFlavor({
       break;
     case DishProfile.stew:
       switch (stewDishKind) {
+        case _StewDishKind.stewedCabbage:
+          if (umami >= 0.14 ||
+              _containsAny(
+                recipeCanonicals,
+                const {'колбаса', 'сосиски', 'курица', 'свинина'},
+              )) {
+            score += 0.18;
+            addReason(
+                'капуста получает мясную или грибную глубину и не кажется пустой');
+          } else {
+            addWarning('тушёной капусте не хватает глубины вкуса');
+            hardPenalty *= 0.86;
+          }
+          if (fat >= 0.10 || creaminess >= 0.08) {
+            score += 0.12;
+          } else {
+            addWarning('тушёной капусте не хватает мягкой домашней опоры');
+          }
+          if (acidity >= 0.08 || hasTomatoDepth || herbiness >= 0.06) {
+            score += 0.10;
+            addReason(
+                'томат и зелень удерживают капусту собранной, а не ватной');
+          } else {
+            addWarning(
+                'тушёной капусте не хватает томатного или травяного контраста');
+            hardPenalty *= 0.84;
+          }
+          if (sweetness >= 0.24) {
+            addWarning(
+                'сладость начинает спорить с домашним профилем тушёной капусты');
+            hardPenalty *= 0.88;
+          }
+          break;
         case _StewDishKind.lazyCabbageRolls:
           if (umami >= 0.18) {
             score += 0.18;
@@ -3362,6 +3691,21 @@ bool _isColdSoupDish(Set<String> ingredientCanonicals) {
       ingredientCanonicals.contains('картофель');
 }
 
+bool _isSvekolnikDish(Set<String> ingredientCanonicals) {
+  return _isColdSoupDish(ingredientCanonicals) &&
+      ingredientCanonicals.contains('свекла') &&
+      ingredientCanonicals.contains('яйцо');
+}
+
+bool _isGreenShchiDish(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals.contains('щавель') &&
+      !_containsAny(ingredientCanonicals, _coldSoupBaseCanonicals) &&
+      _containsAny(
+        ingredientCanonicals,
+        const {'картофель', 'лук', 'морковь'},
+      );
+}
+
 enum _FriedDishKind {
   none,
   blini,
@@ -3372,6 +3716,7 @@ enum _FriedDishKind {
 
 enum _SoupKind {
   none,
+  greenShchi,
   shchi,
   borscht,
   ukha,
@@ -3379,8 +3724,14 @@ enum _SoupKind {
   solyanka,
 }
 
+enum _GrainDishKind {
+  none,
+  buckwheatRustic,
+}
+
 enum _StewDishKind {
   none,
+  stewedCabbage,
   lazyCabbageRolls,
   tefteli,
   zrazy,
@@ -3423,6 +3774,9 @@ _SoupKind _detectSoupKind(Set<String> ingredientCanonicals) {
   if (_isColdSoupDish(ingredientCanonicals)) {
     return _SoupKind.none;
   }
+  if (_isGreenShchiDish(ingredientCanonicals)) {
+    return _SoupKind.greenShchi;
+  }
   if (ingredientCanonicals.contains('рыба')) {
     return _SoupKind.ukha;
   }
@@ -3448,6 +3802,23 @@ _SoupKind _detectSoupKind(Set<String> ingredientCanonicals) {
   return _SoupKind.none;
 }
 
+_GrainDishKind _detectGrainDishKind(
+  DishProfile profile,
+  Set<String> ingredientCanonicals,
+) {
+  if (profile != DishProfile.grainBowl) {
+    return _GrainDishKind.none;
+  }
+  if (ingredientCanonicals.contains('гречка') &&
+      _containsAny(
+        ingredientCanonicals,
+        const {'грибы', 'лук', 'морковь', 'курица', 'говядина', 'сосиски'},
+      )) {
+    return _GrainDishKind.buckwheatRustic;
+  }
+  return _GrainDishKind.none;
+}
+
 _StewDishKind _detectStewDishKind(
   DishProfile profile,
   Set<String> ingredientCanonicals,
@@ -3459,6 +3830,16 @@ _StewDishKind _detectStewDishKind(
       ingredientCanonicals.contains('рис') &&
       ingredientCanonicals.contains('капуста')) {
     return _StewDishKind.lazyCabbageRolls;
+  }
+  if (ingredientCanonicals.contains('капуста') &&
+      _containsAny(ingredientCanonicals, const {'лук', 'морковь'}) &&
+      _containsAny(
+        ingredientCanonicals,
+        const {'томатная паста', 'колбаса', 'сосиски', 'курица', 'свинина'},
+      ) &&
+      !ingredientCanonicals.contains('рис') &&
+      !ingredientCanonicals.contains('фарш')) {
+    return _StewDishKind.stewedCabbage;
   }
   if (ingredientCanonicals.contains('фарш') &&
       _containsAny(
@@ -3536,12 +3917,15 @@ List<String> _recommendedAromatics(
   Set<String> ingredientCanonicals,
 ) {
   final soupKind = _detectSoupKind(ingredientCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
   if (_isColdSoupDish(ingredientCanonicals) ||
       _isFriedSkilletDish(profile, ingredientCanonicals)) {
     return const [];
   }
   switch (stewDishKind) {
+    case _StewDishKind.stewedCabbage:
+      return const ['лук', 'морковь'];
     case _StewDishKind.lazyCabbageRolls:
       return const ['лук', 'морковь'];
     case _StewDishKind.tefteli:
@@ -3561,6 +3945,8 @@ List<String> _recommendedAromatics(
   }
   if (profile == DishProfile.soup) {
     switch (soupKind) {
+      case _SoupKind.greenShchi:
+        return const ['лук', 'морковь'];
       case _SoupKind.shchi:
       case _SoupKind.borscht:
       case _SoupKind.ukha:
@@ -3571,6 +3957,9 @@ List<String> _recommendedAromatics(
       case _SoupKind.none:
         break;
     }
+  }
+  if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+    return const ['лук', 'морковь'];
   }
   switch (profile) {
     case DishProfile.soup:
@@ -3596,12 +3985,18 @@ List<String> _recommendedSeasonings(
   Set<String> ingredientCanonicals,
 ) {
   final friedDishKind = _detectFriedDishKind(profile, ingredientCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isSvekolnikDish(ingredientCanonicals)) {
+    return const ['соль', 'перец', 'укроп', 'сметана'];
+  }
   if (_isColdSoupDish(ingredientCanonicals)) {
     return const ['соль', 'перец', 'укроп', 'зелень'];
   }
   switch (stewDishKind) {
+    case _StewDishKind.stewedCabbage:
+      return const ['соль', 'перец', 'лавровый лист', 'томатная паста'];
     case _StewDishKind.lazyCabbageRolls:
       return const ['соль', 'перец', 'томатная паста', 'лавровый лист'];
     case _StewDishKind.tefteli:
@@ -3627,6 +4022,8 @@ List<String> _recommendedSeasonings(
   }
   if (profile == DishProfile.soup) {
     switch (soupKind) {
+      case _SoupKind.greenShchi:
+        return const ['соль', 'перец', 'лавровый лист', 'укроп'];
       case _SoupKind.shchi:
         return const ['соль', 'перец', 'лавровый лист', 'укроп'];
       case _SoupKind.borscht:
@@ -3652,6 +4049,9 @@ List<String> _recommendedSeasonings(
       case _SoupKind.none:
         break;
     }
+  }
+  if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+    return const ['соль', 'перец', 'укроп'];
   }
   switch (friedDishKind) {
     case _FriedDishKind.blini:
@@ -3708,12 +4108,18 @@ List<String> _recommendedFinishes(
   Set<String> ingredientCanonicals,
 ) {
   final friedDishKind = _detectFriedDishKind(profile, ingredientCanonicals);
+  final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isSvekolnikDish(ingredientCanonicals)) {
+    return const ['сметана', 'укроп'];
+  }
   if (_isColdSoupDish(ingredientCanonicals)) {
     return const ['укроп', 'зелень', 'сметана'];
   }
   switch (stewDishKind) {
+    case _StewDishKind.stewedCabbage:
+      return const ['укроп', 'сметана'];
     case _StewDishKind.lazyCabbageRolls:
       return const ['сметана', 'укроп'];
     case _StewDishKind.tefteli:
@@ -3733,6 +4139,8 @@ List<String> _recommendedFinishes(
   }
   if (profile == DishProfile.soup) {
     switch (soupKind) {
+      case _SoupKind.greenShchi:
+        return const ['сметана', 'укроп'];
       case _SoupKind.shchi:
       case _SoupKind.borscht:
         return const ['сметана', 'укроп'];
@@ -3745,6 +4153,9 @@ List<String> _recommendedFinishes(
       case _SoupKind.none:
         break;
     }
+  }
+  if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+    return const ['сметана', 'укроп', 'масло сливочное'];
   }
   switch (friedDishKind) {
     case _FriedDishKind.blini:

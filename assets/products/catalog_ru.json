@@ -24,6 +24,7 @@
   {"id":"onion","name":"Лук","canonicalName":"Лук","synonyms":["лук","репчатый лук","onion"],"defaultUnit":"g"},
   {"id":"carrot","name":"Морковь","canonicalName":"Морковь","synonyms":["морковь","carrot"],"defaultUnit":"g"},
   {"id":"beetroot","name":"Свекла","canonicalName":"Свекла","synonyms":["свекла","свёкла","вареная свекла","свекла вареная","beetroot","beet"],"defaultUnit":"g"},
+  {"id":"sorrel","name":"Щавель","canonicalName":"Щавель","synonyms":["щавель","свежий щавель","щавель листовой","листья щавеля","sorrel"],"defaultUnit":"g"},
   {"id":"tomato","name":"Помидоры","canonicalName":"Помидор","synonyms":["помидор","помидоры","томаты","томат","помидоры черри","томаты черри","tomato"],"defaultUnit":"g"},
   {"id":"cucumber","name":"Огурцы","canonicalName":"Огурец","synonyms":["огурец","огурцы","огурчики","соленые огурцы","соленые огурчики","маринованные огурцы","маринованные огурчики","cucumber"],"defaultUnit":"g"},
   {"id":"cabbage","name":"Капуста","canonicalName":"Капуста","synonyms":["капуста","свежая капуста","квашеная капуста"],"defaultUnit":"g"},

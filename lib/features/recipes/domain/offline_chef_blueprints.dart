@@ -44,14 +44,17 @@ enum ChefDishFamily {
   olivierSalad,
   vinegretSalad,
   grainPan,
+  buckwheatRusticBowl,
   pastaPan,
   navyPasta,
   soup,
   cabbageSoup,
+  greenShchiSorrelSoup,
   borschtSoup,
   fishSoup,
   pickleSoup,
   solyankaSoup,
+  svekolnikColdSoup,
   bake,
   curdBake,
   savoryClosedPie,
@@ -72,6 +75,7 @@ enum ChefDishFamily {
   zharkoeStew,
   goulashSauceStew,
   stroganoffSauceStew,
+  stewedCabbageStew,
   cutlets,
   stew,
   // Minimalist dish families
@@ -463,6 +467,7 @@ const chefBlueprints = <ChefBlueprint>[
     maxImplicitPantryStarters: 3,
     titleStyle: ChefTitleStyle.anchorWithFocus,
     stepStyle: ChefStepStyle.grainPan,
+    family: ChefDishFamily.buckwheatRusticBowl,
     slots: [
       ChefSlot(
         key: 'grain',
@@ -597,6 +602,45 @@ const chefBlueprints = <ChefBlueprint>[
       ChefSlot(
         key: 'veg',
         candidates: ['картофель', 'морковь', 'лук'],
+        minCount: 2,
+        maxCount: 3,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'green_shchi_sorrel',
+    profile: DishProfile.soup,
+    titlePrefix: 'Щавелевые щи',
+    description:
+        'Зелёные русские щи, где щавель добавляется в самом конце, чтобы сохранить свежую кислоту, а сметана и яйцо удерживают суп собранным.',
+    timeMin: 34,
+    servingsBase: 3,
+    tags: ['russian_classic', 'generated_local'],
+    anchorSlot: 'base',
+    secondaryAnchorSlot: 'protein',
+    supportSlot: 'veg',
+    preferredStarters: ['соль', 'перец', 'лавровый лист', 'сметана', 'укроп'],
+    maxImplicitPantryStarters: 4,
+    titleStyle: ChefTitleStyle.anchorWithFocus,
+    stepStyle: ChefStepStyle.soup,
+    family: ChefDishFamily.greenShchiSorrelSoup,
+    slots: [
+      ChefSlot(
+        key: 'base',
+        candidates: ['щавель'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'protein',
+        candidates: ['яйцо', 'курица'],
+        minCount: 1,
+        maxCount: 1,
+      ),
+      ChefSlot(
+        key: 'veg',
+        candidates: ['картофель', 'лук', 'морковь'],
         minCount: 2,
         maxCount: 3,
       ),
@@ -810,6 +854,45 @@ const chefBlueprints = <ChefBlueprint>[
       ChefSlot(
         key: 'herbs',
         candidates: ['зелень', 'укроп'],
+        minCount: 1,
+        maxCount: 2,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'svekolnik',
+    profile: DishProfile.soup,
+    titlePrefix: 'Свекольник холодный',
+    description:
+        'Холодный свекольник, где свекла держит вкус, а кефир, огурец, картофель и яйцо дают летнюю, но не водянистую структуру.',
+    timeMin: 28,
+    servingsBase: 3,
+    tags: ['quick', 'cold', 'no_oven', 'russian_classic', 'generated_local'],
+    anchorSlot: 'base',
+    secondaryAnchorSlot: 'boiled',
+    supportSlot: 'fresh',
+    preferredStarters: ['соль', 'перец', 'сметана'],
+    maxImplicitPantryStarters: 3,
+    titleStyle: ChefTitleStyle.anchorWithFocus,
+    stepStyle: ChefStepStyle.coldSoup,
+    family: ChefDishFamily.svekolnikColdSoup,
+    slots: [
+      ChefSlot(
+        key: 'base',
+        candidates: ['кефир'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'boiled',
+        candidates: ['свекла', 'картофель', 'яйцо'],
+        minCount: 3,
+        maxCount: 3,
+      ),
+      ChefSlot(
+        key: 'fresh',
+        candidates: ['огурец', 'укроп', 'зелень'],
         minCount: 1,
         maxCount: 2,
       ),
@@ -1101,6 +1184,7 @@ const chefBlueprints = <ChefBlueprint>[
     maxImplicitPantryStarters: 2,
     titleStyle: ChefTitleStyle.anchorWithFocus,
     stepStyle: ChefStepStyle.porridge,
+    family: ChefDishFamily.simpleRiceKasha,
     slots: [
       ChefSlot(
         key: 'grain',
@@ -1796,6 +1880,7 @@ const chefBlueprints = <ChefBlueprint>[
     maxImplicitPantryStarters: 4,
     titleStyle: ChefTitleStyle.anchorWithFocus,
     stepStyle: ChefStepStyle.stew,
+    family: ChefDishFamily.stewedCabbageStew,
     slots: [
       ChefSlot(
         key: 'base',

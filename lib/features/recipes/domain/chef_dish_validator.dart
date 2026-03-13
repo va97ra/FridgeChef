@@ -226,6 +226,41 @@ ChefDishValidationResult validateChefDish({
         'Окрошка на квасе не должна кипятиться после сборки.',
       );
       break;
+    case ChefDishFamily.svekolnikColdSoup:
+      _validateColdSoupTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireCanonical('свекла', 'Свекольник требует свекольную основу.');
+      requireCanonical(
+        'картофель',
+        'Свекольнику нужна картофельная опора в холодной структуре.',
+      );
+      requireCanonical('яйцо', 'Свекольнику нужно яйцо для классической структуры.');
+      requireCanonical('огурец', 'Свекольнику нужен свежий огуречный акцент.');
+      requireAnyCanonical(
+        ['кефир', 'квас'],
+        'Свекольнику нужна холодная кислая база.',
+      );
+      requireAnyCanonical(
+        ['укроп', 'зелень'],
+        'Свекольнику нужна зелень для правильного холодного профиля.',
+      );
+      final hasBeetCooling = _stepsContainAny(
+            normalizedSteps,
+            ['остуди', 'полностью остуди', 'охлади'],
+          ) &&
+          _stepsContainAny(normalizedSteps, ['свекл']);
+      if (!hasBeetCooling) {
+        violations.add(
+          'Свекольник требует отдельно сварить и полностью остудить свекольную основу.',
+        );
+      }
+      forbidAnyStep(
+        ['кипяти', 'доведи до кипения'],
+        'Свекольник не должен кипятиться после сборки.',
+      );
+      break;
     case ChefDishFamily.grainPan:
       requireAnyCanonical(
         ['рис', 'гречка', 'кускус', 'перловка'],
@@ -234,6 +269,33 @@ ChefDishValidationResult validateChefDish({
       _validateGrainPanTechnique(
         violations: violations,
         steps: normalizedSteps,
+      );
+      break;
+    case ChefDishFamily.buckwheatRusticBowl:
+      requireCanonical('гречка', 'Гречка по-домашнему требует гречневую основу.');
+      requireAnyCanonical(
+        ['грибы', 'лук', 'морковь'],
+        'Гречке по-домашнему нужна грибная или луково-морковная база.',
+      );
+      requireAnyCanonical(
+        ['грибы', 'курица', 'говядина', 'сосиски'],
+        'Гречке по-домашнему нужен сытный акцент: грибы, птица или мясо.',
+      );
+      _validateGrainPanTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireAnyStep(
+        ['вари гречку', 'гречку вари'],
+        'Гречку по-домашнему нужно сначала отдельно довести до рассыпчатой готовности.',
+      );
+      requireAnyStep(
+        ['вмешай гречку', 'вмешай основу', 'собери блюдо'],
+        'Гречка по-домашнему должна собираться через вмешивание готовой крупы в ароматическую базу.',
+      );
+      forbidCanonical(
+        'сахар',
+        'Гречка по-домашнему не должна уходить в сладкую кашу.',
       );
       break;
     case ChefDishFamily.pastaPan:
@@ -289,6 +351,39 @@ ChefDishValidationResult validateChefDish({
       forbidCanonical(
         'свекла',
         'Щи не должны уходить в свекольную основу борща.',
+      );
+      break;
+    case ChefDishFamily.greenShchiSorrelSoup:
+      _validateHotSoupTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireCanonical('щавель', 'Щавелевые щи требуют щавелевую основу.');
+      requireAnyCanonical(
+        ['картофель', 'лук', 'морковь'],
+        'Щавелевым щам нужна спокойная овощная база.',
+      );
+      requireAnyCanonical(
+        ['яйцо', 'курица'],
+        'Щавелевым щам нужна яичная или куриная опора, чтобы кислота не стала пустой.',
+      );
+      final hasLateSorrelCue = _stepsContainAny(
+            normalizedSteps,
+            ['в конце', 'за 2-3 минуты', 'в последние 2-3 минуты'],
+          ) &&
+          _stepsContainAny(normalizedSteps, ['щавел']);
+      if (!hasLateSorrelCue) {
+        violations.add(
+          'Щавелевые щи должны добавлять щавель в самом конце, чтобы сохранить свежую кислоту.',
+        );
+      }
+      requireAnyCanonical(
+        ['сметана', 'укроп'],
+        'Щавелевым щам нужен сметанный или укропный финиш.',
+      );
+      forbidCanonical(
+        'свекла',
+        'Щавелевые щи не должны уходить в борщ или холодный свекольник.',
       );
       break;
     case ChefDishFamily.borschtSoup:
@@ -808,6 +903,40 @@ ChefDishValidationResult validateChefDish({
       forbidCanonical(
         'томатная паста',
         'Бефстроганов не должен уходить в томатный профиль гуляша.',
+      );
+      break;
+    case ChefDishFamily.stewedCabbageStew:
+      _validateStewTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireCanonical('капуста', 'Тушёная капуста требует капустную основу.');
+      requireAnyCanonical(
+        ['лук', 'морковь'],
+        'Тушёной капусте нужна луково-морковная база.',
+      );
+      requireAnyCanonical(
+        ['томатная паста', 'колбаса', 'сосиски', 'курица', 'свинина'],
+        'Тушёной капусте нужна томатная глубина или мясной акцент.',
+      );
+      final hasCabbageStewCue = _stepsContainAny(
+            normalizedSteps,
+            ['туши капусту', 'тушеную капусту', 'тушёную капусту'],
+          ) ||
+          (_stepsContainAny(normalizedSteps, ['капуст']) &&
+              _stepsContainAny(normalizedSteps, ['под крышкой', '20-25 минут']));
+      if (!hasCabbageStewCue) {
+        violations.add(
+          'Тушёная капуста должна спокойно тушиться под крышкой 20-25 минут.',
+        );
+      }
+      forbidCanonical(
+        'майонез',
+        'Тушёная капуста не должна уходить в майонезную логику салата.',
+      );
+      forbidAnyStep(
+        ['подавай холодной', 'запекай'],
+        'Тушёная капуста не должна уходить в холодную подачу или запекание.',
       );
       break;
     case ChefDishFamily.cutlets:
@@ -1376,7 +1505,14 @@ void _validateHotSoupTechnique({
     violations.add('Суп требует отдельного этапа варки в жидкости.');
   }
   if (!_stepsContainAny(
-      steps, ['настояться', 'перед подачей', 'сними с огня'])) {
+      steps, [
+        'настояться',
+        'перед подачей',
+        'сними с огня',
+        'дай супу постоять',
+        'дай ему постоять',
+        'дай щам постоять',
+      ])) {
     violations.add('Супу нужен спокойный финиш перед подачей.');
   }
 }
@@ -1749,7 +1885,12 @@ void _validateStewTechnique({
     violations.add('Рагу требует спокойного тушения.');
   }
   if (!_stepsContainAny(
-      steps, ['прогрей в самом начале', 'самые плотные продукты'])) {
+      steps, [
+        'прогрей в самом начале',
+        'самые плотные продукты',
+        'сначала прогрей',
+        'мягко прогрей',
+      ])) {
     violations.add(
       'Рагу должно начинаться с базы и самых плотных продуктов, а не сваливаться в одну фазу.',
     );
@@ -1759,7 +1900,15 @@ void _validateStewTechnique({
       'Рагу должно доходить под крышкой до густой, собранной текстуры.',
     );
   }
-  if (!_stepsContainAny(steps, ['пару минут постоять', 'сними с огня'])) {
+  if (!_stepsContainAny(steps, [
+    'пару минут постоять',
+    'сними с огня',
+    'дай блюду постоять',
+    'дай ему постоять',
+    'дай ей постоять',
+    'постоять 2 3 минуты',
+    'постоять 1 2 минуты',
+  ])) {
     violations.add('Рагу нужно дать коротко успокоиться перед подачей.');
   }
   if (_stepsContainAny(

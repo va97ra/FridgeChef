@@ -1758,4 +1758,304 @@ void main() {
       isTrue,
     );
   });
+
+  test('chef rules reward green shchi over flat sorrel soup', () {
+    final flatSorrelSoup = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {'щавель', 'картофель', 'яйцо', 'лук'},
+      matchedCanonicals: const {'щавель', 'картофель', 'яйцо', 'лук'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'щавель': 'Щавель',
+        'картофель': 'Картофель',
+        'яйцо': 'Яйца',
+        'лук': 'Лук',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Подготовь щавель, картофель и яйца.',
+        'Влей воду и вари суп 18 минут.',
+        'Подавай.',
+      ],
+    );
+
+    final properGreenShchi = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {
+        'щавель',
+        'картофель',
+        'яйцо',
+        'лук',
+        'морковь',
+        'сметана',
+        'укроп',
+      },
+      matchedCanonicals: const {
+        'щавель',
+        'картофель',
+        'яйцо',
+        'лук',
+        'морковь',
+      },
+      supportCanonicals: const {'соль', 'перец', 'сметана', 'укроп'},
+      displayByCanonical: const {
+        'щавель': 'Щавель',
+        'картофель': 'Картофель',
+        'яйцо': 'Яйца',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'сметана': 'Сметана',
+        'укроп': 'Укроп',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Подготовь щавель, картофель, яйца, лук и морковь, затем прогрей лук и морковь 4-5 минут.',
+        'Влей воду и вари основу 16-18 минут, а в последние 2-3 минуты добавь щавель.',
+        'Сними с огня, подай со сметаной и укропом.',
+      ],
+    );
+
+    expect(
+      properGreenShchi.techniqueScore,
+      greaterThan(flatSorrelSoup.techniqueScore),
+    );
+    expect(
+      properGreenShchi.balanceScore,
+      greaterThan(flatSorrelSoup.balanceScore),
+    );
+    expect(
+      properGreenShchi.flavorScore,
+      greaterThan(flatSorrelSoup.flavorScore),
+    );
+    expect(properGreenShchi.score, greaterThan(flatSorrelSoup.score));
+  });
+
+  test('chef rules reward svekolnik over flat cold beet soup', () {
+    final flatSvekolnik = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {
+        'свекла',
+        'кефир',
+        'картофель',
+        'огурец',
+        'яйцо'
+      },
+      matchedCanonicals: const {
+        'свекла',
+        'кефир',
+        'картофель',
+        'огурец',
+        'яйцо',
+      },
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'свекла': 'Свекла',
+        'кефир': 'Кефир',
+        'картофель': 'Картофель',
+        'огурец': 'Огурец',
+        'яйцо': 'Яйца',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Отвари свеклу, картофель и яйца.',
+        'Смешай всё с кефиром.',
+        'Подавай холодным.',
+      ],
+    );
+
+    final properSvekolnik = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {
+        'свекла',
+        'кефир',
+        'картофель',
+        'огурец',
+        'яйцо',
+        'укроп',
+        'сметана',
+      },
+      matchedCanonicals: const {
+        'свекла',
+        'кефир',
+        'картофель',
+        'огурец',
+        'яйцо',
+        'укроп',
+      },
+      supportCanonicals: const {'соль', 'перец', 'сметана'},
+      displayByCanonical: const {
+        'свекла': 'Свекла',
+        'кефир': 'Кефир',
+        'картофель': 'Картофель',
+        'огурец': 'Огурец',
+        'яйцо': 'Яйца',
+        'укроп': 'Укроп',
+        'сметана': 'Сметана',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Отвари свеклу, картофель и яйца, затем полностью остуди свекольную основу.',
+        'Нарежь свеклу, картофель, яйца, огурец и укроп.',
+        'Влей кефир, доведи вкус и дай свекольнику постоять в холоде 5-7 минут, затем подавай охлаждённым.',
+      ],
+    );
+
+    expect(
+      properSvekolnik.techniqueScore,
+      greaterThan(flatSvekolnik.techniqueScore),
+    );
+    expect(
+      properSvekolnik.balanceScore,
+      greaterThan(flatSvekolnik.balanceScore),
+    );
+    expect(
+      properSvekolnik.flavorScore,
+      greaterThan(flatSvekolnik.flavorScore),
+    );
+    expect(properSvekolnik.score, greaterThan(flatSvekolnik.score));
+    expect(
+      flatSvekolnik.warnings.any((warning) => warning.contains('свеколь')),
+      isTrue,
+    );
+  });
+
+  test('chef rules reward buckwheat rustic bowl over plain buckwheat', () {
+    final plainBuckwheat = assessChefRules(
+      profile: DishProfile.grainBowl,
+      recipeCanonicals: const {'гречка'},
+      matchedCanonicals: const {'гречка'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'гречка': 'Гречка',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Свари гречку.',
+        'Подавай.',
+      ],
+    );
+
+    final rusticBuckwheat = assessChefRules(
+      profile: DishProfile.grainBowl,
+      recipeCanonicals: const {
+        'гречка',
+        'грибы',
+        'лук',
+        'морковь',
+        'сметана',
+        'укроп',
+      },
+      matchedCanonicals: const {
+        'гречка',
+        'грибы',
+        'лук',
+        'морковь',
+      },
+      supportCanonicals: const {'соль', 'перец', 'сметана', 'укроп'},
+      displayByCanonical: const {
+        'гречка': 'Гречка',
+        'грибы': 'Грибы',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'сметана': 'Сметана',
+        'укроп': 'Укроп',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Промой крупу и вари гречку 15-18 минут под крышкой, сначала прогрей добавки 4-5 минут.',
+        'Добавь грибы к луку и моркови, затем вмешай основу, чтобы гречка впитала вкус.',
+        'Дай блюду 1-2 минуты постоять и подавай с укропом.',
+      ],
+    );
+
+    expect(
+      rusticBuckwheat.techniqueScore,
+      greaterThan(plainBuckwheat.techniqueScore),
+    );
+    expect(
+      rusticBuckwheat.balanceScore,
+      greaterThan(plainBuckwheat.balanceScore),
+    );
+    expect(
+      rusticBuckwheat.flavorScore,
+      greaterThan(plainBuckwheat.flavorScore),
+    );
+    expect(rusticBuckwheat.score, greaterThan(plainBuckwheat.score));
+  });
+
+  test('chef rules reward stewed cabbage over flat cabbage boil', () {
+    final flatCabbage = assessChefRules(
+      profile: DishProfile.stew,
+      recipeCanonicals: const {'капуста', 'лук', 'морковь'},
+      matchedCanonicals: const {'капуста', 'лук', 'морковь'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'капуста': 'Капуста',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Сложи капусту, лук и морковь в кастрюлю.',
+        'Провари и подай.',
+      ],
+    );
+
+    final properStewedCabbage = assessChefRules(
+      profile: DishProfile.stew,
+      recipeCanonicals: const {
+        'капуста',
+        'лук',
+        'морковь',
+        'колбаса',
+        'томатная паста',
+        'укроп',
+      },
+      matchedCanonicals: const {
+        'капуста',
+        'лук',
+        'морковь',
+        'колбаса',
+        'томатная паста',
+      },
+      supportCanonicals: const {'соль', 'перец', 'укроп'},
+      displayByCanonical: const {
+        'капуста': 'Капуста',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'колбаса': 'Колбаса',
+        'томатная паста': 'Томатная паста',
+        'укроп': 'Укроп',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Подготовь капусту, лук и морковь, прогрей в самом начале лук и морковь 4-5 минут.',
+        'Добавь томатную пасту и колбасу, затем туши капусту на слабом огне под крышкой 20-25 минут.',
+        'Сними с огня, дай блюду пару минут постоять и подавай с укропом.',
+      ],
+    );
+
+    expect(
+      properStewedCabbage.techniqueScore,
+      greaterThan(flatCabbage.techniqueScore),
+    );
+    expect(
+      properStewedCabbage.balanceScore,
+      greaterThan(flatCabbage.balanceScore),
+    );
+    expect(
+      properStewedCabbage.flavorScore,
+      greaterThan(flatCabbage.flavorScore),
+    );
+    expect(properStewedCabbage.score, greaterThan(flatCabbage.score));
+    expect(
+      flatCabbage.warnings
+          .any((warning) => warning.contains('тушёной капусте')),
+      isTrue,
+    );
+  });
 }
