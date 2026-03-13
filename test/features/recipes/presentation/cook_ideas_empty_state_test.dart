@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:help_to_cook/core/theme/app_theme.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe.dart';
 import 'package:help_to_cook/features/recipes/domain/recipe_match.dart';
 import 'package:help_to_cook/features/recipes/presentation/cook_ideas_screen.dart';
@@ -15,7 +16,10 @@ void main() {
           productCatalogProvider.overrideWith((ref) async => const []),
           recipeMatchesProvider.overrideWith((ref) => const <RecipeMatch>[]),
         ],
-        child: const MaterialApp(home: CookIdeasScreen()),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const CookIdeasScreen(),
+        ),
       ),
     );
 

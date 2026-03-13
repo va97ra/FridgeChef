@@ -35,6 +35,7 @@ build/
 /flutter/
 
 # Web related
+/output/
 output/playwright/
 /flutter_*.log
 /web-*.log

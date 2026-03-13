@@ -64,6 +64,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      splashFactory: InkRipple.splashFactory,
       scaffoldBackgroundColor: AppTokens.background,
       colorScheme: const ColorScheme.light(
         primary: AppTokens.primary,

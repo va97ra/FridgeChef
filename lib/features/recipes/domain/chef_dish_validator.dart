@@ -28,6 +28,10 @@ ChefDishValidationResult validateChefDish({
       .map(normalizeIngredientText)
       .where((value) => value.isNotEmpty)
       .toList(growable: false);
+  final normalizedIngredientNames = recipe.ingredients
+      .map((ingredient) => normalizeIngredientText(ingredient.name))
+      .where((value) => value.isNotEmpty)
+      .toList(growable: false);
   final violations = <String>[];
   final family = blueprint.dishFamily;
 
@@ -46,6 +50,12 @@ ChefDishValidationResult validateChefDish({
 
   void forbidCanonical(String canonical, String message) {
     if (_containsCanonical(canonicals, canonical)) {
+      violations.add(message);
+    }
+  }
+
+  void forbidAnyCanonical(Iterable<String> options, String message) {
+    if (options.any((canonical) => _containsCanonical(canonicals, canonical))) {
       violations.add(message);
     }
   }
@@ -412,6 +422,41 @@ ChefDishValidationResult validateChefDish({
         'Борщ не должен уходить в соляночный профиль с оливками.',
       );
       break;
+    case ChefDishFamily.mushroomSoup:
+      _validateHotSoupTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireCanonical('грибы', 'Грибному супу нужна грибная основа.');
+      requireCanonical(
+        'картофель',
+        'Грибному супу нужна картофельная опора, чтобы бульон не стал пустым.',
+      );
+      requireAnyCanonical(
+        ['лук', 'морковь'],
+        'Грибному супу нужна луковая или морковная ароматическая база.',
+      );
+      final hasMushroomBaseCue = normalizedSteps.any(
+        (step) =>
+            step.contains('гриб') &&
+            (step.contains('прогрей') ||
+                step.contains('обжар') ||
+                step.contains('выпар')),
+      );
+      if (!hasMushroomBaseCue) {
+        violations.add(
+          'Грибной суп должен сначала прогреть грибы с ароматической базой, а не варить их сырыми в воде.',
+        );
+      }
+      requireAnyCanonical(
+        ['сметана', 'укроп', 'лавровый лист'],
+        'Грибному супу нужен мягкий домашний финиш через сметану, укроп или лавровый лист.',
+      );
+      forbidCanonical(
+        'томатная паста',
+        'Грибной суп не должен уходить в томатную основу борща или солянки.',
+      );
+      break;
     case ChefDishFamily.fishSoup:
       _validateHotSoupTechnique(
         violations: violations,
@@ -451,6 +496,66 @@ ChefDishValidationResult validateChefDish({
       requireAnyStep(
         ['последние 5-6 минут', 'последние 5 минут'],
         'Рассольник должен добавлять солёный акцент ближе к концу варки.',
+      );
+      break;
+    case ChefDishFamily.peaSmokedSoup:
+      _validateHotSoupTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireCanonical('горох', 'Гороховому супу нужна гороховая основа.');
+      requireAnyCanonical(
+        ['колбаса', 'сосиски'],
+        'Гороховому супу нужна копчёная мясная основа.',
+      );
+      requireAnyCanonical(
+        ['лук', 'морковь'],
+        'Гороховому супу нужна луково-морковная база.',
+      );
+      final hasSmokedIngredientCue = normalizedIngredientNames.any(
+        (name) =>
+            name.contains('копч') ||
+            name.contains('охотнич') ||
+            name.contains('сервелат') ||
+            name.contains('ветчин'),
+      );
+      final hasSmokedStepCue = _stepsContainAny(
+        normalizedSteps,
+        ['копч', 'охотнич', 'сервелат', 'ветчин'],
+      );
+      if (!hasSmokedIngredientCue && !hasSmokedStepCue) {
+        violations.add(
+          'Гороховый суп должен опираться на явно копчёную мясную основу, а не на абстрактную колбасу.',
+        );
+      }
+      final hasPeaPrepCue = _stepsContainAny(
+            normalizedSteps,
+            ['промой горох', 'замочи горох', 'промой и при желании замочи'],
+          ) ||
+          (_stepsContainAny(normalizedSteps, ['промой', 'замочи']) &&
+              _stepsContainAny(normalizedSteps, ['горох']));
+      if (!hasPeaPrepCue) {
+        violations.add(
+          'Гороховый суп должен промыть или замочить горох до основной варки.',
+        );
+      }
+      final hasLongPeaSimmer = _stepsContainAny(
+            normalizedSteps,
+            ['35-45 минут', '40-45 минут', '35-40 минут', '30-35 минут'],
+          ) &&
+          _stepsContainAny(normalizedSteps, ['горох', 'гороховый суп']);
+      if (!hasLongPeaSimmer) {
+        violations.add(
+          'Гороховый суп должен томить горох 30-45 минут до мягкости.',
+        );
+      }
+      forbidCanonical(
+        'томатная паста',
+        'Гороховый суп с копчёностями не должен уходить в томатный контур.',
+      );
+      forbidAnyCanonical(
+        ['оливки', 'лимон'],
+        'Гороховый суп с копчёностями не должен сваливаться в соляночный финиш.',
       );
       break;
     case ChefDishFamily.solyankaSoup:
@@ -700,6 +805,52 @@ ChefDishValidationResult validateChefDish({
       requireAnyStep(
         ['вари кашу', 'тонкой струйкой', 'на спокойном огне'],
         'Каша требует спокойной варки с контролем текстуры.',
+      );
+      break;
+    case ChefDishFamily.classicGolubtsy:
+      requireCanonical(
+          'фарш', 'Классическим голубцам нужна мясная основа из фарша.');
+      requireCanonical(
+          'рис', 'Классическим голубцам нужен рис для правильной начинки.');
+      requireCanonical(
+        'капуста',
+        'Классические голубцы требуют капустные листья для заворачивания.',
+      );
+      requireAnyCanonical(
+        ['лук', 'морковь'],
+        'Классическим голубцам нужна спокойная луково-морковная база.',
+      );
+      requireAnyCanonical(
+        ['томатная паста', 'сметана'],
+        'Классическим голубцам нужен томатный или сметанный соус.',
+      );
+      requireStepWithAll(
+        ['листь', 'кипящ'],
+        'Классическим голубцам нужно подготовить и смягчить капустные листья.',
+      );
+      requireAnyStep(
+        ['заверни голубцы', 'плотно заверни', 'уложи её на листья'],
+        'Классические голубцы нужно заворачивать в капустные листья.',
+      );
+      requireAnyStep(
+        ['швом вниз'],
+        'Классические голубцы должны укладываться швом вниз перед тушением.',
+      );
+      requireAnyStep(
+        ['под крышкой', 'накрой'],
+        'Классические голубцы должны доходить под крышкой.',
+      );
+      requireAnyStep(
+        ['30-35 минут', '28-35 минут'],
+        'Классические голубцы должны спокойно тушиться до мягкости.',
+      );
+      forbidAnyStep(
+        ['ленивые голубцы', 'собери плотную основу для ленивых голубцов'],
+        'Классические голубцы нельзя сводить к технике ленивых голубцов.',
+      );
+      forbidAnyStep(
+        ['духовк', 'запекай', 'влей воду и вари суп'],
+        'Классические голубцы не должны уходить в запекание или суповую технику.',
       );
       break;
     case ChefDishFamily.lazyCabbageRollStew:
@@ -1121,6 +1272,8 @@ ChefDishValidationResult validateChefDish({
   if ((family == ChefDishFamily.soup ||
           family == ChefDishFamily.cabbageSoup ||
           family == ChefDishFamily.borschtSoup ||
+          family == ChefDishFamily.peaSmokedSoup ||
+          family == ChefDishFamily.mushroomSoup ||
           family == ChefDishFamily.coldSoup ||
           family == ChefDishFamily.okroshkaColdSoup ||
           family == ChefDishFamily.okroshkaKvassColdSoup ||

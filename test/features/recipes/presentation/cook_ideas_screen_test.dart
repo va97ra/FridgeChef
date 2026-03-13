@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:help_to_cook/core/theme/app_theme.dart';
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/fridge/domain/product_catalog_entry.dart';
 import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
@@ -90,8 +91,9 @@ void main() {
             ],
           ),
         ],
-        child: const MaterialApp(
-          home: CookIdeasScreen(),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const CookIdeasScreen(),
         ),
       ),
     );
@@ -206,8 +208,9 @@ void main() {
             }).toList();
           }),
         ],
-        child: const MaterialApp(
-          home: CookIdeasScreen(),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const CookIdeasScreen(),
         ),
       ),
     );
@@ -329,8 +332,9 @@ void main() {
             ],
           ),
         ],
-        child: const MaterialApp(
-          home: CookIdeasScreen(),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const CookIdeasScreen(),
         ),
       ),
     );

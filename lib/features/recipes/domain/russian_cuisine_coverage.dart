@@ -291,18 +291,19 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'mushroom_soup',
     title: 'Грибной суп',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'mushroom_soup',
     familyId: 'mushroomSoup',
     continuationNote:
-        'Next missing hot family after classic golubtsy. Needs mushroom-broth reasoning and anti-collapse tests against generic soup.',
+        'Implemented as its own mushroom-broth family with aromatic saute, dedicated validation, and anti-collapse tests against generic soup.',
   ),
   RussianCuisineCoverageEntry(
     id: 'pea_smoked_soup',
     title: 'Гороховый суп с копченостями',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'pea_smoked_soup',
     familyId: 'peaSmokedSoup',
-    continuationNote:
-        'Blocked by missing smoked-meat family reasoning even though basic ingredients exist.',
+    continuationNote: 'Covered as dedicated pea-and-smoked-meat soup family.',
   ),
   RussianCuisineCoverageEntry(
     id: 'pelmeni',

@@ -135,6 +135,13 @@ class OfflineChefEngine {
     required _ChefInventory inventory,
     required int seedSalt,
   }) {
+    GeneratedRecipeCandidate? reject(String reason) {
+      if (blueprint.id == 'pea_smoked_soup' || blueprint.id == 'svekolnik') {
+        print('reject ${blueprint.id}: $reason');
+      }
+      return null;
+    }
+
     final selectedBySlot = <String, List<String>>{};
     final usedCanonicals = <String>{};
 
@@ -150,7 +157,7 @@ class OfflineChefEngine {
         seed: request.seed + seedSalt + slotIndex,
       );
       if (selected.length < slot.minCount) {
-        return null;
+        return reject('slot ${slot.key} minCount ${slot.minCount}');
       }
       if (selected.isNotEmpty) {
         selectedBySlot[slot.key] = selected;
@@ -163,7 +170,7 @@ class OfflineChefEngine {
       ...selectedBySlot[blueprint.secondaryAnchorSlot] ?? const <String>[],
     ];
     if (anchorCanonicals.isEmpty) {
-      return null;
+      return reject('empty anchors');
     }
 
     final coreRecipeCanonicals = usedCanonicals.toSet();
@@ -190,15 +197,16 @@ class OfflineChefEngine {
       starters: starters,
       chefSupport: chefSupport,
     )) {
-      return null;
+      return reject('minimal support gate');
     }
     if (!_passesFamilySupportGate(
       blueprint: blueprint,
       selectedBySlot: selectedBySlot,
       starters: starters,
       chefSupport: chefSupport,
+      inventory: inventory,
     )) {
-      return null;
+      return reject('family support gate');
     }
     final ingredients = _buildIngredients(
       blueprint: blueprint,
@@ -232,7 +240,7 @@ class OfflineChefEngine {
     );
 
     if (!matchesCookFilters(recipe, request.filters)) {
-      return null;
+      return reject('cook filters');
     }
 
     final recipeCanonicals = coreRecipeCanonicals.toSet()
@@ -240,7 +248,7 @@ class OfflineChefEngine {
       ..addAll(chefSupport.explicitCanonicals);
     final pairingCanonicals = _pairingRelevantCanonicals(recipeCanonicals);
     if (!_passesPairingValidation(pairingCanonicals)) {
-      return null;
+      return reject('pairing validation $pairingCanonicals');
     }
     final dishValidation = validateChefDish(
       blueprint: blueprint,
@@ -248,7 +256,7 @@ class OfflineChefEngine {
       recipeCanonicals: recipeCanonicals,
     );
     if (!dishValidation.isValid) {
-      return null;
+      return reject('dish validation ${dishValidation.violations}');
     }
 
     final chefAssessment = assessChefRules(
@@ -287,7 +295,9 @@ class OfflineChefEngine {
             : 0.32;
     if (chefAssessment.score < minimumChefScore ||
         chefAssessment.flavorScore < minimumFlavorScore) {
-      return null;
+      return reject(
+        'chef rules total=${chefAssessment.score} flavor=${chefAssessment.flavorScore} warnings=${chefAssessment.warnings}',
+      );
     }
 
     final tasteAnalysis = request.tasteProfile.analyzeRecipe(
@@ -353,6 +363,7 @@ class OfflineChefEngine {
     final familyDisambiguationBias = _familyDisambiguationBias(
       blueprint: blueprint,
       inventoryCanonicals: inventory.fridgeCanonicals,
+      inventoryDisplayByCanonical: inventory.displayByCanonical,
       recipeCanonicals: recipeCanonicals,
     );
     final priorityScore = ((anchorPriority * 0.30) +
@@ -399,12 +410,17 @@ class OfflineChefEngine {
   double _familyDisambiguationBias({
     required ChefBlueprint blueprint,
     required Set<String> inventoryCanonicals,
+    required Map<String, String> inventoryDisplayByCanonical,
     required Set<String> recipeCanonicals,
   }) {
     bool inventoryHasAny(Iterable<String> canonicals) =>
         canonicals.any(inventoryCanonicals.contains);
     bool recipeHasAny(Iterable<String> canonicals) =>
         canonicals.any(recipeCanonicals.contains);
+    bool inventoryDisplayHasCue(String canonical, Iterable<String> fragments) {
+      final display = _cueText(inventoryDisplayByCanonical[canonical] ?? '');
+      return display.isNotEmpty && fragments.any(display.contains);
+    }
 
     final hasSorrelShchiSet = inventoryCanonicals.contains('щавель') &&
         inventoryHasAny(const {'картофель', 'лук', 'морковь'}) &&
@@ -419,19 +435,57 @@ class OfflineChefEngine {
         inventoryHasAny(
           const {'грибы', 'курица', 'говядина', 'сосиски', 'сметана'},
         );
+    final hasMushroomSoupSet = inventoryCanonicals.contains('грибы') &&
+        inventoryCanonicals.contains('картофель') &&
+        inventoryHasAny(const {'лук', 'морковь'});
+    final hasSmokedMeatCue = inventoryDisplayHasCue(
+          'колбаса',
+          const {'копч', 'охотнич', 'сервелат', 'ветчин'},
+        ) ||
+        inventoryDisplayHasCue('сосиски', const {'копч', 'охотнич'});
+    final hasPeaSmokedSoupSet = inventoryCanonicals.contains('горох') &&
+        inventoryHasAny(const {'колбаса', 'сосиски'}) &&
+        inventoryHasAny(const {'лук', 'морковь'}) &&
+        hasSmokedMeatCue;
     final hasSvekolnikSet = inventoryCanonicals.contains('свекла') &&
         inventoryHasAny(const {'кефир', 'квас'}) &&
         inventoryCanonicals.contains('огурец') &&
         inventoryCanonicals.contains('картофель') &&
         inventoryCanonicals.contains('яйцо');
+    final hasClassicGolubtsySet = inventoryCanonicals.contains('капуста') &&
+        inventoryCanonicals.contains('фарш') &&
+        inventoryCanonicals.contains('рис') &&
+        inventoryHasAny(const {'лук', 'морковь'}) &&
+        inventoryHasAny(const {'томатная паста', 'сметана'});
 
     switch (blueprint.dishFamily) {
+      case ChefDishFamily.classicGolubtsy:
+        return hasClassicGolubtsySet ? 0.22 : 0.0;
       case ChefDishFamily.greenShchiSorrelSoup:
         return hasSorrelShchiSet ? 0.18 : 0.0;
+      case ChefDishFamily.peaSmokedSoup:
+        return hasPeaSmokedSoupSet ? 0.20 : 0.0;
+      case ChefDishFamily.mushroomSoup:
+        return hasMushroomSoupSet ? 0.18 : 0.0;
+      case ChefDishFamily.lazyCabbageRollStew:
+        return hasClassicGolubtsySet &&
+                recipeHasAny(const {'фарш', 'рис', 'капуста'})
+            ? -0.08
+            : 0.0;
       case ChefDishFamily.cabbageSoup:
       case ChefDishFamily.soup:
         if (hasSorrelShchiSet && !recipeCanonicals.contains('щавель')) {
           return -0.14;
+        }
+        if (hasMushroomSoupSet &&
+            recipeCanonicals.contains('картофель') &&
+            !recipeCanonicals.contains('грибы')) {
+          return -0.14;
+        }
+        if (hasPeaSmokedSoupSet &&
+            recipeCanonicals.contains('горох') &&
+            !recipeHasAny(const {'колбаса', 'сосиски'})) {
+          return -0.16;
         }
         if (hasStewedCabbageSet &&
             recipeCanonicals.contains('капуста') &&
@@ -783,7 +837,9 @@ class OfflineChefEngine {
       case ChefDishFamily.borschtSoup:
       case ChefDishFamily.fishSoup:
       case ChefDishFamily.pickleSoup:
+      case ChefDishFamily.peaSmokedSoup:
       case ChefDishFamily.solyankaSoup:
+      case ChefDishFamily.mushroomSoup:
       case ChefDishFamily.svekolnikColdSoup:
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
@@ -795,6 +851,7 @@ class OfflineChefEngine {
       case ChefDishFamily.curdFritter:
       case ChefDishFamily.potatoFritter:
       case ChefDishFamily.porridge:
+      case ChefDishFamily.classicGolubtsy:
       case ChefDishFamily.lazyCabbageRollStew:
       case ChefDishFamily.tefteliSauceStew:
       case ChefDishFamily.homeCutletDinner:
@@ -815,6 +872,7 @@ class OfflineChefEngine {
     required Map<String, List<String>> selectedBySlot,
     required _ResolvedStarters starters,
     required _ResolvedChefSupport chefSupport,
+    required _ChefInventory inventory,
   }) {
     final available = <String>{
       for (final values in selectedBySlot.values) ...values,
@@ -824,6 +882,10 @@ class OfflineChefEngine {
 
     bool hasAny(Iterable<String> canonicals) =>
         canonicals.any(available.contains);
+    bool inventoryDisplayHasCue(String canonical, Iterable<String> fragments) {
+      final display = _cueText(inventory.displayByCanonical[canonical] ?? '');
+      return display.isNotEmpty && fragments.any(display.contains);
+    }
 
     switch (blueprint.dishFamily) {
       case ChefDishFamily.eggSkillet:
@@ -846,6 +908,17 @@ class OfflineChefEngine {
         return hasAny(const {'масло', 'оливковое масло'}) &&
             hasAny(const {'сметана', 'йогурт'}) &&
             hasAny(const {'лаваш'});
+      case ChefDishFamily.peaSmokedSoup:
+        return hasAny(const {'горох'}) &&
+            hasAny(const {'колбаса', 'сосиски'}) &&
+            (inventoryDisplayHasCue(
+                  'колбаса',
+                  const {'копч', 'охотнич', 'сервелат', 'ветчин'},
+                ) ||
+                inventoryDisplayHasCue(
+                  'сосиски',
+                  const {'копч', 'охотнич'},
+                ));
       default:
         return true;
     }
@@ -1063,6 +1136,10 @@ class OfflineChefEngine {
               minimumRatio: slot.isAnchor ? 0.78 : 0.60,
             ),
             unit: defaultUnit,
+            required: _isSelectedIngredientRequired(
+              blueprint: blueprint,
+              slot: slot,
+            ),
           ),
         );
       }
@@ -1102,6 +1179,17 @@ class OfflineChefEngine {
       );
     }
     return ingredients;
+  }
+
+  bool _isSelectedIngredientRequired({
+    required ChefBlueprint blueprint,
+    required ChefSlot slot,
+  }) {
+    if (blueprint.dishFamily == ChefDishFamily.shakshukaSkillet &&
+        slot.key == 'addons') {
+      return false;
+    }
+    return true;
   }
 
   String _buildTitle(
@@ -1977,6 +2065,63 @@ class OfflineChefEngine {
     required String finishText,
   }) {
     switch (blueprint.dishFamily) {
+      case ChefDishFamily.classicGolubtsy:
+        final classicLeafText = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['leaf'] ?? supportCanonicals,
+            inventory,
+            limit: 1,
+          ),
+        );
+        final classicVegText = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['veg'] ?? const <String>[],
+            inventory,
+            limit: 2,
+          ),
+        );
+        final classicSauceText = _sentenceIngredientText(
+          _displayList(
+            [
+              ...(selectedBySlot['sauce'] ?? const <String>[]),
+              for (final canonical in [
+                ...starters.includedCanonicals,
+                ...chefSupport.seasoningCanonicals,
+                ...chefSupport.finishingCanonicals,
+              ])
+                if (canonical == 'томатная паста' || canonical == 'сметана')
+                  canonical,
+            ],
+            inventory,
+            limit: 2,
+          ),
+        );
+        final classicSeasoning = _sentenceIngredientText(seasoningText);
+        final classicFinish = _sentenceIngredientText(
+          finishText.isNotEmpty
+              ? finishText
+              : _displayList(
+                  [
+                    for (final canonical in [
+                      ...chefSupport.finishingCanonicals,
+                      ...chefSupport.seasoningCanonicals,
+                      ...starters.includedCanonicals,
+                    ])
+                      if (canonical == 'сметана' ||
+                          canonical == 'лавровый лист')
+                        canonical,
+                  ],
+                  inventory,
+                  limit: 2,
+                ),
+        );
+        return [
+          'Подготовь ${classicLeafText.isEmpty ? support : classicLeafText}: сними крупные листья, опусти их в кипящую воду на 2-3 минуты и обсуши${classicVegText.isEmpty ? '' : ', а $classicVegText мягко прогрей 4-5 минут для спокойной овощной базы'}.',
+          'Соедини $anchor с $secondary${classicVegText.isEmpty ? '' : ' и частью $classicVegText'} в плотную начинку, уложи её на листья капусты, плотно заверни голубцы и уложи их швом вниз.',
+          classicSeasoning.isEmpty && classicFinish.isEmpty
+              ? 'Добавь${classicSauceText.isEmpty ? ' немного воды и мягкую томатно-сметанную основу' : ' $classicSauceText'}, накрой и туши голубцы 30-35 минут на слабом огне, затем дай им постоять 3-4 минуты и подавай горячими.'
+              : 'Добавь${classicSauceText.isEmpty ? ' немного воды и мягкую томатно-сметанную основу' : ' $classicSauceText'}, накрой и туши голубцы 30-35 минут на слабом огне${classicSeasoning.isEmpty ? '' : ', доведи вкус через $classicSeasoning'}${classicFinish.isEmpty ? '' : ', а подай со $classicFinish'}, затем дай им постоять 3-4 минуты.',
+        ];
       case ChefDishFamily.lazyCabbageRollStew:
         final lazyVegetablesText = _sentenceIngredientText(
           _displayList(
@@ -2448,7 +2593,9 @@ class OfflineChefEngine {
       case ChefDishFamily.borschtSoup:
       case ChefDishFamily.fishSoup:
       case ChefDishFamily.pickleSoup:
+      case ChefDishFamily.peaSmokedSoup:
       case ChefDishFamily.solyankaSoup:
+      case ChefDishFamily.mushroomSoup:
       case ChefDishFamily.svekolnikColdSoup:
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
@@ -2657,6 +2804,115 @@ class OfflineChefEngine {
               ? 'Сними борщ с огня, дай ему настояться 3-4 минуты и подавай горячим.'
               : 'В самом конце доведи борщ${borschtSeasoning.isEmpty ? '' : ' через $borschtSeasoning'}${borschtHomeFinish.isEmpty ? '' : ' и подай со $borschtHomeFinish'}, чтобы свекольная сладость получила мягкий домашний финиш, затем дай ему настояться 3-4 минуты.',
         ];
+      case ChefDishFamily.mushroomSoup:
+        final mushroomRoot = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['root'] ?? const <String>[],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final mushroomAromatics = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['aromatic'] ?? const <String>[],
+            inventory,
+            limit: 2,
+          ),
+        );
+        final mushroomFinish = _sentenceIngredientText(
+          finishText.isNotEmpty
+              ? finishText
+              : _displayList(
+                  [
+                    ...(selectedBySlot['finish'] ?? const <String>[]),
+                    for (final canonical in [
+                      ...chefSupport.finishingCanonicals,
+                      ...starters.includedCanonicals,
+                    ])
+                      if (canonical == 'сметана' || canonical == 'укроп')
+                        canonical,
+                  ],
+                  inventory,
+                  limit: 2,
+                ),
+        );
+        final mushroomSeasoning = _sentenceIngredientText(seasoningText);
+        final mushroomAromaticBase = mushroomAromatics.isNotEmpty
+            ? mushroomAromatics
+            : (aromaticsText.isNotEmpty ? aromaticsText : 'лук');
+        return [
+          'Нарежь $anchor${mushroomRoot.isEmpty ? '' : ', $mushroomRoot'}, сначала мягко прогрей $mushroomAromaticBase 4-5 минут, затем добавь грибы и выпарь их 4-6 минут, чтобы бульон не вышел водянистым.',
+          'Влей воду${mushroomRoot.isEmpty ? '' : ' и добавь $mushroomRoot'}, затем вари грибной суп 16-18 минут на спокойном огне, пока картофель не станет мягким, а грибной вкус не соберётся в бульоне.',
+          mushroomSeasoning.isEmpty && mushroomFinish.isEmpty
+              ? 'Сними грибной суп с огня, дай ему постоять 3-4 минуты и подавай горячим.'
+              : 'В конце доведи грибной суп${mushroomSeasoning.isEmpty ? '' : ' через $mushroomSeasoning'}${mushroomFinish.isEmpty ? '' : ' и подай со $mushroomFinish'}, затем дай ему постоять 3-4 минуты перед подачей.',
+        ];
+      case ChefDishFamily.peaSmokedSoup:
+        final peaSmokedBase = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['base'] ?? const <String>[],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final peaSmokedMeat = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['smoked'] ?? const <String>[],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final peaSmokedVegBase = _sentenceIngredientText(
+          _displayList(
+            [
+              for (final canonical in selectedBySlot['veg'] ?? const <String>[])
+                if (canonical == 'лук' || canonical == 'морковь') canonical,
+            ],
+            inventory,
+            limit: 2,
+          ),
+        );
+        final peaSmokedPotato = _sentenceIngredientText(
+          _displayList(
+            [
+              for (final canonical in selectedBySlot['veg'] ?? const <String>[])
+                if (canonical == 'картофель') canonical,
+            ],
+            inventory,
+            limit: 1,
+          ),
+        );
+        final peaSmokedFinish = _sentenceIngredientText(
+          finishText.isNotEmpty
+              ? finishText
+              : _displayList(
+                  [
+                    ...(selectedBySlot['finish'] ?? const <String>[]),
+                    for (final canonical in [
+                      ...chefSupport.finishingCanonicals,
+                      ...starters.includedCanonicals,
+                    ])
+                      if (canonical == 'сметана' || canonical == 'укроп')
+                        canonical,
+                  ],
+                  inventory,
+                  limit: 2,
+                ),
+        );
+        final peaSmokedSeasoning = _sentenceIngredientText(seasoningText);
+        final peaBaseText = peaSmokedBase.isNotEmpty ? peaSmokedBase : 'горох';
+        final peaMeatText =
+            peaSmokedMeat.isNotEmpty ? peaSmokedMeat : 'копчёную мясную основу';
+        final peaVegText = peaSmokedVegBase.isNotEmpty
+            ? peaSmokedVegBase
+            : (aromaticsText.isNotEmpty ? aromaticsText : 'лук и морковь');
+        return [
+          'Промой $peaBaseText${peaSmokedPotato.isEmpty ? '' : ', $peaSmokedPotato пока держи отдельно'}${peaVegText.isEmpty ? '' : ', сначала мягко прогрей $peaVegText 4-5 минут'} и затем добавь $peaMeatText ещё на 1-2 минуты, чтобы копчёная основа раскрылась в зажарке.',
+          'Влей воду, добавь $peaBaseText и вари гороховый суп 35-45 минут на спокойном огне до мягкости гороха${peaSmokedPotato.isEmpty ? '' : ', а $peaSmokedPotato положи на последние 12-15 минут, чтобы он не развалился раньше времени'}.',
+          peaSmokedSeasoning.isEmpty && peaSmokedFinish.isEmpty
+              ? 'Сними суп с огня, дай ему постоять 3-4 минуты и подавай горячим.'
+              : 'В конце доведи гороховый суп${peaSmokedSeasoning.isEmpty ? '' : ' через $peaSmokedSeasoning'}${peaSmokedFinish.isEmpty ? '' : ' и подай со $peaSmokedFinish'}, затем дай ему постоять 3-4 минуты перед подачей.',
+        ];
       case ChefDishFamily.solyankaSoup:
         final solyankaFinish = _sentenceIngredientText(
           _displayList(
@@ -2738,6 +2994,12 @@ class OfflineChefEngine {
       return text;
     }
     return text.toLowerCase();
+  }
+
+  String _cueText(String raw) {
+    var text = raw.toLowerCase().replaceAll('ё', 'е');
+    text = text.replaceAll(RegExp(r'[^a-zа-я0-9\s]'), ' ');
+    return text.replaceAll(RegExp(r'\s+'), ' ').trim();
   }
 
   String _soupCookTiming({
@@ -3407,6 +3669,8 @@ double _defaultAmountFor(String canonical) {
     case 'кукуруза':
     case 'фасоль':
       return 1;
+    case 'горох':
+      return 220;
     case 'горошек':
       return 160;
     case 'оливки':

@@ -51,6 +51,7 @@
   {"id":"lentils","name":"Чечевица","canonicalName":"Чечевица","synonyms":["чечевица","lentils"],"defaultUnit":"g"},
   {"id":"beans","name":"Фасоль","canonicalName":"Фасоль","synonyms":["фасоль","beans"],"defaultUnit":"g"},
   {"id":"peas","name":"Горошек","canonicalName":"Горошек","synonyms":["горошек","зеленый горошек","зелёный горошек","консервированный горошек","green peas"],"defaultUnit":"g"},
+  {"id":"split_peas","name":"Горох","canonicalName":"Горох","synonyms":["горох","сухой горох","сушеный горох","сушёный горох","колотый горох","горох колотый","split peas","yellow split peas"],"defaultUnit":"g"},
   {"id":"corn","name":"Кукуруза","canonicalName":"Кукуруза","synonyms":["кукуруза","corn"],"defaultUnit":"g"},
   {"id":"flour","name":"Мука","canonicalName":"Мука","synonyms":["мука","flour"],"defaultUnit":"g"},
   {"id":"sugar","name":"Сахар","canonicalName":"Сахар","synonyms":["сахар","sugar"],"defaultUnit":"g"},

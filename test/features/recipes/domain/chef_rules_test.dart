@@ -171,6 +171,151 @@ void main() {
     expect(properSolyanka.score, greaterThan(flatSoup.score));
   });
 
+  test('chef rules reward proper mushroom soup over flat watery version', () {
+    final flatSoup = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {'грибы', 'картофель', 'лук'},
+      matchedCanonicals: const {'грибы', 'картофель', 'лук'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'грибы': 'Грибы',
+        'картофель': 'Картофель',
+        'лук': 'Лук',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Подготовь грибы, картофель и лук.',
+        'Влей воду и вари суп 18 минут.',
+        'Подавай.',
+      ],
+    );
+
+    final properSoup = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {
+        'грибы',
+        'картофель',
+        'лук',
+        'морковь',
+        'сметана',
+        'укроп',
+      },
+      matchedCanonicals: const {
+        'грибы',
+        'картофель',
+        'лук',
+        'морковь',
+      },
+      supportCanonicals: const {
+        'соль',
+        'перец',
+        'лавровый лист',
+        'сметана',
+        'укроп',
+      },
+      displayByCanonical: const {
+        'грибы': 'Грибы',
+        'картофель': 'Картофель',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'сметана': 'Сметана',
+        'укроп': 'Укроп',
+        'лавровый лист': 'Лавровый лист',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Сначала прогрей лук и морковь 4-5 минут, затем добавь грибы и выпарь их 4-6 минут.',
+        'Влей воду, добавь картофель и вари грибной суп 16-18 минут на слабом огне.',
+        'В конце добавь сметану, укроп и подавай.',
+      ],
+    );
+
+    expect(properSoup.techniqueScore, greaterThan(flatSoup.techniqueScore));
+    expect(properSoup.balanceScore, greaterThan(flatSoup.balanceScore));
+    expect(properSoup.flavorScore, greaterThan(flatSoup.flavorScore));
+    expect(properSoup.score, greaterThan(flatSoup.score));
+    expect(
+      flatSoup.warnings.any((warning) => warning.contains('грибному супу')),
+      isTrue,
+    );
+  });
+
+  test('chef rules reward proper pea smoked soup over flat pea sausage soup',
+      () {
+    final flatSoup = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {'горох', 'колбаса', 'лук', 'морковь'},
+      matchedCanonicals: const {'горох', 'колбаса', 'лук', 'морковь'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'горох': 'Горох',
+        'колбаса': 'Колбаса',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Подготовь горох, колбасу, лук и морковь.',
+        'Влей воду и вари суп 18 минут.',
+        'Подавай.',
+      ],
+    );
+
+    final properSoup = assessChefRules(
+      profile: DishProfile.soup,
+      recipeCanonicals: const {
+        'горох',
+        'колбаса',
+        'картофель',
+        'лук',
+        'морковь',
+        'сметана',
+        'укроп',
+      },
+      matchedCanonicals: const {
+        'горох',
+        'колбаса',
+        'картофель',
+        'лук',
+        'морковь',
+      },
+      supportCanonicals: const {
+        'соль',
+        'перец',
+        'лавровый лист',
+        'сметана',
+        'укроп',
+      },
+      displayByCanonical: const {
+        'горох': 'Горох',
+        'колбаса': 'Копченая колбаса',
+        'картофель': 'Картофель',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'сметана': 'Сметана',
+        'укроп': 'Укроп',
+        'лавровый лист': 'Лавровый лист',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Промой горох, картофель пока держи отдельно, сначала мягко прогрей лук и морковь 4-5 минут и затем добавь копченую колбасу еще на 1-2 минуты.',
+        'Влей воду, добавь горох и вари гороховый суп 35-45 минут на спокойном огне, а картофель положи на последние 12-15 минут.',
+        'Сними с огня, подай со сметаной и укропом.',
+      ],
+    );
+
+    expect(properSoup.techniqueScore, greaterThan(flatSoup.techniqueScore));
+    expect(properSoup.balanceScore, greaterThan(flatSoup.balanceScore));
+    expect(properSoup.flavorScore, greaterThan(flatSoup.flavorScore));
+    expect(properSoup.score, greaterThan(flatSoup.score));
+    expect(
+      flatSoup.warnings.any((warning) => warning.contains('гороховому супу')),
+      isTrue,
+    );
+  });
+
   test('chef rules penalize structurally weak dish', () {
     final assessment = assessChefRules(
       profile: DishProfile.skillet,

@@ -333,6 +333,29 @@ double _scoreStructure({
             score += 0.06;
           }
           break;
+        case _SoupKind.mushroom:
+          if (matchedCanonicals.contains('грибы') &&
+              matchedCanonicals.contains('картофель') &&
+              _containsAny(matchedCanonicals, const {'лук', 'морковь'})) {
+            score += 0.16;
+          }
+          if (hasCreamy || _containsAny(matchedCanonicals, _herbCanonicals)) {
+            score += 0.06;
+          }
+          break;
+        case _SoupKind.peaSmoked:
+          if (matchedCanonicals.contains('горох') &&
+              _containsAny(matchedCanonicals, const {'колбаса', 'сосиски'}) &&
+              _containsAny(matchedCanonicals, const {'лук', 'морковь'})) {
+            score += 0.16;
+          }
+          if (matchedCanonicals.contains('картофель')) {
+            score += 0.04;
+          }
+          if (hasCreamy || _containsAny(matchedCanonicals, _herbCanonicals)) {
+            score += 0.06;
+          }
+          break;
         case _SoupKind.shchi:
           if (matchedCanonicals.contains('капуста') && matchedVegetables >= 2) {
             score += 0.14;
@@ -986,6 +1009,78 @@ _TechniqueAnalysis _analyzeTechnique({
             addReason('щавелевые щи получают мягкий домашний финиш');
           }
           break;
+        case _SoupKind.mushroom:
+          if (_containsKeyword(stepText, 'гриб') &&
+              _containsAnyKeyword(
+                stepText,
+                const ['прогрей', 'обжар', 'выпар'],
+              )) {
+            score += 0.10;
+            addReason('грибы сначала раскрываются с ароматической базой');
+          } else {
+            addWarning(
+                'грибному супу нужно сначала прогреть грибы, а не варить их сырыми');
+            hardPenalty *= 0.86;
+          }
+          if (_containsAnyKeyword(
+              stepText, const ['сметан', 'укроп', 'лавров'])) {
+            score += 0.06;
+            addReason('грибной суп получает мягкий домашний финиш');
+          } else {
+            addWarning('грибному супу не хватает мягкого домашнего финиша');
+            hardPenalty *= 0.88;
+          }
+          break;
+        case _SoupKind.peaSmoked:
+          if (_containsAnyKeyword(
+                stepText,
+                const ['промой горох', 'замочи горох', 'промой'],
+              ) &&
+              _containsKeyword(stepText, 'горох')) {
+            score += 0.10;
+            addReason(
+                'горох подготовлен заранее и не даёт супу грубую текстуру');
+          } else {
+            addWarning(
+                'гороховому супу нужно промыть или замочить горох до варки');
+            hardPenalty *= 0.84;
+          }
+          if (_containsAnyKeyword(
+                stepText,
+                const [
+                  '35-45 минут',
+                  '40-45 минут',
+                  '35-40 минут',
+                  '30-35 минут',
+                ],
+              ) &&
+              _containsKeyword(stepText, 'горох')) {
+            score += 0.12;
+            addReason('горох томится достаточно долго и успевает стать мягким');
+          } else {
+            addWarning('гороховому супу нужна длинная спокойная варка гороха');
+            hardPenalty *= 0.82;
+          }
+          if (_containsAnyKeyword(
+                stepText,
+                const ['копч', 'охотнич', 'сервелат', 'ветчин'],
+              ) &&
+              _containsAnyKeyword(
+                stepText,
+                const ['прогрей', 'обжар', 'добавь'],
+              )) {
+            score += 0.10;
+            addReason('копчёная основа раскрывается до основной варки');
+          } else {
+            addWarning(
+                'гороховому супу нужна явная копчёная основа, раскрытая до варки');
+            hardPenalty *= 0.84;
+          }
+          if (_containsAnyKeyword(stepText, const ['укроп', 'сметан'])) {
+            score += 0.06;
+            addReason('гороховый суп получает мягкий домашний финиш');
+          }
+          break;
         case _SoupKind.shchi:
           if (recipeCanonicals.contains('капуста') && hasGentleHeat) {
             score += 0.08;
@@ -1314,27 +1409,49 @@ _TechniqueAnalysis _analyzeTechnique({
           }
           break;
         case _StewDishKind.lazyCabbageRolls:
-          if (hasMix &&
+          final hasLazyAssembly = hasMix &&
               _containsAnyKeyword(
-                  stepText, const ['ленивые голубцы', 'плотную основу'])) {
+                stepText,
+                const ['ленивые голубцы', 'плотную основу'],
+              );
+          final hasWrappedAssembly = _containsAnyKeyword(
+            stepText,
+            const [
+              'сними крупные листья',
+              'кипящую воду',
+              'уложи на листья',
+              'заверни голубцы',
+              'швом вниз',
+            ],
+          );
+          if (hasLazyAssembly || hasWrappedAssembly) {
             score += 0.12;
             addReason(
-                'голубцы сначала собираются в единую мясо-рисовую основу');
+              hasWrappedAssembly
+                  ? 'голубцы держат форму через подготовленные листья и отдельную начинку'
+                  : 'голубцы сначала собираются в единую мясо-рисовую основу',
+            );
           } else {
             addWarning(
-                'ленивым голубцам не хватает этапа сборки общей мясо-рисовой массы');
+                'голубцам не хватает этапа сборки: либо общей массы, либо заворачивания в листья');
             hardPenalty *= 0.80;
           }
-          if (_containsAnyKeyword(
-                  stepText, const ['18-22 минуты', 'под крышкой']) &&
-              (_containsKeyword(stepText, 'туш') ||
-                  (hasHeat && hasGentleHeat))) {
+          final hasLazyCoveredBraise = _containsAnyKeyword(
+                stepText,
+                const ['18-22 минуты', 'под крышкой'],
+              ) &&
+              (_containsKeyword(stepText, 'туш') || (hasHeat && hasGentleHeat));
+          final hasClassicCoveredBraise = _containsAnyKeyword(
+                stepText,
+                const ['30-35 минут', 'под крышкой', 'швом вниз'],
+              ) &&
+              (_containsKeyword(stepText, 'туш') || (hasHeat && hasGentleHeat));
+          if (hasLazyCoveredBraise || hasClassicCoveredBraise) {
             score += 0.16;
             addReason(
                 'голубцы спокойно доходят под крышкой и не разваливаются');
           } else {
-            addWarning(
-                'ленивым голубцам не хватает спокойного тушения под крышкой');
+            addWarning('голубцам не хватает спокойного тушения под крышкой');
             hardPenalty *= 0.78;
           }
           if (_containsAnyKeyword(stepText, const ['томатн', 'сметан'])) {
@@ -2099,6 +2216,48 @@ _BalanceAnalysis _analyzeBalance({
           } else {
             addWarning(
                 'щавелевым щам не хватает мягкого финиша к зелёной кислоте');
+            hardPenalty *= 0.84;
+          }
+          break;
+        case _SoupKind.mushroom:
+          if (hasAromatics) {
+            score += 0.08;
+            addReason(
+                'у грибного супа есть ароматическая база для грибной глубины');
+          } else {
+            addWarning('грибному супу не хватает луково-морковной базы');
+            hardPenalty *= 0.88;
+          }
+          if (hasFinishingSupport || hasCreamy || hasHerbs) {
+            score += 0.08;
+            addReason(
+                'грибной суп получает мягкий сметанный или травяной финиш');
+          } else {
+            addWarning(
+                'грибному супу не хватает мягкого финиша к грибной глубине');
+            hardPenalty *= 0.88;
+          }
+          break;
+        case _SoupKind.peaSmoked:
+          if (_containsAny(recipeCanonicals, const {'лук', 'морковь'})) {
+            score += 0.08;
+            addReason(
+                'гороховый суп опирается на спокойную луково-морковную базу');
+          } else {
+            addWarning('гороховому супу не хватает овощной базы для мягкости');
+            hardPenalty *= 0.88;
+          }
+          if (hasFinishingSupport || hasCreamy || hasHerbs) {
+            score += 0.08;
+            addReason('густой гороховый вкус смягчается домашним финишем');
+          } else {
+            addWarning('гороховому супу не хватает мягкого домашнего финиша');
+            hardPenalty *= 0.88;
+          }
+          if (hasTomatoDepth ||
+              _containsAny(recipeCanonicals, const {'оливки', 'лимон'})) {
+            addWarning(
+                'гороховый суп с копчёностями не должен сваливаться в соляночный или томатный контур');
             hardPenalty *= 0.84;
           }
           break;
@@ -2945,6 +3104,55 @@ _FlavorAnalysis _analyzeFlavor({
             hardPenalty *= 0.88;
           }
           break;
+        case _SoupKind.mushroom:
+          final hasSoftMushroomFinish = availableSet.contains('сметана') ||
+              availableSet.contains('укроп') ||
+              availableSet.contains('лавровый лист');
+          if (hasSoftMushroomFinish) {
+            score += 0.12;
+            addReason('грибной суп держит глубину без сырой водянистости');
+          } else {
+            addWarning(
+                'грибному супу не хватает мягкого или травяного баланса к грибной глубине');
+            hardPenalty *= 0.86;
+          }
+          if (recipeCanonicals.contains('лук') &&
+              recipeCanonicals.contains('морковь')) {
+            score += 0.06;
+            addReason('луково-морковная база смягчает грибную глубину');
+          }
+          if (hasTomatoDepth || acidity >= 0.14) {
+            addWarning(
+                'грибной суп перегружается томатной или слишком резкой кислой нотой');
+            hardPenalty *= 0.88;
+          }
+          break;
+        case _SoupKind.peaSmoked:
+          final hasSoftPeaFinish = availableSet.contains('сметана') ||
+              availableSet.contains('укроп') ||
+              availableSet.contains('лавровый лист');
+          if (umami >= 0.18 &&
+              (fat >= 0.14 || creaminess >= 0.12) &&
+              hasSoftPeaFinish) {
+            score += 0.12;
+            addReason(
+                'гороховый суп держит плотный копчёный вкус мягким и собранным');
+          } else {
+            addWarning(
+                'гороховому супу не хватает мягкого баланса к копчёной и бобовой плотности');
+            hardPenalty *= 0.86;
+          }
+          if (recipeCanonicals.contains('лук') &&
+              recipeCanonicals.contains('морковь')) {
+            score += 0.06;
+            addReason('лук и морковь смягчают густую гороховую основу');
+          }
+          if (hasTomatoDepth || acidity >= 0.18) {
+            addWarning(
+                'гороховый суп перегружается лишней томатной или кислой нотой');
+            hardPenalty *= 0.88;
+          }
+          break;
         case _SoupKind.shchi:
           if (freshness >= 0.12 && (creaminess >= 0.12 || herbiness >= 0.10)) {
             score += 0.08;
@@ -3722,6 +3930,20 @@ bool _isGreenShchiDish(Set<String> ingredientCanonicals) {
       );
 }
 
+bool _isMushroomSoupDish(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals.contains('грибы') &&
+      ingredientCanonicals.contains('картофель') &&
+      _containsAny(ingredientCanonicals, const {'лук', 'морковь'}) &&
+      !ingredientCanonicals.contains('свекла') &&
+      !ingredientCanonicals.contains('капуста') &&
+      !ingredientCanonicals.contains('огурец') &&
+      !ingredientCanonicals.contains('перловка') &&
+      !_containsAny(
+        ingredientCanonicals,
+        const {'рыба', 'колбаса', 'сосиски'},
+      );
+}
+
 enum _FriedDishKind {
   none,
   blini,
@@ -3733,6 +3955,8 @@ enum _FriedDishKind {
 enum _SoupKind {
   none,
   greenShchi,
+  mushroom,
+  peaSmoked,
   shchi,
   borscht,
   ukha,
@@ -3810,6 +4034,14 @@ _SoupKind _detectSoupKind(Set<String> ingredientCanonicals) {
       _containsAny(
           ingredientCanonicals, const {'оливки', 'лимон', 'томатная паста'})) {
     return _SoupKind.solyanka;
+  }
+  if (_isMushroomSoupDish(ingredientCanonicals)) {
+    return _SoupKind.mushroom;
+  }
+  if (ingredientCanonicals.contains('горох') &&
+      _containsAny(ingredientCanonicals, const {'колбаса', 'сосиски'}) &&
+      _containsAny(ingredientCanonicals, const {'лук', 'морковь'})) {
+    return _SoupKind.peaSmoked;
   }
   if (ingredientCanonicals.contains('капуста') &&
       !ingredientCanonicals.contains('свекла')) {
@@ -3959,6 +4191,10 @@ List<String> _recommendedAromatics(
     switch (soupKind) {
       case _SoupKind.greenShchi:
         return const ['лук', 'морковь'];
+      case _SoupKind.mushroom:
+        return const ['лук', 'морковь'];
+      case _SoupKind.peaSmoked:
+        return const ['лук', 'морковь'];
       case _SoupKind.shchi:
       case _SoupKind.borscht:
       case _SoupKind.ukha:
@@ -4035,6 +4271,10 @@ List<String> _recommendedSeasonings(
   if (profile == DishProfile.soup) {
     switch (soupKind) {
       case _SoupKind.greenShchi:
+        return const ['соль', 'перец', 'лавровый лист', 'укроп'];
+      case _SoupKind.mushroom:
+        return const ['соль', 'перец', 'лавровый лист', 'укроп'];
+      case _SoupKind.peaSmoked:
         return const ['соль', 'перец', 'лавровый лист', 'укроп'];
       case _SoupKind.shchi:
         return const ['соль', 'перец', 'лавровый лист', 'укроп'];
@@ -4152,6 +4392,10 @@ List<String> _recommendedFinishes(
   if (profile == DishProfile.soup) {
     switch (soupKind) {
       case _SoupKind.greenShchi:
+        return const ['сметана', 'укроп'];
+      case _SoupKind.mushroom:
+        return const ['сметана', 'укроп'];
+      case _SoupKind.peaSmoked:
         return const ['сметана', 'укроп'];
       case _SoupKind.shchi:
       case _SoupKind.borscht:
@@ -4370,6 +4614,7 @@ const Set<String> _baseCanonicals = {
   'кускус',
   'гречка',
   'перловка',
+  'горох',
   'пшено',
   'манная крупа',
   'овсяные хлопья',
@@ -4540,6 +4785,7 @@ const Set<String> _sweetCanonicals = {
 };
 
 const Set<String> _legumeCanonicals = {
+  'горох',
   'фасоль',
   'чечевица',
 };
@@ -4658,6 +4904,8 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'брокколи': _FlavorVector(freshness: 0.30, umami: 0.10, crunch: 0.20),
   'чечевица': _FlavorVector(umami: 0.26),
   'фасоль': _FlavorVector(umami: 0.24),
+  'горох': _FlavorVector(
+      umami: 0.22, sweetness: 0.06, creaminess: 0.14, freshness: 0.04),
   'горошек': _FlavorVector(sweetness: 0.18, freshness: 0.20, creaminess: 0.06),
   'кукуруза': _FlavorVector(sweetness: 0.24, freshness: 0.14, crunch: 0.14),
   'капуста': _FlavorVector(freshness: 0.30, sweetness: 0.08, crunch: 0.56),

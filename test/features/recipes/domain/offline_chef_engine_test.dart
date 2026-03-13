@@ -470,6 +470,255 @@ void main() {
     );
   });
 
+  test('builds mushroom soup from mushrooms, potato and aromatics', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'bay_leaf',
+            name: 'Лавровый лист',
+            canonicalName: 'лавровый лист',
+            aliases: ['лавровый лист'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'mushrooms', name: 'Грибы', amount: 360, unit: Unit.g),
+          FridgeItem(
+              id: 'potato', name: 'Картофель', amount: 5, unit: Unit.pcs),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 1, unit: Unit.pcs),
+          FridgeItem(
+            id: 'sour_cream',
+            name: 'Сметана',
+            amount: 90,
+            unit: Unit.g,
+          ),
+          FridgeItem(id: 'dill', name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+      ),
+    );
+
+    final mushroomSoup = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Грибной суп'),
+    );
+
+    expect(generated.first.recipe.title, contains('Грибной суп'));
+    expect(mushroomSoup.recipe.chefProfile, 'soup');
+    expect(mushroomSoup.recipe.anchorIngredients, contains('Грибы'));
+    expect(
+      mushroomSoup.recipe.steps.any(
+        (step) =>
+            step.toLowerCase().contains('выпарь их 4-6 минут') &&
+            step.toLowerCase().contains('грибы'),
+      ),
+      isTrue,
+    );
+    expect(
+      mushroomSoup.recipe.steps.any((step) => step.contains('16-18 минут')),
+      isTrue,
+    );
+  });
+
+  test('prioritizes mushroom soup over generic soup on mushroom broth set', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'mushrooms', name: 'Грибы', amount: 320, unit: Unit.g),
+          FridgeItem(
+              id: 'potato', name: 'Картофель', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'dill', name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+      ),
+    );
+
+    final mushroomSoup = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Грибной суп'),
+    );
+    final genericSoup = generated.where(
+      (candidate) => candidate.recipe.title.contains('Домашний суп'),
+    );
+
+    expect(generated.first.recipe.title, contains('Грибной суп'));
+    if (genericSoup.isNotEmpty) {
+      expect(
+        mushroomSoup.priorityScore,
+        greaterThan(genericSoup.first.priorityScore),
+      );
+    }
+  });
+
+  test('builds pea smoked soup from split peas and smoked sausage set', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'bay_leaf',
+            name: 'Лавровый лист',
+            canonicalName: 'лавровый лист',
+            aliases: ['лавровый лист'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'peas', name: 'Горох', amount: 420, unit: Unit.g),
+          FridgeItem(
+            id: 'smoked_sausage',
+            name: 'Копченая колбаса',
+            amount: 260,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+              id: 'potato', name: 'Картофель', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'dill', name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+      ),
+    );
+
+    final peaSoup = generated.firstWhere(
+      (candidate) =>
+          candidate.recipe.title.contains('Гороховый суп с копченостями'),
+    );
+
+    expect(
+        generated.first.recipe.title, contains('Гороховый суп с копченостями'));
+    expect(peaSoup.recipe.chefProfile, 'soup');
+    expect(peaSoup.recipe.anchorIngredients, contains('Горох'));
+    expect(
+      peaSoup.recipe.ingredients.any(
+        (ingredient) => ingredient.name.contains('Копченая колбаса'),
+      ),
+      isTrue,
+    );
+    expect(
+      peaSoup.recipe.steps.any(
+        (step) =>
+            step.toLowerCase().contains('промой горох') &&
+            step.toLowerCase().contains('копченая колбаса'),
+      ),
+      isTrue,
+    );
+    expect(
+      peaSoup.recipe.steps.any((step) => step.contains('35-45 минут')),
+      isTrue,
+    );
+  });
+
+  test('does not build pea smoked soup from split peas with plain sausage', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        fridgeItems: const [
+          FridgeItem(id: 'peas', name: 'Горох', amount: 420, unit: Unit.g),
+          FridgeItem(
+            id: 'sausage',
+            name: 'Колбаса',
+            amount: 260,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+              id: 'potato', name: 'Картофель', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 1, unit: Unit.pcs),
+        ],
+      ),
+    );
+
+    expect(
+      generated.where(
+        (candidate) =>
+            candidate.recipe.title.contains('Гороховый суп с копченостями'),
+      ),
+      isEmpty,
+    );
+  });
+
+  test('does not confuse green peas with pea smoked soup', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        fridgeItems: const [
+          FridgeItem(
+            id: 'green_peas',
+            name: 'Зеленый горошек',
+            amount: 220,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+            id: 'smoked_sausage',
+            name: 'Копченая колбаса',
+            amount: 240,
+            unit: Unit.g,
+          ),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 1, unit: Unit.pcs),
+        ],
+      ),
+    );
+
+    expect(
+      generated.where(
+        (candidate) =>
+            candidate.recipe.title.contains('Гороховый суп с копченостями'),
+      ),
+      isEmpty,
+    );
+  });
+
   test('ingredient families let chef cook from specific real products', () {
     final generated = const OfflineChefEngine().generate(
       _request(
@@ -1735,6 +1984,120 @@ void main() {
         (step) =>
             step.contains('плотную основу для ленивых голубцов') ||
             step.contains('томат'),
+      ),
+      isTrue,
+    );
+  });
+
+  test('builds classic golubtsy with wrapped leaves and covered braise', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'tomato_paste',
+            name: 'Томатная паста',
+            canonicalName: 'томатная паста',
+            aliases: ['томатная паста'],
+            category: 'sauce',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'sour_cream',
+            name: 'Сметана',
+            canonicalName: 'сметана',
+            aliases: ['сметана'],
+            category: 'dairy',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'bay_leaf',
+            name: 'Лавровый лист',
+            canonicalName: 'лавровый лист',
+            aliases: ['лавровый лист'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'mince', name: 'Фарш', amount: 500, unit: Unit.g),
+          FridgeItem(id: 'rice', name: 'Рис', amount: 260, unit: Unit.g),
+          FridgeItem(
+            id: 'cabbage',
+            name: 'Капуста',
+            amount: 1200,
+            unit: Unit.g,
+          ),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 2, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 2, unit: Unit.pcs),
+          FridgeItem(
+            id: 'tomato_paste',
+            name: 'Томатная паста',
+            amount: 120,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+            id: 'sour_cream',
+            name: 'Сметана',
+            amount: 180,
+            unit: Unit.g,
+          ),
+        ],
+      ),
+    );
+
+    final generatedTitles =
+        generated.map((candidate) => candidate.recipe.title).toList();
+    expect(
+      generatedTitles,
+      contains(contains('Голубцы классические')),
+    );
+
+    final classicGolubtsy = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Голубцы классические'),
+    );
+
+    expect(classicGolubtsy.recipe.chefProfile, 'stew');
+    expect(
+      classicGolubtsy.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Капуста',
+      ),
+      isTrue,
+    );
+    expect(
+      classicGolubtsy.recipe.steps.any(
+        (step) => step.contains('сними крупные листья'),
+      ),
+      isTrue,
+    );
+    expect(
+      classicGolubtsy.recipe.steps.any(
+        (step) =>
+            step.contains('плотно заверни голубцы') &&
+            step.contains('швом вниз'),
+      ),
+      isTrue,
+    );
+    expect(
+      classicGolubtsy.recipe.steps.any(
+        (step) =>
+            step.contains('туши голубцы 30-35 минут') &&
+            (step.contains('под крышкой') || step.contains('накрой')),
       ),
       isTrue,
     );
@@ -3851,6 +4214,19 @@ OfflineChefRequest _request({
             name: 'Горошек',
             canonicalName: 'горошек',
             synonyms: ['горошек', 'зеленый горошек'],
+            defaultUnit: Unit.g,
+          ),
+          ProductCatalogEntry(
+            id: 'split_peas',
+            name: 'Горох',
+            canonicalName: 'горох',
+            synonyms: [
+              'горох',
+              'сухой горох',
+              'сушеный горох',
+              'сушёный горох',
+              'колотый горох',
+            ],
             defaultUnit: Unit.g,
           ),
           ProductCatalogEntry(

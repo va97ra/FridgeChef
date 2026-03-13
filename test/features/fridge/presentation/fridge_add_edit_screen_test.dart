@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:help_to_cook/core/theme/app_theme.dart';
 import 'package:help_to_cook/core/utils/formatters.dart';
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/fridge/data/fridge_repo.dart';
@@ -22,8 +23,9 @@ void main() {
             _FakeProductSearchService(),
           ),
         ],
-        child: const MaterialApp(
-          home: FridgeAddEditScreen(),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const FridgeAddEditScreen(),
         ),
       ),
     );
@@ -53,8 +55,9 @@ void main() {
             _FakeProductSearchService(),
           ),
         ],
-        child: const MaterialApp(
-          home: FridgeAddEditScreen(),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const FridgeAddEditScreen(),
         ),
       ),
     );

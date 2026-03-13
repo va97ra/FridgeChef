@@ -186,6 +186,192 @@ void main() {
     );
   });
 
+  test('accepts mushroom soup with sauteed mushrooms and soft finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('mushroom_soup'),
+      recipe: const Recipe(
+        id: 'mushroom-soup-valid',
+        title: 'Грибной суп домашний',
+        timeMin: 32,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Грибы', amount: 320, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 60, unit: Unit.g),
+          RecipeIngredient(name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+        steps: [
+          'Нарежь грибы, картофель, лук и морковь, сначала мягко прогрей лук и морковь 4-5 минут, затем добавь грибы и выпарь их 4-6 минут.',
+          'Влей воду, добавь картофель и вари грибной суп 16-18 минут на спокойном огне.',
+          'Сними с огня, доведи вкус и подай со сметаной и укропом.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'грибы',
+        'картофель',
+        'лук',
+        'морковь',
+        'сметана',
+        'укроп',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects mushroom soup that boils mushrooms from raw in water', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('mushroom_soup'),
+      recipe: const Recipe(
+        id: 'mushroom-soup-flat',
+        title: 'Грибной суп домашний',
+        timeMin: 24,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Грибы', amount: 320, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 60, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь грибы, картофель и лук.',
+          'Влей воду, добавь грибы, картофель и лук сразу и вари суп 18 минут.',
+          'В конце добавь сметану и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'грибы', 'картофель', 'лук', 'сметана'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Грибной суп должен сначала прогреть грибы с ароматической базой, а не варить их сырыми в воде.',
+      ),
+    );
+  });
+
+  test('accepts pea smoked soup with prepared peas and smoked base', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('pea_smoked_soup'),
+      recipe: const Recipe(
+        id: 'pea-smoked-valid',
+        title: 'Гороховый суп с копченостями',
+        timeMin: 48,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Горох', amount: 260, unit: Unit.g),
+          RecipeIngredient(
+            name: 'Копченая колбаса',
+            amount: 220,
+            unit: Unit.g,
+          ),
+          RecipeIngredient(name: 'Картофель', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Укроп', amount: 12, unit: Unit.g),
+        ],
+        steps: [
+          'Промой горох, картофель пока держи отдельно, сначала мягко прогрей лук и морковь 4-5 минут и затем добавь копченую колбасу еще на 1-2 минуты.',
+          'Влей воду, добавь горох и вари гороховый суп 35-45 минут на спокойном огне, а картофель положи на последние 12-15 минут.',
+          'Сними с огня, доведи вкус и подай с укропом.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'горох',
+        'колбаса',
+        'картофель',
+        'лук',
+        'морковь',
+        'укроп',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects pea smoked soup without smoked meat cue', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('pea_smoked_soup'),
+      recipe: const Recipe(
+        id: 'pea-smoked-no-smoke',
+        title: 'Гороховый суп домашний',
+        timeMin: 46,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Горох', amount: 260, unit: Unit.g),
+          RecipeIngredient(name: 'Колбаса', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Картофель', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Промой горох, картофель пока держи отдельно, сначала мягко прогрей лук и морковь 4-5 минут и затем добавь колбасу еще на 1-2 минуты.',
+          'Влей воду, добавь горох и вари суп 35-45 минут на спокойном огне, а картофель положи на последние 12-15 минут.',
+          'Сними с огня и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'горох',
+        'колбаса',
+        'картофель',
+        'лук',
+        'морковь'
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Гороховый суп должен опираться на явно копчёную мясную основу, а не на абстрактную колбасу.',
+      ),
+    );
+  });
+
+  test('rejects pea smoked soup with rushed pea simmer', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('pea_smoked_soup'),
+      recipe: const Recipe(
+        id: 'pea-smoked-rushed',
+        title: 'Гороховый суп с копченостями',
+        timeMin: 24,
+        tags: ['soup'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Горох', amount: 260, unit: Unit.g),
+          RecipeIngredient(
+            name: 'Копченая колбаса',
+            amount: 220,
+            unit: Unit.g,
+          ),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Подготовь горох, лук, морковь и копченую колбасу.',
+          'Влей воду, добавь все сразу и вари суп 18 минут.',
+          'Подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'горох', 'колбаса', 'лук', 'морковь'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Гороховый суп должен томить горох 30-45 минут до мягкости.',
+      ),
+    );
+  });
+
   test('rejects okroshka without chilled kefir assembly', () {
     final result = validateChefDish(
       blueprint: _blueprint('okroshka_kefir'),
@@ -415,6 +601,89 @@ void main() {
     expect(
       result.violations,
       contains('Ленивым голубцам нужен рис для правильной структуры.'),
+    );
+  });
+
+  test('accepts classic golubtsy with wrapped leaves and sauce braise', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('classic_golubtsy'),
+      recipe: const Recipe(
+        id: 'classic-golubtsy',
+        title: 'Голубцы классические',
+        timeMin: 52,
+        tags: ['stew'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Фарш', amount: 500, unit: Unit.g),
+          RecipeIngredient(name: 'Рис', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Капуста', amount: 1200, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Томатная паста', amount: 45, unit: Unit.g),
+          RecipeIngredient(name: 'Сметана', amount: 120, unit: Unit.g),
+        ],
+        steps: [
+          'Подготовь капусту: сними крупные листья, опусти их в кипящую воду на 2-3 минуты и обсуши, а лук с морковью мягко прогрей 4-5 минут.',
+          'Соедини фарш с рисом и частью овощной базы в плотную начинку, уложи её на листья капусты, плотно заверни голубцы и уложи их швом вниз.',
+          'Добавь томатную пасту и сметану, накрой и туши голубцы 30-35 минут на слабом огне, затем дай им постоять 3-4 минуты.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'фарш',
+        'рис',
+        'капуста',
+        'лук',
+        'морковь',
+        'томатная паста',
+        'сметана',
+      },
+    );
+
+    expect(result.isValid, isTrue);
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects classic golubtsy without wrapped leaf technique', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('classic_golubtsy'),
+      recipe: const Recipe(
+        id: 'classic-golubtsy-flat',
+        title: 'Голубцы классические',
+        timeMin: 36,
+        tags: ['stew'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Фарш', amount: 500, unit: Unit.g),
+          RecipeIngredient(name: 'Рис', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Капуста', amount: 900, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Томатная паста', amount: 45, unit: Unit.g),
+        ],
+        steps: [
+          'Соедини фарш, рис и капусту в общую массу.',
+          'Добавь томатную пасту и туши всё вместе 20 минут.',
+          'Подавай горячим.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'фарш',
+        'рис',
+        'капуста',
+        'лук',
+        'томатная паста',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Классическим голубцам нужно подготовить и смягчить капустные листья.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains('Классические голубцы нужно заворачивать в капустные листья.'),
     );
   });
 

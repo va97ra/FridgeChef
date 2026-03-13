@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:help_to_cook/core/theme/app_theme.dart';
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/fridge/data/fridge_repo.dart';
 import 'package:help_to_cook/features/fridge/domain/fridge_item.dart';
@@ -21,7 +22,10 @@ void main() {
           shelfRepoProvider.overrideWithValue(_FakeShelfRepo()),
           recipeMatchesProvider.overrideWith((ref) => const <RecipeMatch>[]),
         ],
-        child: const MaterialApp(home: HomeScreen()),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const HomeScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();

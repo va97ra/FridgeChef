@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:help_to_cook/core/utils/units.dart';
@@ -40,6 +41,10 @@ class _ThrowingUserProductMemoryRepo extends UserProductMemoryRepo {
 
 void main() {
   test('addItem still updates fridge state when memory recording fails', () async {
+    final originalDebugPrint = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) {};
+    addTearDown(() => debugPrint = originalDebugPrint);
+
     final repo = _FakeFridgeRepo();
     final notifier = FridgeListNotifier(repo, _ThrowingUserProductMemoryRepo());
     final item = FridgeItem(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:help_to_cook/core/theme/app_theme.dart';
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/fridge/domain/product_catalog_entry.dart';
 import 'package:help_to_cook/features/recipes/data/generated_recipe_draft_parser.dart';
@@ -34,6 +35,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: RecipeDetailScreen(recipe: recipe),
         ),
       ),
@@ -76,6 +78,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: RecipeDetailScreen(recipe: recipe),
         ),
       ),
@@ -120,6 +123,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: RecipeDetailScreen(recipe: recipe),
         ),
       ),
@@ -161,6 +165,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: RecipeDetailScreen(recipe: recipe),
         ),
       ),
@@ -228,6 +233,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: Builder(
             builder: (context) {
               return Scaffold(
@@ -309,6 +315,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: RecipeDetailScreen(recipe: recipe),
         ),
       ),
@@ -369,6 +376,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: AppTheme.lightTheme,
           home: RecipeDetailScreen(recipe: recipe),
         ),
       ),
