@@ -18,6 +18,8 @@ enum ChefStepStyle {
   fritterBatter,
   syrniki,
   draniki,
+  liverFritters,
+  liverCake,
   porridge,
   cutlets,
   stew,
@@ -68,6 +70,8 @@ enum ChefDishFamily {
   oladyiFritter,
   curdFritter,
   potatoFritter,
+  liverFritters,
+  liverCake,
   porridge,
   classicGolubtsy,
   lazyCabbageRollStew,
@@ -178,6 +182,10 @@ class ChefBlueprint {
         return ChefDishFamily.curdFritter;
       case ChefStepStyle.draniki:
         return ChefDishFamily.potatoFritter;
+      case ChefStepStyle.liverFritters:
+        return ChefDishFamily.liverFritters;
+      case ChefStepStyle.liverCake:
+        return ChefDishFamily.liverCake;
       case ChefStepStyle.porridge:
         return ChefDishFamily.porridge;
       case ChefStepStyle.cutlets:
@@ -1541,6 +1549,90 @@ const chefBlueprints = <ChefBlueprint>[
         candidates: ['лук'],
         minCount: 1,
         maxCount: 1,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'liver_fritters',
+    profile: DishProfile.skillet,
+    titlePrefix: 'Печеночные оладьи',
+    description:
+        'Домашние печеночные оладьи, где печень пробивается с луком в гладкую массу, а потом быстро жарится небольшими порциями.',
+    timeMin: 22,
+    servingsBase: 3,
+    tags: ['quick', 'russian_classic', 'generated_local'],
+    anchorSlot: 'base',
+    secondaryAnchorSlot: 'binder',
+    supportSlot: 'aromatic',
+    preferredStarters: ['соль', 'перец', 'масло', 'сметана'],
+    maxImplicitPantryStarters: 4,
+    titleStyle: ChefTitleStyle.anchorWithFocus,
+    stepStyle: ChefStepStyle.liverFritters,
+    family: ChefDishFamily.liverFritters,
+    slots: [
+      ChefSlot(
+        key: 'base',
+        candidates: ['печень'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'binder',
+        candidates: ['яйцо', 'мука'],
+        minCount: 2,
+        maxCount: 2,
+      ),
+      ChefSlot(
+        key: 'aromatic',
+        candidates: ['лук'],
+        minCount: 1,
+        maxCount: 1,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'liver_cake',
+    profile: DishProfile.general,
+    titlePrefix: 'Печеночный торт',
+    description:
+        'Холодная домашняя закуска, где тонкие печеночные коржи собираются слоями с мягкой овощной и майонезно-сметанной прослойкой.',
+    timeMin: 48,
+    servingsBase: 6,
+    tags: ['cold', 'layered', 'russian_classic', 'generated_local'],
+    anchorSlot: 'base',
+    secondaryAnchorSlot: 'layer',
+    supportSlot: 'sauce',
+    preferredStarters: ['соль', 'перец', 'масло'],
+    maxImplicitPantryStarters: 3,
+    titleStyle: ChefTitleStyle.anchorWithFocus,
+    stepStyle: ChefStepStyle.liverCake,
+    family: ChefDishFamily.liverCake,
+    slots: [
+      ChefSlot(
+        key: 'base',
+        candidates: ['печень'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'binder',
+        candidates: ['яйцо', 'мука'],
+        minCount: 2,
+        maxCount: 2,
+      ),
+      ChefSlot(
+        key: 'layer',
+        candidates: ['лук', 'морковь'],
+        minCount: 2,
+        maxCount: 2,
+      ),
+      ChefSlot(
+        key: 'sauce',
+        candidates: ['майонез', 'сметана'],
+        minCount: 1,
+        maxCount: 2,
       ),
     ],
   ),

@@ -1,5 +1,11 @@
 # FridgeChef Agent Notes
 
+## First Stop
+- Before re-reading the whole project, open `00_CHEF_AGENT_HANDOFF.md`.
+- That file is the compact handoff for chef architecture, Russian cuisine coverage status, recent changes, and the next recommended family to implement.
+- If you change chef-domain behavior, coverage status, or next-step guidance, you must update `00_CHEF_AGENT_HANDOFF.md` in the same turn.
+- If some part of the handoff becomes obsolete, rewrite or replace that part instead of appending conflicting notes.
+
 ## Product Intent
 - The built-in chef must develop real culinary understanding, not just the appearance of understanding.
 - Do not optimize for "feels smart" by only adding more recipes, badges, or UI polish.

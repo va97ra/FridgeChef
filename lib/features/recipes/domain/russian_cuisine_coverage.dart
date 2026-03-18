@@ -372,18 +372,20 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'liver_fritters',
     title: 'Печеночные оладьи',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'liver_fritters',
     familyId: 'liverFritters',
     continuationNote:
-        'Catalog already has liver; next agent can model this after soup batch.',
+        'Covered as a dedicated liver-and-onion skillet fritter family with separate blending and frying checks.',
   ),
   RussianCuisineCoverageEntry(
     id: 'liver_cake',
     title: 'Печеночный торт',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'liver_cake',
     familyId: 'liverCake',
     continuationNote:
-        'Catalog already has liver; requires layered cold appetizer logic.',
+        'Covered as a layered cold appetizer family with separate liver-batter, assembly, and chilling logic.',
   ),
   RussianCuisineCoverageEntry(
     id: 'charlotte',

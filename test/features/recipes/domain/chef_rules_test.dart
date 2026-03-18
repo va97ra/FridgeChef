@@ -946,6 +946,103 @@ void main() {
     );
   });
 
+  test('chef rules reward layered chilled liver cake over flat hot liver mass',
+      () {
+    final flatLiverCake = assessChefRules(
+      profile: DishProfile.general,
+      recipeCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'майонез',
+      },
+      matchedCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'майонез',
+      },
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'печень': 'Печень',
+        'яйцо': 'Яйца',
+        'мука': 'Мука',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'майонез': 'Майонез',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Пробей печень с яйцами и мукой.',
+        'Смешай печеночную массу с луком, морковью и майонезом на сковороде.',
+        'Подавай горячим.',
+      ],
+    );
+
+    final properLiverCake = assessChefRules(
+      profile: DishProfile.general,
+      recipeCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'майонез',
+        'укроп',
+      },
+      matchedCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'майонез',
+      },
+      supportCanonicals: const {'соль', 'перец', 'укроп'},
+      displayByCanonical: const {
+        'печень': 'Печень',
+        'яйцо': 'Яйца',
+        'мука': 'Мука',
+        'лук': 'Лук',
+        'морковь': 'Морковь',
+        'майонез': 'Майонез',
+        'укроп': 'Укроп',
+        'соль': 'Соль',
+        'перец': 'Перец',
+      },
+      steps: const [
+        'Пробей печень с яйцами и мукой в гладкое печеночное тесто.',
+        'Мелко нарежь лук и морковь, обжарь овощную прослойку и отдельно жарь тонкие коржи по 1-2 минуты с каждой стороны.',
+        'Собери печеночный торт слоями с майонезом, каждый корж отдельно остуди и убери в холодильник на 2-3 часа.',
+        'Подавай холодным с укропом.',
+      ],
+    );
+
+    expect(
+      properLiverCake.techniqueScore,
+      greaterThan(flatLiverCake.techniqueScore),
+    );
+    expect(
+      properLiverCake.balanceScore,
+      greaterThan(flatLiverCake.balanceScore),
+    );
+    expect(
+      properLiverCake.flavorScore,
+      greaterThan(flatLiverCake.flavorScore),
+    );
+    expect(properLiverCake.score, greaterThan(flatLiverCake.score));
+    expect(
+      flatLiverCake.warnings.any(
+        (warning) => warning.contains('печеночному торту'),
+      ),
+      isTrue,
+    );
+  });
+
   test('chef rules reward structured lazy cabbage rolls over flat mince stew',
       () {
     final flatGolubtsy = assessChefRules(

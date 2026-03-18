@@ -452,6 +452,16 @@ class OfflineChefEngine {
         inventoryCanonicals.contains('огурец') &&
         inventoryCanonicals.contains('картофель') &&
         inventoryCanonicals.contains('яйцо');
+    final hasLiverFrittersSet = inventoryCanonicals.contains('печень') &&
+        inventoryCanonicals.contains('лук') &&
+        inventoryCanonicals.contains('яйцо') &&
+        inventoryCanonicals.contains('мука');
+    final hasLiverCakeSet = inventoryCanonicals.contains('печень') &&
+        inventoryCanonicals.contains('яйцо') &&
+        inventoryCanonicals.contains('мука') &&
+        inventoryCanonicals.contains('лук') &&
+        inventoryCanonicals.contains('морковь') &&
+        inventoryHasAny(const {'майонез', 'сметана'});
     final hasClassicGolubtsySet = inventoryCanonicals.contains('капуста') &&
         inventoryCanonicals.contains('фарш') &&
         inventoryCanonicals.contains('рис') &&
@@ -503,6 +513,10 @@ class OfflineChefEngine {
             : 0.0;
       case ChefDishFamily.svekolnikColdSoup:
         return hasSvekolnikSet ? 0.16 : 0.0;
+      case ChefDishFamily.liverFritters:
+        return hasLiverFrittersSet ? 0.18 : 0.0;
+      case ChefDishFamily.liverCake:
+        return hasLiverCakeSet ? 0.20 : 0.0;
       case ChefDishFamily.coldSoup:
       case ChefDishFamily.okroshkaColdSoup:
       case ChefDishFamily.okroshkaKvassColdSoup:
@@ -850,6 +864,8 @@ class OfflineChefEngine {
       case ChefDishFamily.oladyiFritter:
       case ChefDishFamily.curdFritter:
       case ChefDishFamily.potatoFritter:
+      case ChefDishFamily.liverFritters:
+      case ChefDishFamily.liverCake:
       case ChefDishFamily.porridge:
       case ChefDishFamily.classicGolubtsy:
       case ChefDishFamily.lazyCabbageRollStew:
@@ -908,6 +924,11 @@ class OfflineChefEngine {
         return hasAny(const {'масло', 'оливковое масло'}) &&
             hasAny(const {'сметана', 'йогурт'}) &&
             hasAny(const {'лаваш'});
+      case ChefDishFamily.liverFritters:
+        return hasAny(const {'масло', 'оливковое масло'});
+      case ChefDishFamily.liverCake:
+        return hasAny(const {'масло', 'оливковое масло'}) &&
+            hasAny(const {'майонез', 'сметана'});
       case ChefDishFamily.peaSmokedSoup:
         return hasAny(const {'горох'}) &&
             hasAny(const {'колбаса', 'сосиски'}) &&
@@ -992,6 +1013,36 @@ class OfflineChefEngine {
 
   double _coreTargetAmountFor(ChefBlueprint blueprint, String canonical) {
     switch (blueprint.dishFamily) {
+      case ChefDishFamily.liverCake:
+        switch (canonical) {
+          case 'печень':
+            return 420;
+          case 'яйцо':
+            return 2;
+          case 'мука':
+            return 90;
+          case 'лук':
+          case 'морковь':
+            return 1;
+          case 'майонез':
+          case 'сметана':
+            return 120;
+          default:
+            return _defaultAmountFor(canonical);
+        }
+      case ChefDishFamily.liverFritters:
+        switch (canonical) {
+          case 'печень':
+            return 320;
+          case 'яйцо':
+            return 2;
+          case 'мука':
+            return 70;
+          case 'лук':
+            return 1;
+          default:
+            return _defaultAmountFor(canonical);
+        }
       case ChefDishFamily.savoryClosedPie:
         switch (canonical) {
           case 'мука':
@@ -1689,6 +1740,30 @@ class OfflineChefEngine {
           seasoningText.isEmpty && finishText.isEmpty
               ? 'Дай драникам 1 минуту стабилизироваться после сковороды и подавай горячими.'
               : 'В конце доведи вкус${seasoningText.isEmpty ? '' : ': $seasoningText'}${finishText.isEmpty ? '' : ' и подай со $finishText'}, чтобы драники остались хрустящими снаружи и мягкими внутри.',
+        ];
+      case ChefStepStyle.liverFritters:
+        final liverFinish = finishText.isNotEmpty ? finishText : 'сметаной';
+        return [
+          'Промой $anchor, зачисти грубые жилки${support.isEmpty ? '' : ', крупно нарежь $support'} и пробей всё вместе в гладкую печеночную массу без крупных кусков.',
+          'Добавь $secondary, размешай густую печеночную массу 1-2 минуты и дай ей постоять 5-7 минут, чтобы мука собрала лишнюю влагу и ложка держала форму.',
+          'Выкладывай массу ложкой небольшими порциями на${panGreaseText.isEmpty ? ' слегка смазанную' : ' слегка смазанную $panGreaseText'} сковороду и жарь печеночные оладьи по 2-3 минуты с каждой стороны до полной готовности без пересушивания.',
+          'Дай оладьям 1 минуту собраться после сковороды${liverFinish.isEmpty ? '' : ' и подавай их со $liverFinish'}, пока середина остаётся мягкой, а вкус не ушёл в сухость.',
+        ];
+      case ChefStepStyle.liverCake:
+        final liverBinders = _sentenceIngredientText(
+          _displayList(
+            selectedBySlot['binder'] ?? const <String>[],
+            inventory,
+            limit: 2,
+          ),
+        );
+        final liverLayer = _sentenceIngredientText(secondary);
+        final liverSauce = _sentenceIngredientText(support);
+        return [
+          'Промой $anchor, зачисти грубые жилки и пробей печень с $liverBinders в гладкое печеночное тесто, которое должно легко разливаться тонким слоем без крупных кусков.',
+          'Мелко нарежь $liverLayer и спокойно обжарь овощную прослойку 6-8 минут до мягкости без лишней сырости. На${panGreaseText.isEmpty ? ' слегка смазанной' : ' слегка смазанной $panGreaseText'} сковороде жарь тонкие печеночные коржи по 1-2 минуты с каждой стороны и каждый корж отдельно остуди.',
+          'Собери печеночный торт слоями: корж, тонкий слой $liverSauce, часть овощной прослойки. Повторяй, пока коржи не закончатся, затем накрой торт и убери в холодильник на 2-3 часа, чтобы слои собрались.',
+          'Перед подачей дай закуске постоять 5 минут вне холода, затем нарежь и подавай печеночный торт холодным или прохладным.',
         ];
       case ChefStepStyle.porridge:
         return [
@@ -2608,6 +2683,8 @@ class OfflineChefEngine {
       case ChefDishFamily.oladyiFritter:
       case ChefDishFamily.curdFritter:
       case ChefDishFamily.potatoFritter:
+      case ChefDishFamily.liverFritters:
+      case ChefDishFamily.liverCake:
       case ChefDishFamily.porridge:
       case ChefDishFamily.cutlets:
       case ChefDishFamily.stew:

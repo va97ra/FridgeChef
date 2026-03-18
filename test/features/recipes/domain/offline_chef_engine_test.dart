@@ -1646,6 +1646,161 @@ void main() {
     );
   });
 
+  test('builds liver fritters from liver onion egg and flour', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'oil',
+            name: 'Масло',
+            canonicalName: 'масло',
+            aliases: ['масло'],
+            category: 'oil',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'sour_cream',
+            name: 'Сметана',
+            canonicalName: 'сметана',
+            aliases: ['сметана'],
+            category: 'dairy',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'liver', name: 'Печень', amount: 450, unit: Unit.g),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 1, unit: Unit.pcs),
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 2, unit: Unit.pcs),
+          FridgeItem(id: 'flour', name: 'Мука', amount: 180, unit: Unit.g),
+        ],
+      ),
+    );
+
+    final liverFritters = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Печеночные оладьи'),
+    );
+
+    expect(liverFritters.recipe.chefProfile, 'skillet');
+    expect(
+      liverFritters.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Лук',
+      ),
+      isTrue,
+    );
+    expect(
+      liverFritters.recipe.steps.any(
+        (step) => step.toLowerCase().contains('гладкую печеночную массу'),
+      ),
+      isTrue,
+    );
+    expect(
+      liverFritters.recipe.steps.any(
+        (step) => step.toLowerCase().contains('ложкой небольшими порциями'),
+      ),
+      isTrue,
+    );
+    expect(
+      liverFritters.recipe.steps.any(
+        (step) => step.contains('2-3 минуты с каждой стороны'),
+      ),
+      isTrue,
+    );
+  });
+
+  test('builds liver cake from liver egg flour onion carrot and mayonnaise',
+      () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'pepper',
+            name: 'Черный перец',
+            canonicalName: 'перец',
+            aliases: ['перец'],
+            category: 'spice',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'oil',
+            name: 'Масло',
+            canonicalName: 'масло',
+            aliases: ['масло'],
+            category: 'oil',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'liver', name: 'Печень', amount: 520, unit: Unit.g),
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 3, unit: Unit.pcs),
+          FridgeItem(id: 'flour', name: 'Мука', amount: 180, unit: Unit.g),
+          FridgeItem(id: 'onion', name: 'Лук', amount: 2, unit: Unit.pcs),
+          FridgeItem(id: 'carrot', name: 'Морковь', amount: 2, unit: Unit.pcs),
+          FridgeItem(id: 'mayo', name: 'Майонез', amount: 200, unit: Unit.g),
+        ],
+      ),
+    );
+
+    final liverCake = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Печеночный торт'),
+    );
+
+    expect(liverCake.recipe.chefProfile, 'general');
+    expect(
+      liverCake.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Морковь',
+      ),
+      isTrue,
+    );
+    expect(
+      liverCake.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Майонез',
+      ),
+      isTrue,
+    );
+    expect(
+      liverCake.recipe.steps.any(
+        (step) => step.toLowerCase().contains('тонкие печеночные коржи'),
+      ),
+      isTrue,
+    );
+    expect(
+      liverCake.recipe.steps.any(
+        (step) => step.toLowerCase().contains('собери печеночный торт слоями'),
+      ),
+      isTrue,
+    );
+    expect(
+      liverCake.recipe.steps.any(
+        (step) => step.toLowerCase().contains('убери в холодильник'),
+      ),
+      isTrue,
+    );
+  });
+
   test('builds stewed cabbage from home-style pantry set', () {
     final generated = const OfflineChefEngine().generate(
       _request(

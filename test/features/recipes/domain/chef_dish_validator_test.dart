@@ -1089,6 +1089,245 @@ void main() {
     expect(result.violations, isEmpty);
   });
 
+  test('rejects liver fritters without blended liver batter', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('liver_fritters'),
+      recipe: const Recipe(
+        id: 'liver-fritters-chopped',
+        title: 'Печеночные оладьи',
+        timeMin: 20,
+        tags: ['quick'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Печень', amount: 380, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 70, unit: Unit.g),
+        ],
+        steps: [
+          'Нарежь печень кусочками, смешай с луком, яйцами и мукой.',
+          'Сформируй котлеты руками и обжарь на сковороде.',
+          'Подавай горячими.',
+        ],
+      ),
+      recipeCanonicals: const {'печень', 'лук', 'яйцо', 'мука'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Печеночным оладьям нужна гладкая печеночная масса, а не рубленые куски печени.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Печеночные оладьи не должны формоваться как сырники или котлеты.',
+      ),
+    );
+  });
+
+  test('rejects liver fritters that drift into sweet baked batter', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('liver_fritters'),
+      recipe: const Recipe(
+        id: 'liver-fritters-sweet',
+        title: 'Печеночные оладьи',
+        timeMin: 26,
+        tags: ['quick'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Печень', amount: 380, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 70, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 20, unit: Unit.g),
+        ],
+        steps: [
+          'Пробей печень с луком, яйцами, мукой и сахаром в массу.',
+          'Разлей массу по форме и запекай 20 минут в духовке.',
+          'Подавай тёплыми.',
+        ],
+      ),
+      recipeCanonicals: const {'печень', 'лук', 'яйцо', 'мука', 'сахар'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains('Печеночные оладьи не должны уходить в сладкий профиль.'),
+    );
+    expect(
+      result.violations,
+      contains('Печеночные оладьи не должны уходить в запекание.'),
+    );
+  });
+
+  test('accepts valid liver fritters structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('liver_fritters'),
+      recipe: const Recipe(
+        id: 'liver-fritters-valid',
+        title: 'Печеночные оладьи',
+        timeMin: 22,
+        tags: ['quick'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Печень', amount: 380, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 70, unit: Unit.g),
+          RecipeIngredient(name: 'Сметана', amount: 90, unit: Unit.g),
+        ],
+        steps: [
+          'Промой печень, крупно нарежь лук и пробей всё вместе в гладкую печеночную массу.',
+          'Добавь яйца и муку, размешай густую печеночную массу и дай ей постоять 5-7 минут.',
+          'Выкладывай массу ложкой небольшими порциями на сковороду и жарь печеночные оладьи по 2-3 минуты с каждой стороны.',
+          'Дай оладьям 1 минуту собраться и подавай со сметаной.',
+        ],
+      ),
+      recipeCanonicals: const {'печень', 'лук', 'яйцо', 'мука', 'сметана'},
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects liver cake without layered chilled assembly', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('liver_cake'),
+      recipe: const Recipe(
+        id: 'liver-cake-flat',
+        title: 'Печеночный торт',
+        timeMin: 30,
+        tags: ['cold'],
+        servingsBase: 6,
+        ingredients: [
+          RecipeIngredient(name: 'Печень', amount: 420, unit: Unit.g),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 90, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Майонез', amount: 120, unit: Unit.g),
+        ],
+        steps: [
+          'Пробей печень с яйцами и мукой в гладкое печеночное тесто.',
+          'Мелко нарежь лук и морковь, быстро обжарь их и смешай всё вместе на сковороде.',
+          'Сразу подавай горячим.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'майонез',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Печеночный торт должен собираться слоями, а не подаваться россыпью.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Печеночный торт должен настояться в холоде перед подачей.',
+      ),
+    );
+  });
+
+  test('rejects liver cake baked as one hot mass', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('liver_cake'),
+      recipe: const Recipe(
+        id: 'liver-cake-baked',
+        title: 'Печеночный торт',
+        timeMin: 55,
+        tags: ['cold'],
+        servingsBase: 6,
+        ingredients: [
+          RecipeIngredient(name: 'Печень', amount: 420, unit: Unit.g),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 90, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Сметана', amount: 140, unit: Unit.g),
+        ],
+        steps: [
+          'Пробей печень с яйцами и мукой в гладкое печеночное тесто.',
+          'Мелко нарежь лук и морковь, вмешай сметану, вылей всё в форму и запекай в духовке 30 минут.',
+          'Сразу подавай горячим.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'сметана',
+      },
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Печеночный торт не должен превращаться в одну запеченную массу.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Печеночный торт не должен подаваться сразу горячим со сковороды.',
+      ),
+    );
+  });
+
+  test('accepts valid liver cake structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('liver_cake'),
+      recipe: const Recipe(
+        id: 'liver-cake-valid',
+        title: 'Печеночный торт',
+        timeMin: 48,
+        tags: ['cold'],
+        servingsBase: 6,
+        ingredients: [
+          RecipeIngredient(name: 'Печень', amount: 420, unit: Unit.g),
+          RecipeIngredient(name: 'Яйца', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 90, unit: Unit.g),
+          RecipeIngredient(name: 'Лук', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Майонез', amount: 120, unit: Unit.g),
+        ],
+        steps: [
+          'Промой печень, зачисти жилки и пробей её с яйцами и мукой в гладкое печеночное тесто.',
+          'Мелко нарежь лук и морковь, спокойно обжарь овощную прослойку. На слегка смазанной сковороде жарь тонкие печеночные коржи по 1-2 минуты с каждой стороны и каждый корж отдельно остуди.',
+          'Собери печеночный торт слоями: каждый корж, тонкий слой майонеза и часть овощной прослойки.',
+          'Накрой и убери в холодильник на 2-3 часа, затем подавай холодным.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'печень',
+        'яйцо',
+        'мука',
+        'лук',
+        'морковь',
+        'майонез',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+    expect(result.violations, isEmpty);
+  });
+
   test('rejects perfect omelette browned on hard heat', () {
     final result = validateChefDish(
       blueprint: _blueprint('perfect_omelette'),

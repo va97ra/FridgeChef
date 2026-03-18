@@ -286,6 +286,7 @@ double _scoreStructure({
   final grainDishKind = _detectGrainDishKind(profile, recipeCanonicals);
   final soupKind = _detectSoupKind(recipeCanonicals);
   final stewDishKind = _detectStewDishKind(profile, recipeCanonicals);
+  final isLiverCake = _isLiverCakeDish(recipeCanonicals);
 
   var score = 0.22;
   switch (profile) {
@@ -660,7 +661,23 @@ double _scoreStructure({
       break;
     case DishProfile.skillet:
     case DishProfile.general:
-      if (friedDishKind == _FriedDishKind.draniki) {
+      if (isLiverCake) {
+        if (matchedCanonicals.contains('печень') &&
+            matchedCanonicals.contains('яйцо') &&
+            matchedCanonicals.contains('мука')) {
+          score += 0.30;
+        }
+        if (matchedCanonicals.contains('лук') &&
+            matchedCanonicals.contains('морковь')) {
+          score += 0.18;
+        }
+        if (_containsAny(matchedCanonicals, const {'майонез', 'сметана'})) {
+          score += 0.12;
+        }
+        if (ingredientCount >= 5 && ingredientCount <= 7) {
+          score += 0.10;
+        }
+      } else if (friedDishKind == _FriedDishKind.draniki) {
         if (matchedCanonicals.contains('картофель')) {
           score += 0.28;
         }
@@ -881,6 +898,7 @@ _TechniqueAnalysis _analyzeTechnique({
   final isFritterBatter = friedDishKind == _FriedDishKind.oladyi;
   final isCurdFritter = friedDishKind == _FriedDishKind.syrniki;
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
+  final isLiverCake = _isLiverCakeDish(recipeCanonicals);
   final isBitochki =
       normalizedTitle.contains('биточ') || _containsKeyword(stepText, 'биточ');
 
@@ -1829,12 +1847,80 @@ _TechniqueAnalysis _analyzeTechnique({
       }
       break;
     case DishProfile.general:
-      if (hasHeat || hasMix) {
-        score += 0.10;
-      }
-      if (!hasHeat && !_containsAny(recipeCanonicals, _freshReadyCanonicals)) {
-        addWarning('техника описана слишком общо');
-        hardPenalty *= 0.90;
+      if (isLiverCake) {
+        if (_containsAnyKeyword(
+              stepText,
+              const ['пробей', 'блендер', 'гладкое печеночное'],
+            ) &&
+            _containsKeyword(stepText, 'печен')) {
+          score += 0.14;
+          addReason('печень сначала собирается в гладкую основу для коржей');
+        } else {
+          addWarning(
+              'печеночному торту нужно гладкое печеночное тесто для тонких коржей');
+          hardPenalty *= 0.80;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['тонкие коржи', 'тонким слоем', '1-2 минуты с каждой стороны'],
+        )) {
+          score += 0.16;
+          addReason(
+              'печеночные коржи жарятся отдельно и не превращаются в одну массу');
+        } else {
+          addWarning(
+              'печеночному торту нужны тонкие отдельно обжаренные коржи');
+          hardPenalty *= 0.78;
+        }
+        if (_containsAnyKeyword(
+              stepText,
+              const ['слоями', 'собери печеночный торт', 'каждый корж'],
+            ) &&
+            _containsAnyKeyword(
+              stepText,
+              const ['лук', 'морковь', 'овощную прослойку'],
+            )) {
+          score += 0.14;
+          addReason(
+              'овощная прослойка и сборка слоями держат торт структурным');
+        } else {
+          addWarning(
+              'печеночному торту нужны овощная прослойка и сборка слоями');
+          hardPenalty *= 0.78;
+        }
+        if (hasColdAssembly &&
+            _containsAnyKeyword(
+              stepText,
+              const ['холодильник', '2-3 часа', 'холодным', 'прохладным'],
+            )) {
+          score += 0.12;
+          addReason('слоеная закуска успевает собраться и подается прохладной');
+        } else {
+          addWarning('печеночному торту нужно охлаждение перед подачей');
+          hardPenalty *= 0.78;
+        }
+        if (_containsAnyKeyword(stepText, const ['духов', 'вылей в форму'])) {
+          addWarning(
+              'печеночный торт не должен превращаться в одну запеченную массу');
+          hardPenalty *= 0.76;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['подавай горячим', 'горячим со сковороды'],
+        )) {
+          addWarning(
+              'печеночный торт не должен подаваться сразу горячим со сковороды');
+          hardPenalty *= 0.78;
+        }
+      } else {
+        if (hasHeat || hasMix) {
+          score += 0.10;
+        }
+        if (!hasHeat &&
+            !_containsAny(recipeCanonicals, _freshReadyCanonicals)) {
+          addWarning('техника описана слишком общо');
+          hardPenalty *= 0.90;
+        }
       }
       break;
   }
@@ -2110,6 +2196,7 @@ _BalanceAnalysis _analyzeBalance({
   final isFritterBatter = friedDishKind == _FriedDishKind.oladyi;
   final isCurdFritter = friedDishKind == _FriedDishKind.syrniki;
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
+  final isLiverCake = _isLiverCakeDish(recipeCanonicals);
 
   final reasons = <String>[];
   final warnings = <String>[];
@@ -2748,7 +2835,40 @@ _BalanceAnalysis _analyzeBalance({
       break;
     case DishProfile.skillet:
     case DishProfile.general:
-      if (isPotatoFritter) {
+      if (isLiverCake) {
+        if (hasAromatics ||
+            _containsAny(recipeCanonicals, const {'лук', 'морковь'})) {
+          score += 0.18;
+          addReason(
+              'лук и морковь смягчают печеночную плотность и держат вкус домашним');
+        } else {
+          addWarning(
+              'печеночному торту не хватает луково-морковной овощной прослойки');
+          hardPenalty *= 0.82;
+        }
+        if (_containsAny(availableSet, const {'майонез', 'сметана'})) {
+          score += 0.18;
+          addReason(
+              'мягкая холодная прослойка не дает печени уйти в сухую тяжесть');
+        } else {
+          addWarning(
+              'печеночному торту не хватает мягкой майонезной или сметанной прослойки');
+          hardPenalty *= 0.78;
+        }
+        if (hasSalt && hasPepper) {
+          score += 0.10;
+        } else {
+          addWarning(
+              'печеночному торту нужна простая соль и перец без сладкого дрейфа');
+        }
+        if (hasFinishingSupport || hasHerbs || availableSet.contains('укроп')) {
+          score += 0.08;
+        }
+        if (hasSweet) {
+          addWarning('сладость спорит с savory-профилем печеночного торта');
+          hardPenalty *= 0.84;
+        }
+      } else if (isPotatoFritter) {
         if (matchedCanonicals.contains('картофель') &&
             matchedCanonicals.contains('лук')) {
           score += 0.24;
@@ -2953,6 +3073,7 @@ _FlavorAnalysis _analyzeFlavor({
   final isFritterBatter = friedDishKind == _FriedDishKind.oladyi;
   final isCurdFritter = friedDishKind == _FriedDishKind.syrniki;
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
+  final isLiverCake = _isLiverCakeDish(recipeCanonicals);
 
   switch (profile) {
     case DishProfile.salad:
@@ -3131,8 +3252,13 @@ _FlavorAnalysis _analyzeFlavor({
           final hasSoftPeaFinish = availableSet.contains('сметана') ||
               availableSet.contains('укроп') ||
               availableSet.contains('лавровый лист');
-          if (umami >= 0.18 &&
-              (fat >= 0.14 || creaminess >= 0.12) &&
+          if (((recipeCanonicals.contains('горох') &&
+                      _containsAny(
+                        recipeCanonicals,
+                        const {'колбаса', 'сосиски'},
+                      )) ||
+                  umami >= 0.18) &&
+              (fat >= 0.10 || creaminess >= 0.08) &&
               hasSoftPeaFinish) {
             score += 0.12;
             addReason(
@@ -3146,6 +3272,15 @@ _FlavorAnalysis _analyzeFlavor({
               recipeCanonicals.contains('морковь')) {
             score += 0.06;
             addReason('лук и морковь смягчают густую гороховую основу');
+          }
+          if (availableSet.contains('сметана') ||
+              availableSet.contains('укроп')) {
+            score += 0.06;
+            addReason('сметана или укроп смягчают копчёную густоту гороха');
+          } else {
+            addWarning(
+                'гороховому супу не хватает сметанного или травяного финиша');
+            hardPenalty *= 0.90;
           }
           if (hasTomatoDepth || acidity >= 0.18) {
             addWarning(
@@ -3223,7 +3358,46 @@ _FlavorAnalysis _analyzeFlavor({
     case DishProfile.grainBowl:
     case DishProfile.skillet:
     case DishProfile.general:
-      if (grainDishKind == _GrainDishKind.buckwheatRustic) {
+      if (isLiverCake) {
+        if (recipeCanonicals.contains('печень') || umami >= 0.18) {
+          score += 0.18;
+          addReason(
+              'печень дает торту плотную savory-глубину, а не пустой вкус');
+        } else {
+          addWarning(
+              'печеночному торту не хватает выраженной печеночной глубины');
+          hardPenalty *= 0.86;
+        }
+        if (creaminess >= 0.12 ||
+            fat >= 0.12 ||
+            _containsAny(availableSet, const {'майонез', 'сметана'})) {
+          score += 0.16;
+          addReason('мягкая прослойка собирает печеночный вкус без сухости');
+        } else {
+          addWarning('печеночному торту не хватает мягкой жирной прослойки');
+          hardPenalty *= 0.84;
+        }
+        if (recipeCanonicals.contains('морковь') || sweetness >= 0.06) {
+          score += 0.08;
+          addReason('морковь добавляет мягкий сладковатый контраст к печени');
+        }
+        if (creaminess >= 0.12 || acidity >= 0.04) {
+          score += 0.08;
+          addReason('холодная прослойка удерживает вкус торта собранным');
+        }
+        if (herbiness >= 0.04 || availableSet.contains('укроп')) {
+          score += 0.06;
+          addReason('зелень не дает печеночному торту уйти в тяжесть');
+        } else {
+          addWarning(
+              'печеночному торту не хватает легкого свежего или травяного акцента');
+        }
+        if (_containsAny(recipeCanonicals, const {'сахар', 'корица'})) {
+          addWarning(
+              'сладкий акцент спорит с домашним профилем печеночного торта');
+          hardPenalty *= 0.82;
+        }
+      } else if (grainDishKind == _GrainDishKind.buckwheatRustic) {
         if (umami >= 0.16) {
           score += 0.18;
           addReason('грибы или мясной акцент дают гречке домашнюю глубину');
@@ -3944,6 +4118,17 @@ bool _isMushroomSoupDish(Set<String> ingredientCanonicals) {
       );
 }
 
+bool _isLiverCakeDish(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals.contains('печень') &&
+      ingredientCanonicals.contains('яйцо') &&
+      ingredientCanonicals.contains('мука') &&
+      ingredientCanonicals.contains('лук') &&
+      ingredientCanonicals.contains('морковь') &&
+      !ingredientCanonicals.contains('картофель') &&
+      !ingredientCanonicals.contains('кефир') &&
+      !ingredientCanonicals.contains('творог');
+}
+
 enum _FriedDishKind {
   none,
   blini,
@@ -4163,6 +4348,9 @@ List<String> _recommendedAromatics(
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isLiverCakeDish(ingredientCanonicals)) {
+    return const ['лук', 'морковь'];
+  }
   if (_isColdSoupDish(ingredientCanonicals) ||
       _isFriedSkilletDish(profile, ingredientCanonicals)) {
     return const [];
@@ -4236,6 +4424,9 @@ List<String> _recommendedSeasonings(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isLiverCakeDish(ingredientCanonicals)) {
+    return const ['соль', 'перец', 'укроп'];
+  }
   if (_isSvekolnikDish(ingredientCanonicals)) {
     return const ['соль', 'перец', 'укроп', 'сметана'];
   }
@@ -4363,6 +4554,9 @@ List<String> _recommendedFinishes(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isLiverCakeDish(ingredientCanonicals)) {
+    return const ['майонез', 'сметана', 'укроп'];
+  }
   if (_isSvekolnikDish(ingredientCanonicals)) {
     return const ['сметана', 'укроп'];
   }
