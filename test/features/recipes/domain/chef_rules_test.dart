@@ -1043,6 +1043,184 @@ void main() {
     );
   });
 
+  test('chef rules reward proper charlotte over dense apple batter bake', () {
+    final flatCharlotte = assessChefRules(
+      profile: DishProfile.bake,
+      recipeCanonicals: const {'яблоко', 'яйцо', 'мука', 'сахар'},
+      matchedCanonicals: const {'яблоко', 'яйцо', 'мука'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'яблоко': 'Яблоко',
+        'яйцо': 'Яйца',
+        'мука': 'Мука',
+        'сахар': 'Сахар',
+      },
+      steps: const [
+        'Смешай яблоки, яйца, сахар и муку в густую массу.',
+        'Переложи всё в форму и запекай 25 минут.',
+        'Сразу подавай.',
+      ],
+    );
+
+    final properCharlotte = assessChefRules(
+      profile: DishProfile.bake,
+      recipeCanonicals: const {
+        'яблоко',
+        'яйцо',
+        'мука',
+        'сахар',
+        'корица',
+        'масло сливочное',
+      },
+      matchedCanonicals: const {'яблоко', 'яйцо', 'мука'},
+      supportCanonicals: const {'сахар', 'корица', 'масло сливочное'},
+      displayByCanonical: const {
+        'яблоко': 'Яблоко',
+        'яйцо': 'Яйца',
+        'мука': 'Мука',
+        'сахар': 'Сахар',
+        'корица': 'Корица',
+        'масло сливочное': 'Сливочное масло',
+      },
+      steps: const [
+        'Смажь форму сливочным маслом и разложи яблоки в форме ровным слоем.',
+        'Взбей яйца с сахаром 4-5 минут в светлую пышную массу и аккуратно вмешай муку лопаткой.',
+        'Вылей тесто на яблоки и запекай шарлотку 30-35 минут до золотистой корочки.',
+        'Дай шарлотке постоять 10 минут перед нарезкой и подавай тёплой с корицей.',
+      ],
+    );
+
+    expect(
+      properCharlotte.techniqueScore,
+      greaterThan(flatCharlotte.techniqueScore),
+    );
+    expect(
+      properCharlotte.balanceScore,
+      greaterThan(flatCharlotte.balanceScore),
+    );
+    expect(
+      properCharlotte.flavorScore,
+      greaterThan(flatCharlotte.flavorScore),
+    );
+    expect(properCharlotte.score, greaterThan(flatCharlotte.score));
+    expect(
+      flatCharlotte.warnings.any(
+        (warning) => warning.contains('шарлотк'),
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+      'chef rules reward proper sauerkraut preserve over rushed cabbage salt mix',
+      () {
+    final flatSauerkraut = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'капуста', 'соль'},
+      matchedCanonicals: const {'капуста'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'капуста': 'Капуста',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Нашинкуй капусту.',
+        'Сразу переложи в миску и подавай.',
+      ],
+    );
+
+    final properSauerkraut = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'капуста', 'морковь', 'соль'},
+      matchedCanonicals: const {'капуста', 'морковь'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'капуста': 'Капуста',
+        'морковь': 'Морковь',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Тонко нашинкуй капусту и натри морковь. Добавь соль и перетри капусту руками, пока она не даст сок.',
+        'Плотно уложи капусту в банку, утрамбуй и прижми так, чтобы капуста оставалась под соком.',
+        'Оставь капусту при комнатной температуре на 2-3 дня и прокалывай её, выпуская газ.',
+        'Убери квашеную капусту в холод и подавай холодной.',
+      ],
+    );
+
+    expect(
+      properSauerkraut.techniqueScore,
+      greaterThan(flatSauerkraut.techniqueScore),
+    );
+    expect(
+      properSauerkraut.balanceScore,
+      greaterThan(flatSauerkraut.balanceScore),
+    );
+    expect(
+      properSauerkraut.flavorScore,
+      greaterThan(flatSauerkraut.flavorScore),
+    );
+    expect(properSauerkraut.score, greaterThan(flatSauerkraut.score));
+    expect(
+      flatSauerkraut.warnings.any(
+        (warning) => warning.contains('квашен'),
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+      'chef rules reward proper lightly salted cucumbers over rushed cucumber mix',
+      () {
+    final flatCucumbers = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'огурец', 'укроп', 'чеснок', 'соль'},
+      matchedCanonicals: const {'огурец', 'укроп', 'чеснок'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'огурец': 'Огурцы',
+        'укроп': 'Укроп',
+        'чеснок': 'Чеснок',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Нарежь огурцы.',
+        'Смешай с укропом и чесноком.',
+        'Подавай сразу.',
+      ],
+    );
+
+    final properCucumbers = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'огурец', 'укроп', 'чеснок', 'соль'},
+      matchedCanonicals: const {'огурец', 'укроп', 'чеснок'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'огурец': 'Огурцы',
+        'укроп': 'Укроп',
+        'чеснок': 'Чеснок',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Срежь кончики у огурцов и уложи огурцы в контейнер слоями с укропом и чесноком.',
+        'Раствори соль в холодной воде и залей огурцы рассолом так, чтобы они были полностью покрыты.',
+        'Оставь огурцы при комнатной температуре на 8-12 часов или на ночь.',
+        'После этого убери малосольные огурцы в холод минимум на 2-3 часа и подавай охлаждёнными.',
+      ],
+    );
+
+    expect(
+      properCucumbers.techniqueScore,
+      greaterThan(flatCucumbers.techniqueScore),
+    );
+    expect(properCucumbers.score, greaterThan(flatCucumbers.score));
+    expect(
+      flatCucumbers.warnings.any(
+        (warning) => warning.contains('малосоль'),
+      ),
+      isTrue,
+    );
+  });
+
   test('chef rules reward structured lazy cabbage rolls over flat mince stew',
       () {
     final flatGolubtsy = assessChefRules(

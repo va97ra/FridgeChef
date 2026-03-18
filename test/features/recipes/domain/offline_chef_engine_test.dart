@@ -3084,6 +3084,188 @@ void main() {
     );
   });
 
+  test('builds charlotte from apples eggs flour and sugar', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'sugar',
+            name: 'Сахар',
+            canonicalName: 'сахар',
+            aliases: ['сахар'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'cinnamon',
+            name: 'Корица',
+            canonicalName: 'корица',
+            aliases: ['корица'],
+            category: 'spice',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'apple', name: 'Яблоко', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'egg', name: 'Яйца', amount: 4, unit: Unit.pcs),
+          FridgeItem(id: 'flour', name: 'Мука', amount: 220, unit: Unit.g),
+          FridgeItem(
+            id: 'butter',
+            name: 'Сливочное масло',
+            amount: 80,
+            unit: Unit.g,
+          ),
+        ],
+      ),
+    );
+
+    final charlotte = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Шарлотк'),
+    );
+
+    expect(charlotte.recipe.chefProfile, 'bake');
+    expect(
+      charlotte.recipe.anchorIngredients.any(
+        (ingredient) => ingredient.contains('Яблок'),
+      ),
+      isTrue,
+    );
+    expect(
+      charlotte.recipe.ingredients.any(
+        (ingredient) => ingredient.name == 'Сахар',
+      ),
+      isTrue,
+    );
+    expect(
+      charlotte.recipe.steps.any(
+        (step) => step.toLowerCase().contains('взбей яйца с'),
+      ),
+      isTrue,
+    );
+    expect(
+      charlotte.recipe.steps.any(
+        (step) => step.toLowerCase().contains('вылей тесто на яблоки'),
+      ),
+      isTrue,
+    );
+    expect(
+      charlotte.recipe.steps.any(
+        (step) => step.toLowerCase().contains('30-35 минут'),
+      ),
+      isTrue,
+    );
+  });
+
+  test('builds sauerkraut preserve from cabbage carrot and salt', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(
+            id: 'cabbage',
+            name: 'Капуста',
+            amount: 900,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+            id: 'carrot',
+            name: 'Морковь',
+            amount: 2,
+            unit: Unit.pcs,
+          ),
+        ],
+      ),
+    );
+
+    final preserve = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Квашен'),
+    );
+
+    expect(
+      preserve.recipe.anchorIngredients.any(
+        (ingredient) => ingredient.contains('Капуст'),
+      ),
+      isTrue,
+    );
+    expect(
+      preserve.recipe.ingredients
+          .any((ingredient) => ingredient.name == 'Соль'),
+      isTrue,
+    );
+    expect(
+      preserve.recipe.steps.any(
+        (step) => step.toLowerCase().contains('пока она не даст сок'),
+      ),
+      isTrue,
+    );
+    expect(
+      preserve.recipe.steps.any(
+        (step) => step.toLowerCase().contains('2-3 дня'),
+      ),
+      isTrue,
+    );
+  });
+
+  test('builds lightly salted cucumbers from cucumber dill garlic and salt',
+      () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'salt',
+            name: 'Соль',
+            canonicalName: 'соль',
+            aliases: ['соль'],
+            category: 'basic',
+            isStarter: true,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(id: 'cucumber', name: 'Огурцы', amount: 6, unit: Unit.pcs),
+          FridgeItem(id: 'dill', name: 'Укроп', amount: 25, unit: Unit.g),
+          FridgeItem(id: 'garlic', name: 'Чеснок', amount: 4, unit: Unit.pcs),
+        ],
+      ),
+    );
+
+    final preserve = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Малосоль'),
+    );
+
+    expect(
+      preserve.recipe.anchorIngredients.any(
+        (ingredient) => ingredient.contains('Огур'),
+      ),
+      isTrue,
+    );
+    expect(
+      preserve.recipe.ingredients
+          .any((ingredient) => ingredient.name == 'Соль'),
+      isTrue,
+    );
+    expect(
+      preserve.recipe.steps.any(
+        (step) => step.toLowerCase().contains('залей огурцы рассолом'),
+      ),
+      isTrue,
+    );
+    expect(
+      preserve.recipe.steps.any(
+        (step) => step.toLowerCase().contains('на ночь'),
+      ),
+      isTrue,
+    );
+  });
+
   test('builds cabbage egg pie with rested dough and closed filling technique',
       () {
     final generated = const OfflineChefEngine().generate(

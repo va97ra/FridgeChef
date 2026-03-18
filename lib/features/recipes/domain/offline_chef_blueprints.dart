@@ -7,6 +7,7 @@ enum ChefStepStyle {
   potatoSkillet,
   freshSalad,
   coldSoup,
+  preserve,
   grainPan,
   pastaPan,
   soup,
@@ -45,6 +46,8 @@ enum ChefDishFamily {
   okroshkaKvassColdSoup,
   olivierSalad,
   vinegretSalad,
+  sauerkrautPreserve,
+  lightlySaltedCucumbers,
   grainPan,
   buckwheatRusticBowl,
   pastaPan,
@@ -61,6 +64,7 @@ enum ChefDishFamily {
   svekolnikColdSoup,
   bake,
   curdBake,
+  charlotte,
   savoryClosedPie,
   shawarmaWrap,
   breakfast,
@@ -160,6 +164,8 @@ class ChefBlueprint {
         return ChefDishFamily.freshSalad;
       case ChefStepStyle.coldSoup:
         return ChefDishFamily.coldSoup;
+      case ChefStepStyle.preserve:
+        return ChefDishFamily.sauerkrautPreserve;
       case ChefStepStyle.grainPan:
         return ChefDishFamily.grainPan;
       case ChefStepStyle.pastaPan:
@@ -414,6 +420,70 @@ const chefBlueprints = <ChefBlueprint>[
         candidates: ['морковь', 'огурец', 'горошек', 'капуста'],
         minCount: 2,
         maxCount: 3,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'sauerkraut_preserve',
+    profile: DishProfile.salad,
+    titlePrefix: 'Квашеная капуста',
+    description:
+        'Русская квашеная капуста строится не как быстрый салат, а как солёная ферментация с собственным соком, прессом и выдержкой до чистой хрустящей кислинки.',
+    timeMin: 4320,
+    servingsBase: 6,
+    tags: ['preserve', 'cold', 'russian_classic', 'generated_local'],
+    anchorSlot: 'base',
+    supportSlot: 'crunch',
+    preferredStarters: ['соль'],
+    maxImplicitPantryStarters: 1,
+    titleStyle: ChefTitleStyle.inventoryLead,
+    stepStyle: ChefStepStyle.preserve,
+    family: ChefDishFamily.sauerkrautPreserve,
+    slots: [
+      ChefSlot(
+        key: 'base',
+        candidates: ['капуста'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'crunch',
+        candidates: ['морковь'],
+        minCount: 0,
+        maxCount: 1,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'lightly_salted_cucumbers',
+    profile: DishProfile.salad,
+    titlePrefix: 'Малосольные огурцы',
+    description:
+        'Малосольные огурцы требуют отдельной brine-and-rest логики: огурец, соль, укроп и чеснок должны просолиться, но сохранить хруст и холодную свежесть.',
+    timeMin: 720,
+    servingsBase: 4,
+    tags: ['preserve', 'cold', 'russian_classic', 'generated_local'],
+    anchorSlot: 'base',
+    secondaryAnchorSlot: 'aromatics',
+    preferredStarters: ['соль'],
+    maxImplicitPantryStarters: 1,
+    titleStyle: ChefTitleStyle.inventoryLead,
+    stepStyle: ChefStepStyle.preserve,
+    family: ChefDishFamily.lightlySaltedCucumbers,
+    slots: [
+      ChefSlot(
+        key: 'base',
+        candidates: ['огурец'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'aromatics',
+        candidates: ['укроп', 'чеснок'],
+        minCount: 2,
+        maxCount: 2,
       ),
     ],
   ),
@@ -1177,6 +1247,45 @@ const chefBlueprints = <ChefBlueprint>[
         candidates: ['сметана', 'молоко', 'яблоко', 'банан', 'корица'],
         minCount: 1,
         maxCount: 2,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'charlotte',
+    profile: DishProfile.bake,
+    titlePrefix: 'Шарлотка',
+    description:
+        'Русская яблочная шарлотка, где яблоки дают сочную фруктовую сердцевину, а пышное яично-сахарное тесто держит лёгкий, а не плотный мякиш.',
+    timeMin: 46,
+    servingsBase: 4,
+    tags: ['oven', 'sweet', 'russian_classic', 'generated_local'],
+    anchorSlot: 'fruit',
+    secondaryAnchorSlot: 'batter',
+    supportSlot: 'fat',
+    preferredStarters: ['сахар', 'корица'],
+    maxImplicitPantryStarters: 3,
+    titleStyle: ChefTitleStyle.inventoryLead,
+    stepStyle: ChefStepStyle.bake,
+    family: ChefDishFamily.charlotte,
+    slots: [
+      ChefSlot(
+        key: 'fruit',
+        candidates: ['яблоко'],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'batter',
+        candidates: ['яйцо', 'мука'],
+        minCount: 2,
+        maxCount: 2,
+      ),
+      ChefSlot(
+        key: 'fat',
+        candidates: ['масло сливочное'],
+        minCount: 0,
+        maxCount: 1,
       ),
     ],
   ),

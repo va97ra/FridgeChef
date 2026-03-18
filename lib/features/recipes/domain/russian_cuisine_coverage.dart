@@ -390,10 +390,11 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'charlotte',
     title: 'Шарлотка',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'charlotte',
     familyId: 'charlotte',
     continuationNote:
-        'Fruit bake family still missing despite existing apple catalog.',
+        'Covered as a dedicated apple charlotte family with airy batter, apple-layer assembly, validator, and rule-scoring checks.',
   ),
   RussianCuisineCoverageEntry(
     id: 'medovik',
@@ -438,18 +439,20 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'sauerkraut_preserve',
     title: 'Квашеная капуста',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'sauerkraut_preserve',
     familyId: 'sauerkrautPreserve',
     continuationNote:
-        'Ingredient exists, but preserve-family logic is still missing.',
+        'Covered as a dedicated cabbage preserve family with salting, pressing, fermentation wait, and anti-salad drift checks.',
   ),
   RussianCuisineCoverageEntry(
     id: 'lightly_salted_cucumbers',
     title: 'Малосольные огурцы',
-    status: RussianCuisineCoverageStatus.missing,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'lightly_salted_cucumbers',
     familyId: 'lightlySaltedCucumbers',
     continuationNote:
-        'Ingredient exists, but preserve-family logic is still missing.',
+        'Covered as a dedicated cucumber preserve family with dill-garlic brine, short room-temperature cure, chilling, and anti-salad drift checks.',
   ),
   RussianCuisineCoverageEntry(
     id: 'berry_jam',
@@ -457,6 +460,6 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
     status: RussianCuisineCoverageStatus.blockedByCatalog,
     familyId: 'berryJam',
     continuationNote:
-        'Needs berry product expansion and preserve-family modeling.',
+        'Preserve-family modeling exists; now blocked by berry product expansion.',
   ),
 ];

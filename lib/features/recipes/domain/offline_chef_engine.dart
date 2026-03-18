@@ -462,6 +462,15 @@ class OfflineChefEngine {
         inventoryCanonicals.contains('лук') &&
         inventoryCanonicals.contains('морковь') &&
         inventoryHasAny(const {'майонез', 'сметана'});
+    final hasSauerkrautSet = inventoryCanonicals.contains('капуста') &&
+        inventoryCanonicals.contains('морковь');
+    final hasLightlySaltedCucumbersSet =
+        inventoryCanonicals.contains('огурец') &&
+            inventoryCanonicals.contains('укроп') &&
+            inventoryCanonicals.contains('чеснок');
+    final hasCharlotteSet = inventoryCanonicals.contains('яблоко') &&
+        inventoryCanonicals.contains('яйцо') &&
+        inventoryCanonicals.contains('мука');
     final hasClassicGolubtsySet = inventoryCanonicals.contains('капуста') &&
         inventoryCanonicals.contains('фарш') &&
         inventoryCanonicals.contains('рис') &&
@@ -517,6 +526,12 @@ class OfflineChefEngine {
         return hasLiverFrittersSet ? 0.18 : 0.0;
       case ChefDishFamily.liverCake:
         return hasLiverCakeSet ? 0.20 : 0.0;
+      case ChefDishFamily.sauerkrautPreserve:
+        return hasSauerkrautSet ? 0.16 : 0.0;
+      case ChefDishFamily.lightlySaltedCucumbers:
+        return hasLightlySaltedCucumbersSet ? 0.18 : 0.0;
+      case ChefDishFamily.charlotte:
+        return hasCharlotteSet ? 0.18 : 0.0;
       case ChefDishFamily.coldSoup:
       case ChefDishFamily.okroshkaColdSoup:
       case ChefDishFamily.okroshkaKvassColdSoup:
@@ -841,6 +856,8 @@ class OfflineChefEngine {
       case ChefDishFamily.okroshkaKvassColdSoup:
       case ChefDishFamily.olivierSalad:
       case ChefDishFamily.vinegretSalad:
+      case ChefDishFamily.sauerkrautPreserve:
+      case ChefDishFamily.lightlySaltedCucumbers:
       case ChefDishFamily.grainPan:
       case ChefDishFamily.buckwheatRusticBowl:
       case ChefDishFamily.pastaPan:
@@ -857,6 +874,7 @@ class OfflineChefEngine {
       case ChefDishFamily.svekolnikColdSoup:
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
+      case ChefDishFamily.charlotte:
       case ChefDishFamily.breakfast:
       case ChefDishFamily.panBatter:
       case ChefDishFamily.bliniPan:
@@ -929,6 +947,11 @@ class OfflineChefEngine {
       case ChefDishFamily.liverCake:
         return hasAny(const {'масло', 'оливковое масло'}) &&
             hasAny(const {'майонез', 'сметана'});
+      case ChefDishFamily.sauerkrautPreserve:
+      case ChefDishFamily.lightlySaltedCucumbers:
+        return hasAny(const {'соль'});
+      case ChefDishFamily.charlotte:
+        return hasAny(const {'сахар'});
       case ChefDishFamily.peaSmokedSoup:
         return hasAny(const {'горох'}) &&
             hasAny(const {'колбаса', 'сосиски'}) &&
@@ -1013,6 +1036,39 @@ class OfflineChefEngine {
 
   double _coreTargetAmountFor(ChefBlueprint blueprint, String canonical) {
     switch (blueprint.dishFamily) {
+      case ChefDishFamily.sauerkrautPreserve:
+        switch (canonical) {
+          case 'капуста':
+            return 700;
+          case 'морковь':
+            return 1;
+          default:
+            return _defaultAmountFor(canonical);
+        }
+      case ChefDishFamily.lightlySaltedCucumbers:
+        switch (canonical) {
+          case 'огурец':
+            return 5;
+          case 'укроп':
+            return 20;
+          case 'чеснок':
+            return 3;
+          default:
+            return _defaultAmountFor(canonical);
+        }
+      case ChefDishFamily.charlotte:
+        switch (canonical) {
+          case 'яблоко':
+            return 3;
+          case 'яйцо':
+            return 4;
+          case 'мука':
+            return 180;
+          case 'масло сливочное':
+            return 25;
+          default:
+            return _defaultAmountFor(canonical);
+        }
       case ChefDishFamily.liverCake:
         switch (canonical) {
           case 'печень':
@@ -1105,6 +1161,31 @@ class OfflineChefEngine {
 
   double _starterAmountForBlueprint(ChefBlueprint blueprint, String canonical) {
     switch (blueprint.dishFamily) {
+      case ChefDishFamily.sauerkrautPreserve:
+        switch (canonical) {
+          case 'соль':
+            return 18;
+          default:
+            return _supportAmountFor(canonical);
+        }
+      case ChefDishFamily.lightlySaltedCucumbers:
+        switch (canonical) {
+          case 'соль':
+            return 20;
+          default:
+            return _supportAmountFor(canonical);
+        }
+      case ChefDishFamily.charlotte:
+        switch (canonical) {
+          case 'сахар':
+            return 120;
+          case 'корица':
+            return 3;
+          case 'соль':
+            return 1;
+          default:
+            return _supportAmountFor(canonical);
+        }
       case ChefDishFamily.savoryClosedPie:
         switch (canonical) {
           case 'масло сливочное':
@@ -1499,6 +1580,29 @@ class OfflineChefEngine {
           'Нарежь ${coldFresh.isEmpty ? secondary : coldFresh}${coldProtein.isEmpty ? '' : ', $coldProtein'}${support.isEmpty ? '' : ', а $support мелко поруби'} и сложи всё в большую миску.',
           'Влей $anchor, аккуратно доведи вкус${seasoningText.isEmpty ? '' : ' через $seasoningText'}${finishText.isEmpty ? '' : ', а перед подачей добавь $finishText'}, затем дай окрошке постоять в холоде 5-7 минут и подавай холодной.',
         ];
+      case ChefStepStyle.preserve:
+        final familyPreserveSteps = _buildStructuredPreserveSteps(
+          blueprint: blueprint,
+          selectedBySlot: selectedBySlot,
+          starters: starters,
+          chefSupport: chefSupport,
+          inventory: inventory,
+          anchorCanonicals: anchorCanonicals,
+          secondaryCanonicals: secondaryCanonicals,
+          supportCanonicals: supportCanonicals,
+          anchor: anchor,
+          secondary: secondary,
+          support: support,
+          seasoningText: seasoningText,
+        );
+        if (familyPreserveSteps != null) {
+          return familyPreserveSteps;
+        }
+        return [
+          'Подготовь основу: $anchor${secondary.isEmpty ? '' : ', добавь $secondary'}${support.isEmpty ? '' : ' и $support'}, затем доведи её через соль и плотную укладку.',
+          'Оставь заготовку в рассоле или под гнётом, чтобы вкус собрался без горячей обработки.',
+          'После выдержки убери заготовку в холод и подавай хорошо охлаждённой.',
+        ];
       case ChefStepStyle.grainPan:
         final familyGrainSteps = _buildStructuredGrainSteps(
           blueprint: blueprint,
@@ -1567,6 +1671,63 @@ class OfflineChefEngine {
               : 'В самом конце аккуратно добавь${seasoningText.isEmpty ? '' : ' $seasoningText'}${finishText.isEmpty ? '' : ' и заверши $finishText'}, затем дай супу настояться 3-4 минуты перед подачей.',
         ];
       case ChefStepStyle.bake:
+        if (blueprint.dishFamily == ChefDishFamily.charlotte) {
+          final charlotteButter = _sentenceIngredientText(
+            _displayList(
+              _dedupeCanonicals([
+                ...(selectedBySlot['fat'] ?? const <String>[]),
+                for (final canonical in [
+                  ...starters.includedCanonicals,
+                  ...chefSupport.finishingCanonicals,
+                ])
+                  if (canonical == 'масло сливочное') canonical,
+              ]),
+              inventory,
+              limit: 1,
+            ),
+          );
+          final charlotteSugar = _sentenceIngredientText(
+            _displayList(
+              _dedupeCanonicals([
+                for (final canonical in [
+                  ...starters.includedCanonicals,
+                  ...chefSupport.seasoningCanonicals,
+                ])
+                  if (canonical == 'сахар') canonical,
+              ]),
+              inventory,
+              limit: 1,
+            ),
+          );
+          final charlotteCinnamon = _sentenceIngredientText(
+            _displayList(
+              _dedupeCanonicals([
+                for (final canonical in [
+                  ...starters.includedCanonicals,
+                  ...chefSupport.seasoningCanonicals,
+                  ...chefSupport.finishingCanonicals,
+                ])
+                  if (canonical == 'корица') canonical,
+              ]),
+              inventory,
+              limit: 1,
+            ),
+          );
+          final charlotteHasSalt =
+              starters.includedCanonicals.contains('соль') ||
+                  chefSupport.seasoningCanonicals.contains('соль');
+          final hasCharlotteButter = charlotteButter.isNotEmpty;
+          final hasCharlotteCinnamon = charlotteCinnamon.isNotEmpty;
+          final fruitText = _sentenceIngredientText(
+            anchor.isNotEmpty ? anchor : 'яблоки',
+          );
+          return [
+            '${hasCharlotteButter ? 'Смажь форму сливочным маслом' : 'Подготовь форму'}, нарежь $fruitText тонкими дольками${hasCharlotteCinnamon ? ' и часть яблок мягко смешай с корицей' : ''}. Разложи яблоки в форме ровным фруктовым слоем, чтобы бисквит не остался пустым в середине.',
+            'Взбей яйца с ${charlotteSugar.isEmpty ? 'сахаром' : 'сахаром'}${charlotteHasSalt ? ' и щепоткой соли' : ''} 4-5 минут до светлой пышной массы, затем аккуратно вмешай муку лопаткой, чтобы тесто осталось воздушным.',
+            'Вылей тесто на яблоки, слегка постучи формой о стол и запекай шарлотку 30-35 минут при 180-190°C до уверенного подъёма и ровной золотистой корочки.',
+            'Дай шарлотке постоять 10 минут вне духовки, затем аккуратно нарежь и подавай тёплой или комнатной температуры${hasCharlotteCinnamon ? ', при желании дополнив оставшейся корицей.' : '.'}',
+          ];
+        }
         return [
           'Подготовь $anchor${secondary.isEmpty ? '' : ', $secondary'}${aromaticsText.isEmpty ? '' : ', а $aromaticsText вмешай для глубины вкуса'} и сложи всё в форму одним ровным слоем.',
           'Добавь связующие ингредиенты${support.isEmpty ? '' : ' и $support'}, чтобы блюдо держало форму и не пересохло в духовке, затем запекай ${_bakeCookTiming(anchorCanonicals)}.',
@@ -2045,6 +2206,56 @@ class OfflineChefEngine {
           'Отвари ${boiledText.isEmpty ? secondary : boiledText} 10-12 минут до готовности и полностью остуди 8-10 минут, чтобы свекольная основа осталась чистой и холодной.',
           'Нарежь ${boiledText.isEmpty ? secondary : boiledText}${freshText.isEmpty ? '' : ', добавь $freshText'} и сложи всё в большую миску.',
           'Влей $anchor, аккуратно доведи вкус${seasoningText.isEmpty ? '' : ' через $seasoningText'}${svekolnikFinish.isEmpty ? '' : ', а перед подачей добавь $svekolnikFinish'}, затем дай свекольнику постоять в холоде 5-7 минут и подавай холодным.',
+        ];
+      default:
+        return null;
+    }
+  }
+
+  List<String>? _buildStructuredPreserveSteps({
+    required ChefBlueprint blueprint,
+    required Map<String, List<String>> selectedBySlot,
+    required _ResolvedStarters starters,
+    required _ResolvedChefSupport chefSupport,
+    required _ChefInventory inventory,
+    required List<String> anchorCanonicals,
+    required List<String> secondaryCanonicals,
+    required List<String> supportCanonicals,
+    required String anchor,
+    required String secondary,
+    required String support,
+    required String seasoningText,
+  }) {
+    switch (blueprint.dishFamily) {
+      case ChefDishFamily.sauerkrautPreserve:
+        final hasCarrot =
+            (selectedBySlot['crunch'] ?? const <String>[]).contains('морковь');
+        return [
+          'Тонко нашинкуй капусту${hasCarrot ? ' и натри морковь на крупной тёрке' : ''}. Добавь соль и перетри капусту руками 4-5 минут, пока она не даст сок.',
+          'Плотно уложи капусту в чистую банку или миску, хорошо утрамбуй и прижми так, чтобы сок поднялся выше овощей и капуста оставалась под соком.',
+          'Оставь капусту при комнатной температуре на 2-3 дня. 2-3 раза в день прокалывай её до дна, выпуская газ, и снова прижимай под сок.',
+          'Когда вкус станет ярко кисловатым и хрустящим, убери квашеную капусту в холод на 6-8 часов и подавай холодной.',
+        ];
+      case ChefDishFamily.lightlySaltedCucumbers:
+        final cucumberAromatics = <String>[
+          if ((selectedBySlot['aromatics'] ?? const <String>[])
+              .contains('укроп'))
+            'укропом',
+          if ((selectedBySlot['aromatics'] ?? const <String>[]).contains(
+            'чеснок',
+          ))
+            'чесноком',
+        ];
+        final cucumberAromaticsText = cucumberAromatics.isEmpty
+            ? ''
+            : cucumberAromatics.length == 1
+                ? cucumberAromatics.first
+                : '${cucumberAromatics[0]} и ${cucumberAromatics[1]}';
+        return [
+          'Срежь кончики у огурцов. Уложи огурцы в контейнер слоями${cucumberAromaticsText.isEmpty ? '' : ' с $cucumberAromaticsText'}, слегка прижимая ароматную прослойку к огурцам.',
+          'Раствори соль в холодной воде и залей огурцы рассолом так, чтобы они были полностью покрыты. Сверху положи тарелку или небольшой груз.',
+          'Оставь огурцы при комнатной температуре на 8-12 часов или на ночь, чтобы они просолились, но сохранили хруст.',
+          'После этого убери малосольные огурцы в холод минимум на 2-3 часа и подавай охлаждёнными.',
         ];
       default:
         return null;
@@ -2674,6 +2885,7 @@ class OfflineChefEngine {
       case ChefDishFamily.svekolnikColdSoup:
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
+      case ChefDishFamily.charlotte:
       case ChefDishFamily.savoryClosedPie:
       case ChefDishFamily.shawarmaWrap:
       case ChefDishFamily.breakfast:

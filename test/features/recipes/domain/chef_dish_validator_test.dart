@@ -1328,6 +1328,261 @@ void main() {
     expect(result.violations, isEmpty);
   });
 
+  test('rejects charlotte without airy batter and apple layering', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('charlotte'),
+      recipe: const Recipe(
+        id: 'charlotte-flat',
+        title: 'Шарлотка',
+        timeMin: 28,
+        tags: ['bake'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Яблоко', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 180, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 100, unit: Unit.g),
+        ],
+        steps: [
+          'Смешай яблоки, яйца, сахар и муку в густую массу.',
+          'Переложи всё в форму и запекай 25 минут.',
+          'Сразу нарежь и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'яблоко', 'яйцо', 'мука', 'сахар'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Шарлотке нужен пышный яично-сахарный бисквит, а не плотная смешанная масса.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Шарлотке нужно уложить яблоки в форму и залить их бисквитным тестом.',
+      ),
+    );
+  });
+
+  test('rejects charlotte drifting into savory skillet bake', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('charlotte'),
+      recipe: const Recipe(
+        id: 'charlotte-savory',
+        title: 'Шарлотка',
+        timeMin: 20,
+        tags: ['bake'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Яблоко', amount: 2, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 160, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 80, unit: Unit.g),
+          RecipeIngredient(name: 'Сыр', amount: 90, unit: Unit.g),
+        ],
+        steps: [
+          'Смешай яблоки, яйца, сахар, муку и сыр.',
+          'Обжарь массу на сковороде 8 минут с двух сторон.',
+          'Подавай горячей прямо со сковороды.',
+        ],
+      ),
+      recipeCanonicals: const {'яблоко', 'яйцо', 'мука', 'сахар', 'сыр'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Шарлотка не должна уходить в savory-запеканку или несладкий пирог.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Шарлотка не должна жариться на сковороде или превращаться в раскатной пирог.',
+      ),
+    );
+  });
+
+  test('accepts valid charlotte structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('charlotte'),
+      recipe: const Recipe(
+        id: 'charlotte-valid',
+        title: 'Шарлотка',
+        timeMin: 46,
+        tags: ['bake', 'sweet'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Яблоко', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Яйца', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Мука', amount: 180, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 120, unit: Unit.g),
+          RecipeIngredient(
+            name: 'Сливочное масло',
+            amount: 25,
+            unit: Unit.g,
+          ),
+          RecipeIngredient(name: 'Корица', amount: 3, unit: Unit.g),
+        ],
+        steps: [
+          'Смажь форму сливочным маслом, нарежь яблоки тонкими дольками и разложи яблоки в форме ровным слоем.',
+          'Взбей яйца с сахаром 4-5 минут в светлую пышную массу, затем аккуратно вмешай муку лопаткой.',
+          'Вылей тесто на яблоки и запекай шарлотку 30-35 минут при 180°C до золотистой корочки.',
+          'Дай шарлотке постоять 10 минут перед нарезкой и подавай тёплой с корицей.',
+        ],
+      ),
+      recipeCanonicals: const {
+        'яблоко',
+        'яйцо',
+        'мука',
+        'сахар',
+        'масло сливочное',
+        'корица',
+      },
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects sauerkraut preserve without fermentation structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('sauerkraut_preserve'),
+      recipe: const Recipe(
+        id: 'sauerkraut-flat',
+        title: 'Квашеная капуста',
+        timeMin: 12,
+        tags: ['preserve'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Капуста', amount: 700, unit: Unit.g),
+          RecipeIngredient(name: 'Соль', amount: 18, unit: Unit.g),
+          RecipeIngredient(name: 'Майонез', amount: 80, unit: Unit.g),
+        ],
+        steps: [
+          'Нашинкуй капусту.',
+          'Сразу заправь капусту майонезом и уксусом.',
+          'Подавай сразу.',
+        ],
+      ),
+      recipeCanonicals: const {'капуста', 'соль', 'майонез'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Квашеную капусту нужно плотно утрамбовать и держать под соком.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Квашеная капуста не должна уходить в салат с заправкой или горячий гарнир.',
+      ),
+    );
+  });
+
+  test('accepts valid sauerkraut preserve structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('sauerkraut_preserve'),
+      recipe: const Recipe(
+        id: 'sauerkraut-valid',
+        title: 'Квашеная капуста',
+        timeMin: 4320,
+        tags: ['preserve'],
+        servingsBase: 6,
+        ingredients: [
+          RecipeIngredient(name: 'Капуста', amount: 800, unit: Unit.g),
+          RecipeIngredient(name: 'Морковь', amount: 1, unit: Unit.pcs),
+          RecipeIngredient(name: 'Соль', amount: 18, unit: Unit.g),
+        ],
+        steps: [
+          'Тонко нашинкуй капусту и натри морковь на крупной тёрке. Добавь соль и перетри капусту руками 4-5 минут, пока она не даст сок.',
+          'Плотно уложи капусту в банку, утрамбуй и прижми так, чтобы капуста оставалась под соком.',
+          'Оставь капусту при комнатной температуре на 2-3 дня и 2-3 раза в день прокалывай её до дна, выпуская газ.',
+          'Убери квашеную капусту в холод на 6-8 часов и подавай холодной.',
+        ],
+      ),
+      recipeCanonicals: const {'капуста', 'морковь', 'соль'},
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+    expect(result.violations, isEmpty);
+  });
+
+  test('rejects lightly salted cucumbers drifting into dressed salad', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('lightly_salted_cucumbers'),
+      recipe: const Recipe(
+        id: 'light-cucumber-flat',
+        title: 'Малосольные огурцы',
+        timeMin: 10,
+        tags: ['preserve'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Огурцы', amount: 5, unit: Unit.pcs),
+          RecipeIngredient(name: 'Укроп', amount: 20, unit: Unit.g),
+          RecipeIngredient(name: 'Чеснок', amount: 3, unit: Unit.pcs),
+          RecipeIngredient(name: 'Соль', amount: 18, unit: Unit.g),
+          RecipeIngredient(name: 'Сметана', amount: 80, unit: Unit.g),
+        ],
+        steps: [
+          'Нарежь огурцы кружками.',
+          'Заправь сметаной и сразу подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'огурец', 'укроп', 'чеснок', 'соль', 'сметана'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Малосольные огурцы должны солиться в явном рассоле, который покрывает огурцы.',
+      ),
+    );
+    expect(
+      result.violations,
+      contains(
+        'Малосольные огурцы не должны превращаться в обычный салат или горячую закуску.',
+      ),
+    );
+  });
+
+  test('accepts valid lightly salted cucumbers structure', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('lightly_salted_cucumbers'),
+      recipe: const Recipe(
+        id: 'light-cucumber-valid',
+        title: 'Малосольные огурцы',
+        timeMin: 720,
+        tags: ['preserve'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Огурцы', amount: 6, unit: Unit.pcs),
+          RecipeIngredient(name: 'Укроп', amount: 25, unit: Unit.g),
+          RecipeIngredient(name: 'Чеснок', amount: 4, unit: Unit.pcs),
+          RecipeIngredient(name: 'Соль', amount: 20, unit: Unit.g),
+        ],
+        steps: [
+          'Срежь кончики у огурцов и уложи огурцы в контейнер слоями с укропом и чесноком.',
+          'Раствори соль в холодной воде и залей огурцы рассолом так, чтобы они были полностью покрыты.',
+          'Оставь огурцы при комнатной температуре на 8-12 часов или на ночь.',
+          'После этого убери малосольные огурцы в холод минимум на 2-3 часа и подавай охлаждёнными.',
+        ],
+      ),
+      recipeCanonicals: const {'огурец', 'укроп', 'чеснок', 'соль'},
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+    expect(result.violations, isEmpty);
+  });
+
   test('rejects perfect omelette browned on hard heat', () {
     final result = validateChefDish(
       blueprint: _blueprint('perfect_omelette'),

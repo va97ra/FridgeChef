@@ -286,7 +286,11 @@ double _scoreStructure({
   final grainDishKind = _detectGrainDishKind(profile, recipeCanonicals);
   final soupKind = _detectSoupKind(recipeCanonicals);
   final stewDishKind = _detectStewDishKind(profile, recipeCanonicals);
+  final isCharlotte = _isCharlotteDish(recipeCanonicals);
   final isLiverCake = _isLiverCakeDish(recipeCanonicals);
+  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
+  final isLightlySaltedCucumbers =
+      _isLightlySaltedCucumberDish(recipeCanonicals);
 
   var score = 0.22;
   switch (profile) {
@@ -405,6 +409,39 @@ double _scoreStructure({
       }
       break;
     case DishProfile.salad:
+      if (isSauerkrautPreserve) {
+        if (matchedCanonicals.contains('капуста')) {
+          score += 0.30;
+        }
+        if (supportPlan.seasoningCanonicals.contains('соль') ||
+            recipeCanonicals.contains('соль')) {
+          score += 0.16;
+        }
+        if (matchedCanonicals.contains('морковь')) {
+          score += 0.10;
+        }
+        if (ingredientCount >= 2 && ingredientCount <= 4) {
+          score += 0.10;
+        }
+        break;
+      }
+      if (isLightlySaltedCucumbers) {
+        if (matchedCanonicals.contains('огурец')) {
+          score += 0.28;
+        }
+        if (matchedCanonicals.contains('укроп') &&
+            matchedCanonicals.contains('чеснок')) {
+          score += 0.22;
+        }
+        if (supportPlan.seasoningCanonicals.contains('соль') ||
+            recipeCanonicals.contains('соль')) {
+          score += 0.14;
+        }
+        if (ingredientCount >= 3 && ingredientCount <= 5) {
+          score += 0.08;
+        }
+        break;
+      }
       if (matchedFresh >= 2) {
         score += 0.22;
       } else if (matchedFresh == 1) {
@@ -421,6 +458,23 @@ double _scoreStructure({
       }
       break;
     case DishProfile.bake:
+      if (isCharlotte) {
+        if (matchedCanonicals.contains('яблоко') &&
+            matchedCanonicals.contains('яйцо') &&
+            matchedCanonicals.contains('мука')) {
+          score += 0.34;
+        }
+        if (hasBinder) {
+          score += 0.12;
+        }
+        if (matchedFresh > 0) {
+          score += 0.10;
+        }
+        if (ingredientCount >= 3 && ingredientCount <= 6) {
+          score += 0.10;
+        }
+        break;
+      }
       if (matchedBases > 0 || matchedProteins > 0) {
         score += 0.24;
       }
@@ -736,6 +790,10 @@ double _scoreSeasoning({
     ...matchedCanonicals,
     ...supportCanonicals,
   };
+  final isCharlotte = _isCharlotteDish(recipeCanonicals);
+  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
+  final isLightlySaltedCucumbers =
+      _isLightlySaltedCucumberDish(recipeCanonicals);
   final recommended =
       _recommendedSeasonings(profile, recipeCanonicals).take(3).toList();
   if (recommended.isEmpty) {
@@ -746,6 +804,42 @@ double _scoreSeasoning({
   final matchedRecommended =
       recommended.where(availableSeasonings.contains).length;
   score += (matchedRecommended / recommended.length) * 0.48;
+
+  if (isSauerkrautPreserve) {
+    if (availableSeasonings.contains('соль')) {
+      score += 0.24;
+    }
+    if (recipeCanonicals.contains('морковь')) {
+      score += 0.08;
+    }
+    return score.clamp(0.0, 1.0);
+  }
+
+  if (isLightlySaltedCucumbers) {
+    if (availableSeasonings.contains('соль')) {
+      score += 0.18;
+    }
+    if (availableSeasonings.contains('укроп')) {
+      score += 0.10;
+    }
+    if (availableSeasonings.contains('чеснок')) {
+      score += 0.10;
+    }
+    return score.clamp(0.0, 1.0);
+  }
+
+  if (isCharlotte) {
+    if (availableSeasonings.contains('сахар')) {
+      score += 0.16;
+    }
+    if (availableSeasonings.contains('корица')) {
+      score += 0.12;
+    }
+    if (availableSeasonings.contains('соль')) {
+      score += 0.06;
+    }
+    return score.clamp(0.0, 1.0);
+  }
 
   final hasSavoryFoundation =
       _containsAny(recipeCanonicals, _proteinCanonicals) ||
@@ -898,7 +992,14 @@ _TechniqueAnalysis _analyzeTechnique({
   final isFritterBatter = friedDishKind == _FriedDishKind.oladyi;
   final isCurdFritter = friedDishKind == _FriedDishKind.syrniki;
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
+  final isCharlotte = _isCharlotteDish(recipeCanonicals);
   final isLiverCake = _isLiverCakeDish(recipeCanonicals);
+  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
+  final isLightlySaltedCucumbers =
+      _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
+  final isLightlySaltedCucumbers =
+      _isLightlySaltedCucumberDish(recipeCanonicals);
   final isBitochki =
       normalizedTitle.contains('биточ') || _containsKeyword(stepText, 'биточ');
 
@@ -1167,6 +1268,137 @@ _TechniqueAnalysis _analyzeTechnique({
       }
       break;
     case DishProfile.salad:
+      if (isSauerkrautPreserve) {
+        if (_containsAnyKeyword(
+          stepText,
+          const ['перетри капусту', 'пока она не даст сок', 'даст сок'],
+        )) {
+          score += 0.16;
+          addReason('капуста перетирается с солью и даёт собственный сок');
+        } else {
+          addWarning(
+              'квашеной капусте нужно дать собственный сок через перетирание');
+          hardPenalty *= 0.78;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['утрамбуй', 'под соком', 'прижми так'],
+        )) {
+          score += 0.14;
+          addReason('капуста утрамбовывается и остаётся под соком');
+        } else {
+          addWarning('квашеную капусту нужно утрамбовать и держать под соком');
+          hardPenalty *= 0.80;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['2-3 дня', 'при комнатной температуре'],
+        )) {
+          score += 0.14;
+          addReason('ферментация получает нужную выдержку, а не спешит');
+        } else {
+          addWarning(
+              'квашеной капусте нужна выдержка 2-3 дня при комнатной температуре');
+          hardPenalty *= 0.76;
+        }
+        if (_containsAnyKeyword(
+            stepText, const ['прокалывай', 'выпуская газ'])) {
+          score += 0.08;
+          addReason('во время ферментации из капусты выпускается лишний газ');
+        } else {
+          addWarning('квашеную капусту нужно прокалывать во время ферментации');
+          hardPenalty *= 0.86;
+        }
+        if (hasColdAssembly ||
+            _containsAnyKeyword(
+              stepText,
+              const ['в холод', 'подавай холодной'],
+            )) {
+          score += 0.08;
+          addReason('после ферментации капуста стабилизируется в холоде');
+        } else {
+          addWarning('после ферментации квашеную капусту нужно охладить');
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['уксус', 'маринуй', 'обжар', 'сковород', 'запекай', 'майонез'],
+        )) {
+          addWarning(
+              'квашеная капуста не должна уходить в уксусный маринад, жарку или салатную заправку');
+          hardPenalty *= 0.72;
+        }
+        break;
+      }
+      if (isLightlySaltedCucumbers) {
+        if (_containsAnyKeyword(
+          stepText,
+          const ['срежь кончики', 'кончики у огурцов'],
+        )) {
+          score += 0.10;
+          addReason(
+              'огурцы подготавливаются для ровного и быстрого просаливания');
+        } else {
+          addWarning(
+              'малосольным огурцам нужно срезать кончики перед засолкой');
+          hardPenalty *= 0.84;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['слоями', 'укропом', 'чесноком'],
+        )) {
+          score += 0.10;
+          addReason('огурцы собираются слоями с укропом и чесноком');
+        } else {
+          addWarning(
+              'малосольным огурцам нужна слоёная укропно-чесночная сборка');
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['залей огурцы рассолом', 'рассолом', 'полностью покрыты'],
+        )) {
+          score += 0.16;
+          addReason(
+              'огурцы солятся в явном рассоле, а не просто приправляются');
+        } else {
+          addWarning(
+              'малосольным огурцам нужен рассол, который покрывает огурцы');
+          hardPenalty *= 0.78;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['8-12 часов', 'на ночь', 'при комнатной температуре'],
+        )) {
+          score += 0.14;
+          addReason('огурцы получают короткую засолку без потери хруста');
+        } else {
+          addWarning('малосольным огурцам нужно постоять 8-12 часов или ночь');
+          hardPenalty *= 0.80;
+        }
+        if (hasColdAssembly ||
+            _containsAnyKeyword(
+              stepText,
+              const [
+                'в холод минимум',
+                'убери малосольные огурцы в холод',
+                'охлажден'
+              ],
+            )) {
+          score += 0.10;
+          addReason('после засолки огурцы охлаждаются и остаются хрустящими');
+        } else {
+          addWarning('после засолки малосольные огурцы нужно охладить');
+          hardPenalty *= 0.86;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['уксус', 'маринуй', 'обжар', 'сковород', 'заправь'],
+        )) {
+          addWarning(
+              'малосольные огурцы не должны уходить в уксусный маринад, жарку или салатную заправку');
+          hardPenalty *= 0.72;
+        }
+        break;
+      }
       if (hasMix) {
         score += 0.10;
       }
@@ -1179,6 +1411,79 @@ _TechniqueAnalysis _analyzeTechnique({
       }
       break;
     case DishProfile.bake:
+      if (isCharlotte) {
+        if (_containsAnyKeyword(
+              stepText,
+              const ['взбей яйца', 'пышную массу', 'светлую пышную массу'],
+            ) &&
+            (_containsKeyword(stepText, 'сахар') ||
+                recipeCanonicals.contains('сахар'))) {
+          score += 0.16;
+          addReason(
+              'яйца взбиваются в пышную основу, поэтому мякиш не тяжелеет');
+        } else {
+          addWarning('шарлотке нужно отдельно взбить яйца с сахаром');
+          hardPenalty *= 0.78;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const [
+            'аккуратно вмешай муку',
+            'вмешай муку лопаткой',
+            'воздушное тесто'
+          ],
+        )) {
+          score += 0.12;
+          addReason('мука входит мягко и не сажает бисквит');
+        } else {
+          addWarning(
+              'шарлотке нужно аккуратно вмешать муку, а не забить тесто');
+          hardPenalty *= 0.80;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['разложи яблоки', 'яблоки в форме', 'вылей тесто на яблоки'],
+        )) {
+          score += 0.14;
+          addReason(
+              'яблоки лежат отдельным фруктовым слоем, а не теряются в массе');
+        } else {
+          addWarning(
+              'шарлотке нужно выложить яблоки в форму и залить их тестом');
+          hardPenalty *= 0.78;
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['30-35 минут', '35-40 минут', 'золотистой корочки', 'подъём'],
+        )) {
+          score += 0.10;
+          addReason(
+              'бисквит успевает подняться и допекается до румяной корочки');
+        } else {
+          addWarning('шарлотке нужно допечься до подъёма и золотистой корочки');
+          hardPenalty *= 0.82;
+        }
+        if (hasRest ||
+            _containsAnyKeyword(
+              stepText,
+              const ['10 минут', 'перед нарезкой', 'дай постоять'],
+            )) {
+          score += 0.08;
+          addReason(
+              'после духовки шарлотка немного стабилизируется перед нарезкой');
+        } else {
+          addWarning('шарлотке полезно дать короткий отдых перед нарезкой');
+        }
+        if (_containsAnyKeyword(
+          stepText,
+          const ['сковород', 'обжар', 'раскатай', 'защипни края'],
+        )) {
+          addWarning(
+              'шарлотка не должна жариться или превращаться в пирог на раскатанном тесте');
+          hardPenalty *= 0.76;
+        }
+        break;
+      }
       if (_containsAnyKeyword(stepText, const ['запек', 'духов'])) {
         score += 0.14;
       } else {
@@ -2120,9 +2425,14 @@ List<String> _buildWarnings({
   required _FlavorAnalysis flavorAnalysis,
 }) {
   final warnings = <String>[];
+  final isSweetBake = profile == DishProfile.bake &&
+      supportPlan.aromaticCanonicals.isEmpty &&
+      supportPlan.seasoningCanonicals.contains('сахар') &&
+      supportPlan.seasoningCanonicals.contains('корица');
   if (supportPlan.aromaticCanonicals.isEmpty &&
       profile != DishProfile.salad &&
-      profile != DishProfile.breakfast) {
+      profile != DishProfile.breakfast &&
+      !isSweetBake) {
     warnings.add('нет ароматической базы');
   }
   if (supportPlan.seasoningCanonicals.isEmpty) {
@@ -2196,6 +2506,7 @@ _BalanceAnalysis _analyzeBalance({
   final isFritterBatter = friedDishKind == _FriedDishKind.oladyi;
   final isCurdFritter = friedDishKind == _FriedDishKind.syrniki;
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
+  final isCharlotte = _isCharlotteDish(recipeCanonicals);
   final isLiverCake = _isLiverCakeDish(recipeCanonicals);
 
   final reasons = <String>[];
@@ -2402,6 +2713,69 @@ _BalanceAnalysis _analyzeBalance({
       }
       break;
     case DishProfile.salad:
+      if (isSauerkrautPreserve) {
+        if (hasSalt) {
+          score += 0.18;
+          addReason(
+              'соль удерживает капустную ферментацию в собранном контуре');
+        } else {
+          addWarning('квашеной капусте нужна соль как опора ферментации');
+          hardPenalty *= 0.76;
+        }
+        if (recipeCanonicals.contains('капуста')) {
+          score += 0.14;
+        }
+        if (recipeCanonicals.contains('морковь')) {
+          score += 0.08;
+          addReason('морковь смягчает солёно-кислый профиль');
+        }
+        if (!hasFat && !hasCreamy && !hasDressingSupport) {
+          score += 0.12;
+          addReason('капустный баланс не смазан жирной салатной заправкой');
+        } else {
+          addWarning('квашеной капусте не нужна жирная салатная заправка');
+          hardPenalty *= 0.78;
+        }
+        if (_hasSauerkrautPreserveDrift(recipeCanonicals)) {
+          addWarning(
+              'квашеная капуста уходит в чужой салатный или горячий контур');
+          hardPenalty *= 0.74;
+        }
+        break;
+      }
+      if (isLightlySaltedCucumbers) {
+        if (hasSalt) {
+          score += 0.18;
+          addReason('рассол даёт огурцам чистую и ровную соль');
+        } else {
+          addWarning('малосольным огурцам нужна соль как основа рассола');
+          hardPenalty *= 0.76;
+        }
+        if (hasHerbs && recipeCanonicals.contains('чеснок')) {
+          score += 0.16;
+          addReason('укроп и чеснок собирают классический малосольный профиль');
+        } else {
+          addWarning('малосольным огурцам не хватает укропа и чеснока');
+          hardPenalty *= 0.80;
+        }
+        if (!hasFat && !hasCreamy && !hasDressingSupport) {
+          score += 0.12;
+        } else {
+          addWarning('малосольным огурцам не нужна жирная салатная заправка');
+          hardPenalty *= 0.78;
+        }
+        if (freshCount > 0 || recipeCanonicals.contains('огурец')) {
+          score += 0.10;
+          addReason(
+              'огуречная свежесть остаётся главной, а не маскируется соусом');
+        }
+        if (_hasLightlySaltedCucumberDrift(recipeCanonicals)) {
+          addWarning(
+              'малосольные огурцы уводятся в салатный или горячий дрейф');
+          hardPenalty *= 0.74;
+        }
+        break;
+      }
       if (freshCount >= 2) {
         score += 0.18;
       } else {
@@ -2425,6 +2799,40 @@ _BalanceAnalysis _analyzeBalance({
       }
       break;
     case DishProfile.bake:
+      if (isCharlotte) {
+        if (hasBinder && availableSet.contains('сахар')) {
+          score += 0.24;
+          addReason(
+              'бисквитная база держится на яйце и сахаре, а не на тяжёлой смеси');
+        } else {
+          addWarning(
+              'шарлотке нужна сладкая яичная база для воздушного бисквита');
+          hardPenalty *= 0.78;
+        }
+        if (recipeCanonicals.contains('яблоко')) {
+          score += 0.14;
+          addReason('яблоки дают шарлотке сочный фруктовый центр');
+        } else {
+          addWarning('шарлотке не хватает яблочной основы');
+          hardPenalty *= 0.80;
+        }
+        if (hasWarmSpice || availableSet.contains('корица')) {
+          score += 0.10;
+          addReason('тёплая специя поддерживает яблочный профиль');
+        }
+        if (hasFat || availableSet.contains('масло сливочное')) {
+          score += 0.08;
+          addReason('небольшая жирность защищает форму и мякиш от сухости');
+        }
+        if (_containsAny(
+          availableSet,
+          const {'сыр', 'майонез', 'чеснок', 'лук'},
+        )) {
+          addWarning('savory-акценты спорят с яблочным профилем шарлотки');
+          hardPenalty *= 0.80;
+        }
+        break;
+      }
       if (hasBinder || hasCreamy || hasFat) {
         score += 0.24;
         addReason('для духовки есть связка и защита от сухости');
@@ -3073,10 +3481,86 @@ _FlavorAnalysis _analyzeFlavor({
   final isFritterBatter = friedDishKind == _FriedDishKind.oladyi;
   final isCurdFritter = friedDishKind == _FriedDishKind.syrniki;
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
+  final isCharlotte = _isCharlotteDish(recipeCanonicals);
   final isLiverCake = _isLiverCakeDish(recipeCanonicals);
+  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
+  final isLightlySaltedCucumbers =
+      _isLightlySaltedCucumberDish(recipeCanonicals);
 
   switch (profile) {
     case DishProfile.salad:
+      if (isSauerkrautPreserve) {
+        if (recipeCanonicals.contains('капуста') &&
+            availableSet.contains('соль')) {
+          score += 0.16;
+          addReason(
+              'капустная свежесть собирается в чистый солёный ферментный контур');
+        } else {
+          addWarning(
+              'квашеной капусте не хватает чистого солёно-капустного ядра');
+          hardPenalty *= 0.80;
+        }
+        if (recipeCanonicals.contains('морковь')) {
+          score += 0.10;
+          addReason('морковь смягчает резкость и даёт естественную сладость');
+        }
+        if (crunch >= 0.18) {
+          score += 0.16;
+          addReason('хруст удерживает квашеную капусту живой, а не вялой');
+        } else {
+          addWarning('квашеной капусте не хватает уверенного хруста');
+          hardPenalty *= 0.86;
+        }
+        if (fat >= 0.12 || creaminess >= 0.08) {
+          addWarning('жирная заправка глушит чистый вкус квашеной капусты');
+          hardPenalty *= 0.82;
+        } else {
+          score += 0.10;
+        }
+        if (_hasSauerkrautPreserveDrift(recipeCanonicals)) {
+          addWarning(
+              'чужие салатные или горячие добавки ломают вкус квашеной капусты');
+          hardPenalty *= 0.74;
+        }
+        break;
+      }
+      if (isLightlySaltedCucumbers) {
+        if (crunch >= 0.18) {
+          score += 0.20;
+          addReason('огурцы сохраняют правильный хруст после короткой засолки');
+        } else {
+          addWarning('малосольным огурцам не хватает хруста');
+          hardPenalty *= 0.84;
+        }
+        if (freshness >= 0.20) {
+          score += 0.12;
+          addReason('огуречная свежесть остаётся явной даже после засолки');
+        } else {
+          addWarning('малосольным огурцам не хватает огуречной свежести');
+          hardPenalty *= 0.86;
+        }
+        if (herbiness >= 0.08 && spice >= 0.08) {
+          score += 0.14;
+          addReason('укроп и чеснок собирают классический малосольный аромат');
+        } else {
+          addWarning(
+              'малосольным огурцам не хватает укропно-чесночного профиля');
+          hardPenalty *= 0.82;
+        }
+        if (fat >= 0.12 || creaminess >= 0.08) {
+          addWarning(
+              'жирная заправка спорит с чистым вкусом малосольных огурцов');
+          hardPenalty *= 0.82;
+        } else {
+          score += 0.08;
+        }
+        if (_hasLightlySaltedCucumberDrift(recipeCanonicals)) {
+          addWarning(
+              'чужие салатные или горячие добавки ломают вкус малосольных огурцов');
+          hardPenalty *= 0.74;
+        }
+        break;
+      }
       if (freshness >= 0.32) {
         score += 0.20;
         addReason('есть свежесть, за счёт которой салат не будет скучным');
@@ -3333,6 +3817,42 @@ _FlavorAnalysis _analyzeFlavor({
       }
       break;
     case DishProfile.bake:
+      if (isCharlotte) {
+        if (sweetness >= 0.18 && freshness >= 0.08) {
+          score += 0.20;
+          addReason('яблочная сладость и свежесть держат шарлотку живой');
+        } else {
+          addWarning('шарлотке не хватает яблочной сладости и свежести');
+          hardPenalty *= 0.84;
+        }
+        if (fat >= 0.08 || creaminess >= 0.08) {
+          score += 0.12;
+          addReason(
+              'небольшая жирность делает мякиш мягче и не даёт ему крошиться');
+        } else {
+          addWarning('шарлотке не хватает мягкой жировой опоры');
+          hardPenalty *= 0.86;
+        }
+        if (acidity >= 0.05 || freshness >= 0.10) {
+          score += 0.10;
+          addReason('яблочный контраст не дает шарлотке стать приторной');
+        } else {
+          addWarning('шарлотке не хватает яблочного контраста против сладости');
+          hardPenalty *= 0.84;
+        }
+        if (hasWarmSpice || availableSet.contains('корица')) {
+          score += 0.08;
+          addReason('тёплая специя собирает печёный яблочный аромат');
+        }
+        if (_containsAny(
+          recipeCanonicals,
+          const {'сыр', 'майонез', 'чеснок', 'лук'},
+        )) {
+          addWarning('savory-ноты спорят с фруктовым вкусом шарлотки');
+          hardPenalty *= 0.80;
+        }
+        break;
+      }
       if (fat >= 0.22) {
         score += 0.18;
         addReason('есть жирность, которая удержит блюдо сочным');
@@ -4095,6 +4615,80 @@ bool _isSvekolnikDish(Set<String> ingredientCanonicals) {
       ingredientCanonicals.contains('яйцо');
 }
 
+bool _isSauerkrautPreserveDish(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals.contains('капуста') &&
+      !ingredientCanonicals.contains('картофель') &&
+      !_containsAny(
+        ingredientCanonicals,
+        const {
+          'майонез',
+          'сметана',
+          'сыр',
+          'яйцо',
+          'колбаса',
+          'сосиски',
+          'фарш',
+          'курица',
+          'свинина',
+          'говядина',
+          'томатная паста',
+        },
+      );
+}
+
+bool _isLightlySaltedCucumberDish(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals.contains('огурец') &&
+      ingredientCanonicals.contains('укроп') &&
+      ingredientCanonicals.contains('чеснок') &&
+      !ingredientCanonicals.contains('картофель') &&
+      !_containsAny(
+        ingredientCanonicals,
+        const {
+          'майонез',
+          'сметана',
+          'сыр',
+          'яйцо',
+          'томатная паста',
+          'колбаса',
+          'сосиски',
+        },
+      );
+}
+
+bool _hasSauerkrautPreserveDrift(Set<String> ingredientCanonicals) {
+  return _containsAny(
+    ingredientCanonicals,
+    const {
+      'майонез',
+      'сметана',
+      'сыр',
+      'яйцо',
+      'колбаса',
+      'сосиски',
+      'фарш',
+      'курица',
+      'свинина',
+      'говядина',
+      'томатная паста',
+    },
+  );
+}
+
+bool _hasLightlySaltedCucumberDrift(Set<String> ingredientCanonicals) {
+  return _containsAny(
+    ingredientCanonicals,
+    const {
+      'майонез',
+      'сметана',
+      'сыр',
+      'яйцо',
+      'томатная паста',
+      'колбаса',
+      'сосиски',
+    },
+  );
+}
+
 bool _isGreenShchiDish(Set<String> ingredientCanonicals) {
   return ingredientCanonicals.contains('щавель') &&
       !_containsAny(ingredientCanonicals, _coldSoupBaseCanonicals) &&
@@ -4102,6 +4696,21 @@ bool _isGreenShchiDish(Set<String> ingredientCanonicals) {
         ingredientCanonicals,
         const {'картофель', 'лук', 'морковь'},
       );
+}
+
+bool _isCharlotteDish(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals.contains('яблоко') &&
+      ingredientCanonicals.contains('яйцо') &&
+      ingredientCanonicals.contains('мука') &&
+      !ingredientCanonicals.contains('творог') &&
+      !ingredientCanonicals.contains('сыр') &&
+      !ingredientCanonicals.contains('лук') &&
+      !ingredientCanonicals.contains('чеснок') &&
+      !ingredientCanonicals.contains('печень') &&
+      !ingredientCanonicals.contains('капуста') &&
+      !ingredientCanonicals.contains('картофель') &&
+      !_containsAny(ingredientCanonicals, _redMeatCanonicals) &&
+      !_containsAny(ingredientCanonicals, _fishCanonicals);
 }
 
 bool _isMushroomSoupDish(Set<String> ingredientCanonicals) {
@@ -4348,6 +4957,13 @@ List<String> _recommendedAromatics(
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isSauerkrautPreserveDish(ingredientCanonicals) ||
+      _isLightlySaltedCucumberDish(ingredientCanonicals)) {
+    return const [];
+  }
+  if (_isCharlotteDish(ingredientCanonicals)) {
+    return const [];
+  }
   if (_isLiverCakeDish(ingredientCanonicals)) {
     return const ['лук', 'морковь'];
   }
@@ -4424,6 +5040,15 @@ List<String> _recommendedSeasonings(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isSauerkrautPreserveDish(ingredientCanonicals)) {
+    return const ['соль'];
+  }
+  if (_isLightlySaltedCucumberDish(ingredientCanonicals)) {
+    return const ['соль', 'укроп', 'чеснок'];
+  }
+  if (_isCharlotteDish(ingredientCanonicals)) {
+    return const ['сахар', 'корица', 'соль'];
+  }
   if (_isLiverCakeDish(ingredientCanonicals)) {
     return const ['соль', 'перец', 'укроп'];
   }
@@ -4554,6 +5179,13 @@ List<String> _recommendedFinishes(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isSauerkrautPreserveDish(ingredientCanonicals) ||
+      _isLightlySaltedCucumberDish(ingredientCanonicals)) {
+    return const [];
+  }
+  if (_isCharlotteDish(ingredientCanonicals)) {
+    return const ['масло сливочное', 'корица', 'сахар'];
+  }
   if (_isLiverCakeDish(ingredientCanonicals)) {
     return const ['майонез', 'сметана', 'укроп'];
   }
