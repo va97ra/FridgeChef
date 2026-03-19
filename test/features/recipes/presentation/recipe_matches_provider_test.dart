@@ -184,6 +184,37 @@ void main() {
       isTrue,
     );
   });
+
+  test('recipeMatchesProvider returns empty list when fridge is empty',
+      () async {
+    final container = ProviderContainer(
+      overrides: [
+        recipesProvider.overrideWith((ref) async => [_strongBaseRecipe]),
+        productCatalogProvider.overrideWith((ref) async => _catalog),
+        pantryCatalogProvider.overrideWith((ref) async => _pantryCatalog),
+        tasteProfileProvider.overrideWith((ref) => const TasteProfile.empty()),
+        fridgeRepoProvider.overrideWithValue(
+          _StaticFridgeRepo(const []),
+        ),
+        userProductMemoryRepoProvider
+            .overrideWithValue(const _NoopUserProductMemoryRepo()),
+        shelfRepoProvider.overrideWithValue(
+          _StaticShelfRepo(const [
+            ShelfItem(id: 'salt', name: 'Соль', inStock: true),
+          ]),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await container.read(recipesProvider.future);
+    await container.read(productCatalogProvider.future);
+    await container.read(pantryCatalogProvider.future);
+
+    final matches = container.read(recipeMatchesProvider);
+
+    expect(matches, isEmpty);
+  });
 }
 
 const _strongBaseRecipe = Recipe(

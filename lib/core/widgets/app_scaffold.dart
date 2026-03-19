@@ -36,12 +36,21 @@ class AppScaffold extends StatelessWidget {
             image: AssetImage(_countertopTextureAsset),
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
-            opacity: 0.9,
+            opacity: 0.78,
             filterQuality: FilterQuality.high,
           ),
         ),
         child: Container(
-          color: const Color(0x18FFFFFF),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0x5CF8F3EB),
+                Color(0x72F1E8DC),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
           child: SafeArea(
             top: title == null,
             bottom: false,

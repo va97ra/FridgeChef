@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/tokens.dart';
 import '../../../../core/utils/units.dart';
-import '../../../../core/widgets/section_surface.dart';
 import '../../domain/recipe.dart';
 import '../../domain/recipe_match.dart';
 import '../../domain/recipe_nutrition.dart';
 import '../recipe_ui_meta.dart';
 import 'match_bar.dart';
+import 'recipe_board_surface.dart';
 
 class RecipeCard extends StatelessWidget {
   final RecipeMatch match;
@@ -42,7 +42,10 @@ class RecipeCard extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(AppTokens.r20),
-            child: SectionSurface(
+            child: RecipeBoardSurface(
+              gradient: AppTokens.recipeBoardGradient,
+              accentColor: hasMissing ? AppTokens.warn : _sourceColor,
+              showHandle: false,
               padding: const EdgeInsets.all(AppTokens.p16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,9 +149,18 @@ class RecipeCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(AppTokens.p12),
                     decoration: BoxDecoration(
-                      color: AppTokens.insetSurface,
+                      color: Colors.black.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppTokens.r16),
-                      border: Border.all(color: AppTokens.insetBorder),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.14),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
@@ -158,11 +170,11 @@ class RecipeCard extends StatelessWidget {
                             children: [
                               Text(
                                 'Совпадение ${match.matchedCount} из ${match.totalCount}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: AppTokens.text,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w800,
                                     ),
                               ),
@@ -178,8 +190,8 @@ class RecipeCard extends StatelessWidget {
                                     .bodySmall
                                     ?.copyWith(
                                       color: hasMissing
-                                          ? AppTokens.warn
-                                          : AppTokens.accent,
+                                          ? const Color(0xFFFFC4A3)
+                                          : const Color(0xFFE4F2D9),
                                     ),
                               ),
                             ],
@@ -188,7 +200,7 @@ class RecipeCard extends StatelessWidget {
                         const SizedBox(width: AppTokens.p12),
                         const Icon(
                           Icons.arrow_forward_rounded,
-                          color: AppTokens.textLight,
+                          color: Colors.white,
                         ),
                       ],
                     ),
@@ -304,12 +316,24 @@ class _CardMainContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          match.recipe.title,
+        BoardText(
+          text: match.recipe.title,
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    height: 1.04,
+                  ) ??
+              const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                height: 1.04,
               ),
+          strokeColor: Colors.black.withValues(alpha: 0.24),
+          strokeWidth: 2.3,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
         if (match.why.isNotEmpty) ...[
           const SizedBox(height: 10),
@@ -349,9 +373,13 @@ class _MiniTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: background,
+        color: background.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(AppTokens.pill),
-        border: Border.all(color: borderColor),
+        border: Border.all(
+          color: borderColor == Colors.transparent
+              ? Colors.white.withValues(alpha: 0.14)
+              : borderColor,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -387,9 +415,9 @@ class _ReasonTag extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: AppTokens.insetSurface,
+          color: Colors.black.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(AppTokens.pill),
-          border: Border.all(color: AppTokens.insetBorder),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -397,7 +425,7 @@ class _ReasonTag extends StatelessWidget {
             const Icon(
               Icons.auto_awesome_outlined,
               size: 13,
-              color: AppTokens.text,
+              color: Colors.white,
             ),
             const SizedBox(width: 5),
             Flexible(
@@ -406,7 +434,7 @@ class _ReasonTag extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTokens.text,
+                      color: Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
               ),

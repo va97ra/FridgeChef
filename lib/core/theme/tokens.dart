@@ -43,9 +43,14 @@ class AppTokens {
   static const infoSoft = Color(0xFFDDE4F1);
 
   static const primaryGradient = LinearGradient(
-    colors: [Color(0xFFD6673F), Color(0xFFE58F62)],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
+    colors: [
+      Color(0xFFD9794A),
+      Color(0xFFC95E36),
+      Color(0xFFAB4323),
+    ],
+    stops: [0, 0.56, 1],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 
   static const primaryGradientV = LinearGradient(
@@ -61,13 +66,45 @@ class AppTokens {
   );
 
   static const fridgeGradient = LinearGradient(
-    colors: [Color(0xFF5F8B69), Color(0xFF4E7A5A)],
+    colors: [
+      Color(0xFF6D9274),
+      Color(0xFF51745B),
+      Color(0xFF3F5946),
+    ],
+    stops: [0, 0.58, 1],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const shelfGradient = LinearGradient(
-    colors: [Color(0xFFC0942E), Color(0xFFD1A84A)],
+    colors: [
+      Color(0xFFE0B64C),
+      Color(0xFFC89121),
+      Color(0xFFA96F10),
+    ],
+    stops: [0, 0.56, 1],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const recipeHeroBoardGradient = LinearGradient(
+    colors: [
+      Color(0xFFE09863),
+      Color(0xFFBD6A3C),
+      Color(0xFF7E3C1E),
+    ],
+    stops: [0, 0.56, 1],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const recipeBoardGradient = LinearGradient(
+    colors: [
+      Color(0xFFE8B681),
+      Color(0xFFCB8C53),
+      Color(0xFFA46434),
+    ],
+    stops: [0, 0.56, 1],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -187,4 +224,6 @@ class AppGradientRefs {
   Gradient get background => AppTokens.bgGradient;
   Gradient get fridge => AppTokens.fridgeGradient;
   Gradient get shelf => AppTokens.shelfGradient;
+  Gradient get recipeHeroBoard => AppTokens.recipeHeroBoardGradient;
+  Gradient get recipeBoard => AppTokens.recipeBoardGradient;
 }

@@ -16,7 +16,7 @@ import '../domain/recipe_nutrition.dart';
 import 'providers.dart';
 import 'recipe_detail_screen.dart';
 import 'widgets/rename_recipe_dialog.dart';
-import 'widgets/match_bar.dart';
+import 'widgets/recipe_board_surface.dart';
 import 'widgets/recipe_card.dart';
 
 class CookIdeasScreen extends ConsumerStatefulWidget {
@@ -494,6 +494,7 @@ class _BestRecipeHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final confidence = (match.score * 100).round().clamp(0, 100);
+    final heroReasons = match.why.take(3).toList(growable: false);
 
     return Semantics(
       button: true,
@@ -505,8 +506,12 @@ class _BestRecipeHero extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(AppTokens.r24),
-          child: SectionSurface(
-            tone: SectionSurfaceTone.primarySoft,
+          child: RecipeBoardSurface(
+            gradient: AppTokens.recipeHeroBoardGradient,
+            accentColor: match.source == RecipeMatchSource.generated
+                ? AppTokens.accent
+                : AppTokens.primaryDark,
+            showHandle: false,
             padding: const EdgeInsets.all(AppTokens.p20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,27 +525,76 @@ class _BestRecipeHero extends StatelessWidget {
                         children: [
                           _SourceBadge(match: match),
                           const SizedBox(height: 10),
-                          Text(
-                            match.recipe.title,
+                          BoardText(
+                            text: match.recipe.title,
                             style: Theme.of(context)
-                                .textTheme
-                                .displayMedium
-                                ?.copyWith(
-                                  fontSize: 26,
+                                    .textTheme
+                                    .displayMedium
+                                    ?.copyWith(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      height: 1.02,
+                                    ) ??
+                                const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  height: 1.02,
                                 ),
+                            strokeColor: Colors.black.withValues(alpha: 0.24),
+                            strokeWidth: 2.6,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Icon(
-                      Icons.restaurant_menu_rounded,
-                      color: AppTokens.primary,
-                      size: 28,
-                    ),
+                    _HeroConfidenceBadge(confidence: confidence),
                   ],
                 ),
                 const SizedBox(height: AppTokens.p16),
+                if (heroReasons.isNotEmpty) ...[
+                  Text(
+                    'Почему сейчас',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFFF8EFE4),
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                  const SizedBox(height: AppTokens.p8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: heroReasons.map((reason) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTokens.p12,
+                          vertical: AppTokens.p8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x33241208),
+                          borderRadius: BorderRadius.circular(
+                            AppTokens.pill,
+                          ),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.14),
+                          ),
+                        ),
+                        child: Text(
+                          reason,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: const Color(0xFFFFF6EC),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppTokens.p16),
+                ],
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -565,44 +619,39 @@ class _BestRecipeHero extends StatelessWidget {
                       ),
                   ],
                 ),
-                if (match.why.isNotEmpty) ...[
-                  const SizedBox(height: AppTokens.p16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: match.why.take(3).map((reason) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppTokens.p12,
-                          vertical: AppTokens.p8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTokens.insetSurface,
-                          borderRadius: BorderRadius.circular(
-                            AppTokens.pill,
-                          ),
-                          border: Border.all(color: AppTokens.insetBorder),
-                        ),
-                        child: Text(
-                          reason,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppTokens.text,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
                 const SizedBox(height: AppTokens.p16),
                 Row(
                   children: [
-                    Expanded(child: MatchBar(score: match.score)),
+                    Expanded(child: _HeroBoardMatchBar(score: match.score)),
                     const SizedBox(width: AppTokens.p12),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: AppTokens.textLight,
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withValues(alpha: 0.16),
+                            Colors.black.withValues(alpha: 0.08),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(AppTokens.r16),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.14),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -610,6 +659,62 @@ class _BestRecipeHero extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _HeroConfidenceBadge extends StatelessWidget {
+  final int confidence;
+
+  const _HeroConfidenceBadge({
+    required this.confidence,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 70,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTokens.p12,
+        vertical: AppTokens.p12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(AppTokens.r16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.restaurant_menu_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '$confidence%',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  height: 1,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'совп.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: const Color(0xFFF7EBDD),
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -662,19 +767,19 @@ class _HeroInfoPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTokens.insetSurface,
+        color: Colors.black.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(AppTokens.pill),
-        border: Border.all(color: AppTokens.insetBorder),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppTokens.textLight, size: 14),
+          Icon(icon, color: const Color(0xFFF8EFE4), size: 14),
           const SizedBox(width: 6),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTokens.text,
+                  color: Colors.white,
                   fontWeight: FontWeight.w700,
                 ),
           ),
@@ -712,9 +817,9 @@ class _SourceBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: background,
+        color: background.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(AppTokens.pill),
-        border: Border.all(color: AppTokens.insetBorder),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Text(
         label,
@@ -724,6 +829,65 @@ class _SourceBadge extends StatelessWidget {
           fontSize: 12,
         ),
       ),
+    );
+  }
+}
+
+class _HeroBoardMatchBar extends StatelessWidget {
+  final double score;
+
+  const _HeroBoardMatchBar({required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    final clamped = score.clamp(0.0, 1.0);
+    final percent = (clamped * 100).round();
+    final barColor = switch (percent) {
+      >= 75 => const Color(0xFFD8F0DF),
+      >= 45 => const Color(0xFFFFE0A3),
+      _ => const Color(0xFFFFC4A3),
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        BoardText(
+          text: '$percent%',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ) ??
+              const TextStyle(
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+                fontSize: 20,
+              ),
+          strokeColor: Colors.black.withValues(alpha: 0.22),
+          strokeWidth: 2.2,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'совпадение',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: const Color(0xFFF8EFE4),
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppTokens.pill),
+          child: SizedBox(
+            width: 96,
+            child: LinearProgressIndicator(
+              value: clamped,
+              minHeight: 8,
+              backgroundColor: Colors.white.withValues(alpha: 0.16),
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

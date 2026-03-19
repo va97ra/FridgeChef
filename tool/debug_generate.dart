@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:help_to_cook/core/utils/units.dart';
 import 'package:help_to_cook/features/fridge/domain/fridge_item.dart';
 import 'package:help_to_cook/features/fridge/domain/product_catalog_entry.dart';
@@ -100,10 +102,10 @@ void main() {
     ),
   );
 
-  print('PEA');
+  _logLine('PEA');
   for (final candidate in peaGenerated.take(10)) {
-    print(candidate.recipe.title);
-    print(candidate.recipe.steps);
+    _logLine(candidate.recipe.title);
+    _logLine(candidate.recipe.steps);
   }
 
   final flatPea = assessChefRules(
@@ -168,11 +170,11 @@ void main() {
       'Сними с огня, подай со сметаной и укропом.',
     ],
   );
-  print('PEA SCORES');
-  print(
+  _logLine('PEA SCORES');
+  _logLine(
     'flat total=${flatPea.score} structure=${flatPea.structureScore} technique=${flatPea.techniqueScore} balance=${flatPea.balanceScore} flavor=${flatPea.flavorScore} warnings=${flatPea.warnings}',
   );
-  print(
+  _logLine(
     'proper total=${properPea.score} structure=${properPea.structureScore} technique=${properPea.techniqueScore} balance=${properPea.balanceScore} flavor=${properPea.flavorScore} warnings=${properPea.warnings}',
   );
 
@@ -261,9 +263,13 @@ void main() {
     ),
   );
 
-  print('SVEKOLNIK');
+  _logLine('SVEKOLNIK');
   for (final candidate in svekolnikGenerated.take(10)) {
-    print(candidate.recipe.title);
-    print(candidate.recipe.steps);
+    _logLine(candidate.recipe.title);
+    _logLine(candidate.recipe.steps);
   }
+}
+
+void _logLine(Object? message) {
+  stdout.writeln(message);
 }

@@ -1593,18 +1593,25 @@ _TechniqueAnalysis _analyzeTechnique({
           _containsAny(recipeCanonicals, _binderCanonicals) ||
           _containsAny(recipeCanonicals, _fatCanonicals)) {
         score += 0.10;
-        addReason('есть защита от пересушивания в духовке');
+        addReason(
+          _describeBakeMoistureReason(
+            recipeCanonicals: recipeCanonicals,
+            stepText: stepText,
+          ),
+        );
       } else {
-        addWarning('духовочному блюду не хватает защиты от пересушивания');
+        addWarning(
+          'духовочному блюду не хватает соуса, связки или более мягкого запекания',
+        );
         hardPenalty *= 0.84;
       }
       if (_containsAny(recipeCanonicals, _redMeatCanonicals)) {
         if (hasCover || hasGentleHeat || _containsKeyword(stepText, 'марина')) {
           score += 0.10;
-          addReason('мясо в духовке защищено от жёсткого пересушивания');
+          addReason(_describeBakedMeatReason(stepText: stepText));
         } else {
           addWarning(
-              'мясу в духовке лучше дать защиту: накрыть, мариновать или готовить мягче');
+              'мясо в духовке лучше накрыть, замариновать или готовить мягче, чтобы оно не вышло сухим');
           hardPenalty *= 0.82;
         }
         if (hasRest) {
@@ -2563,6 +2570,51 @@ List<String> _buildWarnings({
   return warnings;
 }
 
+String _describeBakeMoistureReason({
+  required Set<String> recipeCanonicals,
+  required String stepText,
+}) {
+  if (_containsAnyKeyword(stepText, const ['накр', 'под крыш', 'фольг'])) {
+    return 'запекание под крышкой или фольгой поможет блюду остаться сочнее';
+  }
+  if (_containsAnyKeyword(
+    stepText,
+    const ['соус', 'сметан', 'бульон', 'слив'],
+  )) {
+    return 'соус или жидкая основа помогут блюду не пересохнуть в духовке';
+  }
+
+  final hasEgg = recipeCanonicals.contains('яйцо');
+  final hasMilk = recipeCanonicals.contains('молоко');
+  final hasCurd = recipeCanonicals.contains('творог');
+  if (hasEgg && hasMilk) {
+    return 'яично-молочная основа поможет блюду не пересохнуть в духовке';
+  }
+  if (hasEgg && hasCurd) {
+    return 'яично-творожная основа поможет блюду остаться нежным после духовки';
+  }
+  if (_containsAny(
+      recipeCanonicals, const {'яйцо', 'молоко', 'сметана', 'творог'})) {
+    return 'мягкая связка поможет блюду остаться нежным после духовки';
+  }
+  if (_containsAny(recipeCanonicals, _fatCanonicals)) {
+    return 'небольшая жирность смягчит запекание и не даст блюду выйти сухим';
+  }
+  return 'в рецепте есть основа, которая поможет блюду остаться сочным в духовке';
+}
+
+String _describeBakedMeatReason({
+  required String stepText,
+}) {
+  if (_containsAnyKeyword(stepText, const ['накр', 'под крыш', 'фольг'])) {
+    return 'мясо запекается под крышкой или фольгой и теряет меньше сока';
+  }
+  if (_containsKeyword(stepText, 'марина')) {
+    return 'маринад поможет мясу запечься мягче и сочнее';
+  }
+  return 'мягкий режим запекания поможет мясу остаться сочнее';
+}
+
 _BalanceAnalysis _analyzeBalance({
   required DishProfile profile,
   required Set<String> recipeCanonicals,
@@ -2983,7 +3035,7 @@ _BalanceAnalysis _analyzeBalance({
         }
         if (hasFat || availableSet.contains('масло сливочное')) {
           score += 0.08;
-          addReason('небольшая жирность защищает форму и мякиш от сухости');
+          addReason('небольшая жирность помогает сохранить мягкий мякиш');
         }
         if (_containsAny(
           availableSet,
@@ -2996,9 +3048,14 @@ _BalanceAnalysis _analyzeBalance({
       }
       if (hasBinder || hasCreamy || hasFat) {
         score += 0.24;
-        addReason('для духовки есть связка и защита от сухости');
+        addReason(
+          _describeBakeMoistureReason(
+            recipeCanonicals: availableSet,
+            stepText: '',
+          ),
+        );
       } else {
-        addWarning('для духовки не хватает связки или защиты от сухости');
+        addWarning('для запекания не хватает связки или более сочной основы');
         hardPenalty *= 0.70;
       }
       if (hasAromatics) {

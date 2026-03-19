@@ -144,6 +144,10 @@ final recipeMatchesProvider = Provider<List<RecipeMatch>>((ref) {
     return const [];
   }
 
+  if (fridgeItems.isEmpty) {
+    return const [];
+  }
+
   final generatedCandidates = const OfflineChefEngine().generate(
     OfflineChefRequest(
       baseRecipes: recipes,

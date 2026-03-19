@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import '../../../core/utils/units.dart';
 import '../../fridge/domain/fridge_item.dart';
 import '../../fridge/domain/product_catalog_entry.dart';
@@ -136,9 +138,7 @@ class OfflineChefEngine {
     required int seedSalt,
   }) {
     GeneratedRecipeCandidate? reject(String reason) {
-      if (blueprint.id == 'pea_smoked_soup' || blueprint.id == 'svekolnik') {
-        print('reject ${blueprint.id}: $reason');
-      }
+      _debugRejectCandidate(blueprint.id, reason);
       return null;
     }
 
@@ -3896,6 +3896,18 @@ class _StoredChefAmount {
     required this.amount,
     required this.unit,
   });
+}
+
+void _debugRejectCandidate(String blueprintId, String reason) {
+  assert(() {
+    if (blueprintId == 'pea_smoked_soup' || blueprintId == 'svekolnik') {
+      developer.log(
+        'reject $blueprintId: $reason',
+        name: 'OfflineChefEngine',
+      );
+    }
+    return true;
+  }());
 }
 
 int _expiryScore(DateTime? expiresAt) {

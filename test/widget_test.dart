@@ -14,6 +14,10 @@ import 'package:help_to_cook/features/shelf/domain/shelf_item.dart';
 void main() {
   testWidgets('Home screen renders 3 main actions', (tester) async {
     final semantics = tester.ensureSemantics();
+    final homeScroll = find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    );
 
     await tester.pumpWidget(
       ProviderScope(
@@ -30,33 +34,36 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Мой холодильник'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel(RegExp('Открыть раздел Мой холодильник')),
-      findsOneWidget,
-    );
+    final fridgeAction =
+        find.bySemanticsLabel(RegExp('Открыть раздел Мой холодильник'));
+    final shelfAction = find.bySemanticsLabel(RegExp('Открыть раздел Полка'));
+    final cookAction =
+        find.bySemanticsLabel(RegExp('Открыть раздел Помоги приготовить'));
+
     await tester.scrollUntilVisible(
-      find.text('Полка'),
+      fridgeAction,
       250,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: homeScroll,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Полка'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel(RegExp('Открыть раздел Полка')),
-      findsOneWidget,
-    );
+    expect(find.text('Мой холодильник', skipOffstage: false), findsWidgets);
+    expect(fridgeAction, findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Помоги приготовить'),
+      shelfAction,
       250,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: homeScroll,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Помоги приготовить'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel(RegExp('Открыть раздел Помоги приготовить')),
-      findsOneWidget,
+    expect(find.text('Полка', skipOffstage: false), findsWidgets);
+    expect(shelfAction, findsOneWidget);
+    await tester.scrollUntilVisible(
+      cookAction,
+      250,
+      scrollable: homeScroll,
     );
+    await tester.pumpAndSettle();
+    expect(find.text('Помоги приготовить', skipOffstage: false), findsWidgets);
+    expect(cookAction, findsOneWidget);
 
     semantics.dispose();
   });

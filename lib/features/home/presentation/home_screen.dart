@@ -7,11 +7,9 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_icon_button.dart';
 import '../../../core/widgets/app_scaffold.dart';
 import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/section_surface.dart';
 import '../../fridge/presentation/providers.dart';
 import '../../recipes/domain/recipe_match.dart';
 import '../../recipes/presentation/providers.dart';
-import '../../recipes/presentation/recipe_detail_screen.dart';
 import '../../shelf/presentation/providers.dart';
 import 'widgets/home_action_button.dart';
 
@@ -65,32 +63,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               AppRoutes.settings,
             ),
           ),
-          const SizedBox(height: AppTokens.p16),
-          _TodayCard(
-            bestMatch: bestMatch,
+          const SizedBox(height: AppTokens.p12),
+          _KitchenStatusStrip(
             fridgeCount: fridgeItems.length,
             shelfCount: inStockShelf,
-            onPrimaryAction: () {
-              if (fridgeItems.isEmpty) {
-                Navigator.pushNamed(context, AppRoutes.fridge);
-                return;
-              }
-              if (bestMatch != null) {
-                Navigator.push(
-                  context,
-                  AppRoutes.fadeThroughRoute(
-                    page: RecipeDetailScreen(
-                      recipe: bestMatch.recipe,
-                      why: bestMatch.why,
-                    ),
-                  ),
-                );
-                return;
-              }
-              Navigator.pushNamed(context, AppRoutes.cook);
-            },
+            expiringSoon: expiringSoon,
+            bestMatch: bestMatch,
           ),
-          const SizedBox(height: AppTokens.p24),
+          const SizedBox(height: AppTokens.p20),
           HomeActionButton(
             title: 'Мой холодильник',
             subtitle: fridgeItems.isEmpty
@@ -138,7 +118,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 '${bestMatch == null ? 'Подберём лучшее блюдо, когда дома появятся продукты' : 'Сейчас лучший вариант: ${bestMatch.recipe.title}'}',
             onTap: () => Navigator.pushNamed(context, AppRoutes.cook),
           ),
-          const SizedBox(height: AppTokens.p24),
+          const SizedBox(height: AppTokens.p20),
         ],
       ),
     );
@@ -217,9 +197,21 @@ class _Header extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(
-            'Что готовим сегодня?',
-            style: Theme.of(context).textTheme.displayLarge,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Что готовим сегодня?',
+                style: Theme.of(context).textTheme.displayLarge,
+              ),
+              const SizedBox(height: AppTokens.p8),
+              Text(
+                'Офлайн-шеф собирает лучший вариант из того, что уже есть дома.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTokens.textLight,
+                    ),
+              ),
+            ],
           ),
         ),
         const SizedBox(width: AppTokens.p12),
@@ -233,111 +225,130 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _TodayCard extends StatelessWidget {
-  final RecipeMatch? bestMatch;
+class _KitchenStatusStrip extends StatelessWidget {
   final int fridgeCount;
   final int shelfCount;
-  final VoidCallback onPrimaryAction;
+  final int expiringSoon;
+  final RecipeMatch? bestMatch;
 
-  const _TodayCard({
-    required this.bestMatch,
+  const _KitchenStatusStrip({
     required this.fridgeCount,
     required this.shelfCount,
-    required this.onPrimaryAction,
+    required this.expiringSoon,
+    required this.bestMatch,
   });
 
   @override
   Widget build(BuildContext context) {
-    final readyToCook = bestMatch != null;
-    final title = readyToCook
-        ? 'Сейчас лучше всего: ${bestMatch!.recipe.title}'
-        : fridgeCount == 0
-            ? 'Сначала добавь продукты'
-            : shelfCount == 0
-                ? 'Добавь полку для более точных рецептов'
-                : 'Можно перейти к подбору рецептов';
-    final subtitle = readyToCook
-        ? bestMatch!.why.take(2).join(' • ')
-        : fridgeCount == 0
-            ? 'Заполни холодильник хотя бы несколькими продуктами, и приложение сразу предложит лучший вариант.'
-            : shelfCount == 0
-                ? 'Специи, масла и соусы заметно повышают точность и вкус офлайн-рекомендаций.'
-                : 'Холодильник уже заполнен. Открой подбор и посмотри лучший вариант из того, что есть дома.';
+    final matchPercent =
+        bestMatch == null ? 'Оффлайн' : '${(bestMatch!.score * 100).round()}%';
 
-    return Semantics(
-      container: true,
-      label:
-          '${readyToCook ? 'Сегодняшний выбор' : 'Следующий шаг'}. $title. $subtitle',
-      child: SectionSurface(
-        tone: readyToCook
-            ? SectionSurfaceTone.primarySoft
-            : SectionSurfaceTone.muted,
-        padding: const EdgeInsets.all(AppTokens.p20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTokens.p8,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: readyToCook
-                    ? AppTokens.insetSurfaceStrong.withValues(alpha: 0.94)
-                    : AppTokens.insetSurface,
-                borderRadius: BorderRadius.circular(AppTokens.pill),
-                border: Border.all(color: AppTokens.insetBorder),
-              ),
-              child: Text(
-                readyToCook ? 'Сегодняшний выбор' : 'Следующий шаг',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color:
-                          readyToCook ? AppTokens.primary : AppTokens.textLight,
-                      fontWeight: FontWeight.w800,
-                    ),
-              ),
-            ),
-            const SizedBox(height: AppTokens.p12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 22,
-                  ),
-            ),
-            const SizedBox(height: AppTokens.p8),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: AppTokens.p16),
-            Row(
-              children: [
-                if (readyToCook)
-                  _InfoBox(
-                    label: '${bestMatch!.recipe.timeMin} мин',
-                    icon: Icons.timer_outlined,
-                  ),
-                if (readyToCook) const SizedBox(width: AppTokens.p8),
-                _InfoBox(
-                  label: readyToCook
-                      ? '${(bestMatch!.score * 100).round()}% совпадение'
-                      : '$fridgeCount продуктов добавлено',
-                  icon: readyToCook
-                      ? Icons.auto_awesome_outlined
-                      : Icons.inventory_2_outlined,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppTokens.p16),
-            PrimaryButton(
-              text: readyToCook ? 'Открыть лучший рецепт' : 'Перейти дальше',
-              onPressed: onPrimaryAction,
-              icon: readyToCook
-                  ? Icons.arrow_forward_rounded
-                  : Icons.chevron_right_rounded,
-            ),
-          ],
+    return Row(
+      children: [
+        Expanded(
+          child: _StatusTile(
+            icon: Icons.kitchen_outlined,
+            title: 'Холодильник',
+            value: '$fridgeCount',
+            hint: expiringSoon > 0 ? '$expiringSoon скоро' : 'спокоен',
+            accent: AppTokens.accent,
+          ),
         ),
+        const SizedBox(width: AppTokens.p8),
+        Expanded(
+          child: _StatusTile(
+            icon: Icons.spa_outlined,
+            title: 'Полка',
+            value: '$shelfCount',
+            hint: shelfCount == 0 ? 'пора заполнить' : 'усиливает вкус',
+            accent: AppTokens.secondaryDark,
+          ),
+        ),
+        const SizedBox(width: AppTokens.p8),
+        Expanded(
+          child: _StatusTile(
+            icon: Icons.auto_awesome_rounded,
+            title: 'Шеф',
+            value: matchPercent,
+            hint: bestMatch == null ? 'ждёт продукты' : 'лучший вариант',
+            accent: AppTokens.primary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String value;
+  final String hint;
+  final Color accent;
+
+  const _StatusTile({
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.hint,
+    required this.accent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        AppTokens.p12,
+        AppTokens.p12,
+        AppTokens.p12,
+        AppTokens.p12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(AppTokens.r20),
+        border: Border.all(color: AppTokens.border.withValues(alpha: 0.9)),
+        boxShadow: AppTokens.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppTokens.r12),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, size: 18, color: accent),
+          ),
+          const SizedBox(height: AppTokens.p8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTokens.text,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            hint,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTokens.textLight,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -383,45 +394,6 @@ class _OnboardingStep extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _InfoBox extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _InfoBox({
-    required this.label,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.p12,
-        vertical: AppTokens.p8,
-      ),
-      decoration: BoxDecoration(
-        color: AppTokens.insetSurface,
-        borderRadius: BorderRadius.circular(AppTokens.r12),
-        border: Border.all(color: AppTokens.insetBorder),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppTokens.textLight),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTokens.text,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ],
-      ),
     );
   }
 }
