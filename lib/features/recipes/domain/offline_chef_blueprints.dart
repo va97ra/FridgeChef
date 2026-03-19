@@ -8,6 +8,7 @@ enum ChefStepStyle {
   freshSalad,
   coldSoup,
   preserve,
+  morsDrink,
   grainPan,
   pastaPan,
   soup,
@@ -65,6 +66,7 @@ enum ChefDishFamily {
   bake,
   curdBake,
   charlotte,
+  mors,
   savoryClosedPie,
   shawarmaWrap,
   breakfast,
@@ -166,6 +168,8 @@ class ChefBlueprint {
         return ChefDishFamily.coldSoup;
       case ChefStepStyle.preserve:
         return ChefDishFamily.sauerkrautPreserve;
+      case ChefStepStyle.morsDrink:
+        return ChefDishFamily.mors;
       case ChefStepStyle.grainPan:
         return ChefDishFamily.grainPan;
       case ChefStepStyle.pastaPan:
@@ -1284,6 +1288,46 @@ const chefBlueprints = <ChefBlueprint>[
       ChefSlot(
         key: 'fat',
         candidates: ['масло сливочное'],
+        minCount: 0,
+        maxCount: 1,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'mors',
+    profile: DishProfile.general,
+    titlePrefix: 'Морс',
+    description:
+        'Русский морс строится не как сладкий компот, а как чистый ягодный напиток: ягоду разминают, отдельно сохраняют сок, прогревают основу, процеживают и только потом собирают холодный вкус.',
+    timeMin: 28,
+    servingsBase: 4,
+    tags: ['drink', 'cold', 'russian_classic', 'generated_local'],
+    anchorSlot: 'berries',
+    supportSlot: 'accent',
+    preferredStarters: ['сахар'],
+    maxImplicitPantryStarters: 1,
+    titleStyle: ChefTitleStyle.inventoryLead,
+    stepStyle: ChefStepStyle.morsDrink,
+    family: ChefDishFamily.mors,
+    slots: [
+      ChefSlot(
+        key: 'berries',
+        candidates: [
+          'клюква',
+          'брусника',
+          'смородина',
+          'вишня',
+          'малина',
+          'черника',
+          'облепиха',
+        ],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'accent',
+        candidates: ['лимон'],
         minCount: 0,
         maxCount: 1,
       ),

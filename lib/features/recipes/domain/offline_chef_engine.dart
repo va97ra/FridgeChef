@@ -471,6 +471,18 @@ class OfflineChefEngine {
     final hasCharlotteSet = inventoryCanonicals.contains('яблоко') &&
         inventoryCanonicals.contains('яйцо') &&
         inventoryCanonicals.contains('мука');
+    final hasMorsSet = inventoryHasAny(
+          const {
+            'клюква',
+            'брусника',
+            'смородина',
+            'вишня',
+            'малина',
+            'черника',
+            'облепиха',
+          },
+        ) &&
+        inventoryCanonicals.contains('сахар');
     final hasClassicGolubtsySet = inventoryCanonicals.contains('капуста') &&
         inventoryCanonicals.contains('фарш') &&
         inventoryCanonicals.contains('рис') &&
@@ -532,6 +544,8 @@ class OfflineChefEngine {
         return hasLightlySaltedCucumbersSet ? 0.18 : 0.0;
       case ChefDishFamily.charlotte:
         return hasCharlotteSet ? 0.18 : 0.0;
+      case ChefDishFamily.mors:
+        return hasMorsSet ? 0.18 : 0.0;
       case ChefDishFamily.coldSoup:
       case ChefDishFamily.okroshkaColdSoup:
       case ChefDishFamily.okroshkaKvassColdSoup:
@@ -875,6 +889,7 @@ class OfflineChefEngine {
       case ChefDishFamily.bake:
       case ChefDishFamily.curdBake:
       case ChefDishFamily.charlotte:
+      case ChefDishFamily.mors:
       case ChefDishFamily.breakfast:
       case ChefDishFamily.panBatter:
       case ChefDishFamily.bliniPan:
@@ -951,6 +966,8 @@ class OfflineChefEngine {
       case ChefDishFamily.lightlySaltedCucumbers:
         return hasAny(const {'соль'});
       case ChefDishFamily.charlotte:
+        return hasAny(const {'сахар'});
+      case ChefDishFamily.mors:
         return hasAny(const {'сахар'});
       case ChefDishFamily.peaSmokedSoup:
         return hasAny(const {'горох'}) &&
@@ -1069,6 +1086,21 @@ class OfflineChefEngine {
           default:
             return _defaultAmountFor(canonical);
         }
+      case ChefDishFamily.mors:
+        switch (canonical) {
+          case 'клюква':
+          case 'брусника':
+          case 'смородина':
+          case 'вишня':
+          case 'малина':
+          case 'черника':
+          case 'облепиха':
+            return 250;
+          case 'лимон':
+            return 1;
+          default:
+            return _defaultAmountFor(canonical);
+        }
       case ChefDishFamily.liverCake:
         switch (canonical) {
           case 'печень':
@@ -1183,6 +1215,13 @@ class OfflineChefEngine {
             return 3;
           case 'соль':
             return 1;
+          default:
+            return _supportAmountFor(canonical);
+        }
+      case ChefDishFamily.mors:
+        switch (canonical) {
+          case 'сахар':
+            return 80;
           default:
             return _supportAmountFor(canonical);
         }
@@ -1602,6 +1641,13 @@ class OfflineChefEngine {
           'Подготовь основу: $anchor${secondary.isEmpty ? '' : ', добавь $secondary'}${support.isEmpty ? '' : ' и $support'}, затем доведи её через соль и плотную укладку.',
           'Оставь заготовку в рассоле или под гнётом, чтобы вкус собрался без горячей обработки.',
           'После выдержки убери заготовку в холод и подавай хорошо охлаждённой.',
+        ];
+      case ChefStepStyle.morsDrink:
+        return [
+          'Разомни $anchor толкушкой или ложкой, затем отдели сок через сито и убери его в холод, чтобы сохранить живую ягодную свежесть.${support.isEmpty ? '' : ' $support пока оставь для финального баланса.'}',
+          'Залей ягодный жмых водой, добавь ${seasoningText.isEmpty ? 'сахар' : seasoningText} и спокойно прогрей основу 8-10 минут без бурного кипения, чтобы ягода отдала цвет и вкус без варёной тяжести.',
+          'Процеди ягодную основу, остуди до тёплого состояния и верни отложенный сок${support.isEmpty ? '' : ', затем добавь $support'}, чтобы вкус остался ярким, а не компотным.',
+          'Доведи баланс по сладости и кислоте, охлади морс 2-3 часа и подавай хорошо холодным.',
         ];
       case ChefStepStyle.grainPan:
         final familyGrainSteps = _buildStructuredGrainSteps(
@@ -2869,6 +2915,8 @@ class OfflineChefEngine {
       case ChefDishFamily.okroshkaKvassColdSoup:
       case ChefDishFamily.olivierSalad:
       case ChefDishFamily.vinegretSalad:
+      case ChefDishFamily.sauerkrautPreserve:
+      case ChefDishFamily.lightlySaltedCucumbers:
       case ChefDishFamily.grainPan:
       case ChefDishFamily.buckwheatRusticBowl:
       case ChefDishFamily.pastaPan:
@@ -2911,6 +2959,7 @@ class OfflineChefEngine {
       case ChefDishFamily.cucumberSmetanaSalad:
       case ChefDishFamily.potatoEggHash:
       case ChefDishFamily.simpleRiceKasha:
+      case ChefDishFamily.mors:
         return null;
     }
   }

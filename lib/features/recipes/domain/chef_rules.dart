@@ -291,6 +291,27 @@ double _scoreStructure({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isMors = _isMorsDish(recipeCanonicals);
+
+  if (isMors) {
+    var score = 0.24;
+    if (_containsAny(matchedCanonicals, _morsBerryCanonicals)) {
+      score += 0.34;
+    }
+    if (recipeCanonicals.contains('сахар')) {
+      score += 0.18;
+    }
+    if (recipeCanonicals.contains('лимон')) {
+      score += 0.08;
+    }
+    if (ingredientCount >= 2 && ingredientCount <= 4) {
+      score += 0.10;
+    }
+    if (!_hasMorsDrift(recipeCanonicals)) {
+      score += 0.08;
+    }
+    return score.clamp(0.0, 1.0);
+  }
 
   var score = 0.22;
   switch (profile) {
@@ -769,7 +790,8 @@ double _scoreStructure({
   if (matchedProteins == 0 &&
       matchedBases == 0 &&
       profile != DishProfile.salad &&
-      profile != DishProfile.breakfast) {
+      profile != DishProfile.breakfast &&
+      !isMors) {
     score -= 0.14;
   }
   if (matchedCanonicals.isEmpty) {
@@ -794,6 +816,7 @@ double _scoreSeasoning({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isMors = _isMorsDish(recipeCanonicals);
   final recommended =
       _recommendedSeasonings(profile, recipeCanonicals).take(3).toList();
   if (recommended.isEmpty) {
@@ -837,6 +860,16 @@ double _scoreSeasoning({
     }
     if (availableSeasonings.contains('соль')) {
       score += 0.06;
+    }
+    return score.clamp(0.0, 1.0);
+  }
+
+  if (isMors) {
+    if (availableSeasonings.contains('сахар')) {
+      score += 0.30;
+    }
+    if (availableSeasonings.contains('лимон')) {
+      score += 0.12;
     }
     return score.clamp(0.0, 1.0);
   }
@@ -997,9 +1030,7 @@ _TechniqueAnalysis _analyzeTechnique({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
-  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
-  final isLightlySaltedCucumbers =
-      _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isMors = _isMorsDish(recipeCanonicals);
   final isBitochki =
       normalizedTitle.contains('биточ') || _containsKeyword(stepText, 'биточ');
 
@@ -1013,6 +1044,74 @@ _TechniqueAnalysis _analyzeTechnique({
     if (!warnings.contains(value)) {
       warnings.add(value);
     }
+  }
+
+  if (isMors) {
+    score = 0.28;
+    if (_containsAnyKeyword(stepText, const ['разомни', 'раздав', 'протри'])) {
+      score += 0.14;
+      addReason('ягоды сначала раскрываются, а не варятся без подготовки');
+    } else {
+      addWarning('морсу нужно сначала раздавить ягоды');
+      hardPenalty *= 0.80;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['отдели сок', 'убери его в холод', 'сохрани сок'],
+    )) {
+      score += 0.14;
+      addReason('часть ягодного сока сохраняется для живого вкуса');
+    } else {
+      addWarning('морсу полезно отдельно сохранить ягодный сок');
+      hardPenalty *= 0.82;
+    }
+    if ((_containsKeyword(stepText, 'залей') ||
+            _containsKeyword(stepText, 'влей')) &&
+        _containsKeyword(stepText, 'вод')) {
+      score += 0.12;
+      addReason(
+          'ягодная основа собирается на воде, а не уходит в густую массу');
+    } else {
+      addWarning('морсу нужна явная водная основа');
+      hardPenalty *= 0.84;
+    }
+    if (_containsAnyKeyword(stepText, const ['процеди', 'процеж'])) {
+      score += 0.12;
+      addReason('основа процеживается и остаётся чистой по текстуре');
+    } else {
+      addWarning('морс нужно процедить после прогрева ягодной основы');
+      hardPenalty *= 0.82;
+    }
+    if (_containsAnyKeyword(stepText, const ['остуди', 'охлади', 'в холод'])) {
+      score += 0.12;
+      addReason('напиток успевает остыть и сохраняет холодный профиль');
+    } else {
+      addWarning('морс нужно охладить перед подачей');
+      hardPenalty *= 0.80;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['бурно кипяти', 'сильном огне'],
+    )) {
+      addWarning('морс нельзя агрессивно кипятить, иначе вкус уйдёт в компот');
+      hardPenalty *= 0.76;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['молок', 'кефир', 'йогурт', 'крахмал'],
+    )) {
+      addWarning('морс не должен уходить в молочный напиток или кисель');
+      hardPenalty *= 0.72;
+    }
+    if (!hasServe) {
+      addWarning('не хватает финального шага подачи или доведения вкуса');
+    }
+    return _TechniqueAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
   }
 
   switch (profile) {
@@ -2425,6 +2524,7 @@ List<String> _buildWarnings({
   required _FlavorAnalysis flavorAnalysis,
 }) {
   final warnings = <String>[];
+  final isMors = _isMorsDish(matchedCanonicals);
   final isSweetBake = profile == DishProfile.bake &&
       supportPlan.aromaticCanonicals.isEmpty &&
       supportPlan.seasoningCanonicals.contains('сахар') &&
@@ -2432,7 +2532,8 @@ List<String> _buildWarnings({
   if (supportPlan.aromaticCanonicals.isEmpty &&
       profile != DishProfile.salad &&
       profile != DishProfile.breakfast &&
-      !isSweetBake) {
+      !isSweetBake &&
+      !isMors) {
     warnings.add('нет ароматической базы');
   }
   if (supportPlan.seasoningCanonicals.isEmpty) {
@@ -2440,7 +2541,8 @@ List<String> _buildWarnings({
   }
   if (!_containsAny(matchedCanonicals, _proteinCanonicals) &&
       !_containsAny(matchedCanonicals, _baseCanonicals) &&
-      profile != DishProfile.salad) {
+      profile != DishProfile.salad &&
+      !isMors) {
     warnings.add('не хватает опорного ингредиента');
   }
   for (final warning in techniqueAnalysis.warnings) {
@@ -2508,6 +2610,10 @@ _BalanceAnalysis _analyzeBalance({
   final isPotatoFritter = friedDishKind == _FriedDishKind.draniki;
   final isCharlotte = _isCharlotteDish(recipeCanonicals);
   final isLiverCake = _isLiverCakeDish(recipeCanonicals);
+  final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
+  final isLightlySaltedCucumbers =
+      _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isMors = _isMorsDish(recipeCanonicals);
 
   final reasons = <String>[];
   final warnings = <String>[];
@@ -2524,6 +2630,61 @@ _BalanceAnalysis _analyzeBalance({
     if (!warnings.contains(value)) {
       warnings.add(value);
     }
+  }
+
+  if (isMors) {
+    if (_containsAny(recipeCanonicals, _morsBerryCanonicals)) {
+      score += 0.22;
+      addReason('ягодная база даёт морсу настоящий фруктовый центр');
+    } else {
+      addWarning('морсу не хватает явной ягодной базы');
+      hardPenalty *= 0.78;
+    }
+    if (availableSet.contains('сахар')) {
+      score += 0.18;
+      addReason('сахар собирает ягодную кислоту и убирает резкость');
+    } else {
+      addWarning('морсу не хватает сладости, которая собирает ягодный вкус');
+      hardPenalty *= 0.80;
+    }
+    if (hasAcid || recipeCanonicals.contains('лимон')) {
+      score += 0.12;
+      addReason('кислотный штрих удерживает морс живым и не приторным');
+    } else {
+      addWarning('морсу не хватает свежего кислого контура');
+      hardPenalty *= 0.88;
+    }
+    if (recipeCanonicals.contains('лимон') || hasBrightFinish) {
+      score += 0.08;
+      addReason('цитрусовый финиш делает ягодный вкус чище и длиннее');
+    } else {
+      addWarning('морсу не хватает яркого финишного штриха');
+    }
+    if (freshCount > 0 || hasBrightFinish) {
+      score += 0.10;
+      addReason('ягодная свежесть остаётся слышной после прогрева основы');
+    } else {
+      addWarning('морсу не хватает ощущения свежести');
+      hardPenalty *= 0.88;
+    }
+    if (hasFat || hasCreamy || hasTomatoDepth || hasWarmSpice) {
+      addWarning(
+          'жирные, томатные или пряные ноты спорят с чистым профилем морса');
+      hardPenalty *= 0.74;
+    } else {
+      score += 0.08;
+    }
+    if (_hasMorsDrift(recipeCanonicals)) {
+      addWarning(
+          'чужие молочные или savory-добавки ломают ягодный профиль морса');
+      hardPenalty *= 0.72;
+    }
+    return _BalanceAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
   }
 
   switch (profile) {
@@ -3374,7 +3535,7 @@ _BalanceAnalysis _analyzeBalance({
         'сладкий завтрак опирается не только на сладость, но и на аромат');
   }
 
-  if (!hasProtein && !hasBase && profile != DishProfile.salad) {
+  if (!hasProtein && !hasBase && profile != DishProfile.salad && !isMors) {
     hardPenalty *= 0.82;
   }
 
@@ -3486,6 +3647,46 @@ _FlavorAnalysis _analyzeFlavor({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isMors = _isMorsDish(recipeCanonicals);
+
+  if (isMors) {
+    if (freshness >= 0.18 || acidity >= 0.18) {
+      score += 0.24;
+      addReason('ягоды дают морсу живую свежесть и чистую кислоту');
+    } else {
+      addWarning('морсу не хватает яркой ягодной свежести');
+      hardPenalty *= 0.82;
+    }
+    if (sweetness >= 0.14) {
+      score += 0.18;
+      addReason('сладость удерживает кислоту и не даёт вкусу стать резким');
+    } else {
+      addWarning('морсу не хватает сладкого баланса к ягодной кислоте');
+      hardPenalty *= 0.84;
+    }
+    if (recipeCanonicals.contains('лимон') || hasBrightFinish) {
+      score += 0.10;
+      addReason('цитрусовый штрих делает ягодный вкус чище и ярче');
+    } else {
+      addWarning('морсу не хватает яркого лимонного или финишного акцента');
+    }
+    if (fat >= 0.08 || creaminess >= 0.08 || umami >= 0.12 || spice >= 0.10) {
+      addWarning('молочные, жирные или savoury-ноты ломают чистый вкус морса');
+      hardPenalty *= 0.74;
+    } else {
+      score += 0.12;
+    }
+    if (_hasMorsDrift(recipeCanonicals)) {
+      addWarning('чужие добавки уводят морс из ягодного напитка в другой жанр');
+      hardPenalty *= 0.72;
+    }
+    return _FlavorAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
+  }
 
   switch (profile) {
     case DishProfile.salad:
@@ -4617,76 +4818,39 @@ bool _isSvekolnikDish(Set<String> ingredientCanonicals) {
 
 bool _isSauerkrautPreserveDish(Set<String> ingredientCanonicals) {
   return ingredientCanonicals.contains('капуста') &&
-      !ingredientCanonicals.contains('картофель') &&
-      !_containsAny(
-        ingredientCanonicals,
-        const {
-          'майонез',
-          'сметана',
-          'сыр',
-          'яйцо',
-          'колбаса',
-          'сосиски',
-          'фарш',
-          'курица',
-          'свинина',
-          'говядина',
-          'томатная паста',
-        },
-      );
+      ingredientCanonicals.contains('соль') &&
+      ingredientCanonicals.every(_sauerkrautAllowedCanonicals.contains);
 }
 
 bool _isLightlySaltedCucumberDish(Set<String> ingredientCanonicals) {
   return ingredientCanonicals.contains('огурец') &&
       ingredientCanonicals.contains('укроп') &&
       ingredientCanonicals.contains('чеснок') &&
-      !ingredientCanonicals.contains('картофель') &&
-      !_containsAny(
-        ingredientCanonicals,
-        const {
-          'майонез',
-          'сметана',
-          'сыр',
-          'яйцо',
-          'томатная паста',
-          'колбаса',
-          'сосиски',
-        },
-      );
+      ingredientCanonicals.contains('соль') &&
+      ingredientCanonicals
+          .every(_lightlySaltedCucumberAllowedCanonicals.contains);
 }
 
 bool _hasSauerkrautPreserveDrift(Set<String> ingredientCanonicals) {
-  return _containsAny(
-    ingredientCanonicals,
-    const {
-      'майонез',
-      'сметана',
-      'сыр',
-      'яйцо',
-      'колбаса',
-      'сосиски',
-      'фарш',
-      'курица',
-      'свинина',
-      'говядина',
-      'томатная паста',
-    },
-  );
+  return ingredientCanonicals
+      .any((canonical) => !_sauerkrautAllowedCanonicals.contains(canonical));
 }
 
 bool _hasLightlySaltedCucumberDrift(Set<String> ingredientCanonicals) {
-  return _containsAny(
-    ingredientCanonicals,
-    const {
-      'майонез',
-      'сметана',
-      'сыр',
-      'яйцо',
-      'томатная паста',
-      'колбаса',
-      'сосиски',
-    },
+  return ingredientCanonicals.any(
+    (canonical) => !_lightlySaltedCucumberAllowedCanonicals.contains(canonical),
   );
+}
+
+bool _isMorsDish(Set<String> ingredientCanonicals) {
+  return _containsAny(ingredientCanonicals, _morsBerryCanonicals) &&
+      ingredientCanonicals.contains('сахар') &&
+      ingredientCanonicals.every(_morsAllowedCanonicals.contains);
+}
+
+bool _hasMorsDrift(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals
+      .any((canonical) => !_morsAllowedCanonicals.contains(canonical));
 }
 
 bool _isGreenShchiDish(Set<String> ingredientCanonicals) {
@@ -4957,7 +5121,8 @@ List<String> _recommendedAromatics(
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
-  if (_isSauerkrautPreserveDish(ingredientCanonicals) ||
+  if (_isMorsDish(ingredientCanonicals) ||
+      _isSauerkrautPreserveDish(ingredientCanonicals) ||
       _isLightlySaltedCucumberDish(ingredientCanonicals)) {
     return const [];
   }
@@ -5040,6 +5205,9 @@ List<String> _recommendedSeasonings(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isMorsDish(ingredientCanonicals)) {
+    return const ['сахар', 'лимон'];
+  }
   if (_isSauerkrautPreserveDish(ingredientCanonicals)) {
     return const ['соль'];
   }
@@ -5179,6 +5347,9 @@ List<String> _recommendedFinishes(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isMorsDish(ingredientCanonicals)) {
+    return const ['лимон'];
+  }
   if (_isSauerkrautPreserveDish(ingredientCanonicals) ||
       _isLightlySaltedCucumberDish(ingredientCanonicals)) {
     return const [];
@@ -5426,6 +5597,44 @@ const Set<String> _proteinCanonicals = {
   'колбаса',
 };
 
+const Set<String> _sauerkrautAllowedCanonicals = {
+  'капуста',
+  'морковь',
+  'соль',
+  'вода',
+};
+
+const Set<String> _lightlySaltedCucumberAllowedCanonicals = {
+  'огурец',
+  'укроп',
+  'чеснок',
+  'соль',
+  'вода',
+};
+
+const Set<String> _morsBerryCanonicals = {
+  'клюква',
+  'брусника',
+  'смородина',
+  'вишня',
+  'малина',
+  'черника',
+  'облепиха',
+};
+
+const Set<String> _morsAllowedCanonicals = {
+  'клюква',
+  'брусника',
+  'смородина',
+  'вишня',
+  'малина',
+  'черника',
+  'облепиха',
+  'сахар',
+  'вода',
+  'лимон',
+};
+
 const Set<String> _aromaticCanonicals = {
   'лук',
   'чеснок',
@@ -5472,6 +5681,13 @@ const Set<String> _freshCanonicals = {
   'апельсин',
   'перец сладкий',
   'кукуруза',
+  'клюква',
+  'брусника',
+  'смородина',
+  'вишня',
+  'малина',
+  'черника',
+  'облепиха',
 };
 
 const Set<String> _freshReadyCanonicals = {
@@ -5514,6 +5730,13 @@ const Set<String> _acidCanonicals = {
   'томатная паста',
   'кетчуп',
   'яблоко',
+  'клюква',
+  'брусника',
+  'смородина',
+  'вишня',
+  'малина',
+  'черника',
+  'облепиха',
   'горчица',
   'уксус',
   'кислотный акцент',
@@ -5741,6 +5964,13 @@ const Map<String, _FlavorVector> _flavorVectors = {
   'банан': _FlavorVector(sweetness: 0.62, freshness: 0.16, creaminess: 0.24),
   'апельсин': _FlavorVector(
       acidity: 0.30, sweetness: 0.42, freshness: 0.36, crunch: 0.06),
+  'клюква': _FlavorVector(acidity: 0.62, sweetness: 0.10, freshness: 0.38),
+  'брусника': _FlavorVector(acidity: 0.54, sweetness: 0.14, freshness: 0.34),
+  'смородина': _FlavorVector(acidity: 0.48, sweetness: 0.18, freshness: 0.36),
+  'вишня': _FlavorVector(acidity: 0.32, sweetness: 0.34, freshness: 0.28),
+  'малина': _FlavorVector(acidity: 0.34, sweetness: 0.30, freshness: 0.34),
+  'черника': _FlavorVector(acidity: 0.20, sweetness: 0.26, freshness: 0.24),
+  'облепиха': _FlavorVector(acidity: 0.64, sweetness: 0.12, freshness: 0.36),
   'сахар': _FlavorVector(sweetness: 1.0),
   'томатная паста': _FlavorVector(acidity: 0.30, umami: 0.66, spice: 0.04),
   'перец': _FlavorVector(freshness: 0.02, spice: 0.36),

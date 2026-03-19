@@ -707,6 +707,46 @@ ChefDishValidationResult validateChefDish({
         'Шарлотка не должна жариться на сковороде или превращаться в раскатной пирог.',
       );
       break;
+    case ChefDishFamily.mors:
+      _validateMorsTechnique(
+        violations: violations,
+        steps: normalizedSteps,
+      );
+      requireAnyCanonical(
+        [
+          'клюква',
+          'брусника',
+          'смородина',
+          'вишня',
+          'малина',
+          'черника',
+          'облепиха',
+        ],
+        'Морсу нужна явная ягодная база, а не случайный сладкий напиток.',
+      );
+      requireCanonical(
+        'сахар',
+        'Морсу нужна сахарная опора, чтобы собрать яркую ягодную кислоту.',
+      );
+      forbidAnyCanonical(
+        [
+          'молоко',
+          'кефир',
+          'йогурт',
+          'сметана',
+          'майонез',
+          'сыр',
+          'лук',
+          'чеснок',
+          'томатная паста',
+        ],
+        'Морс не должен превращаться в молочный коктейль, соус или savoury-напиток.',
+      );
+      forbidAnyStep(
+        ['крахмал', 'молоко', 'кефир', 'йогурт', 'блендером с молоком'],
+        'Морс не должен уходить в кисель или молочный коктейль.',
+      );
+      break;
     case ChefDishFamily.savoryClosedPie:
       _validateSavoryClosedPieTechnique(
         violations: violations,
@@ -1472,6 +1512,50 @@ void _validateFreshSaladTechnique({
   }
   if (!_stepsContainAny(steps, ['подавай сразу', 'перед подачей заправь'])) {
     violations.add('Салат должен собираться непосредственно перед подачей.');
+  }
+}
+
+void _validateMorsTechnique({
+  required List<String> violations,
+  required List<String> steps,
+}) {
+  if (!_stepsContainAny(steps, ['разомни', 'раздав', 'протри'])) {
+    violations.add(
+      'Морсу нужно сначала раздавить ягоды, а не просто долго кипятить их целиком.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['отдели сок', 'убери его в холод', 'сохрани сок'])) {
+    violations.add(
+      'Морсу полезно отдельно сохранить ягодный сок, чтобы напиток не ушёл в компотную тяжесть.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['залей ягодный жмых водой', 'залей водой', 'прогрей основу'])) {
+    violations.add(
+      'Морсу нужна отдельная прогретая ягодная основа на воде.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['процеди', 'процеж'])) {
+    violations.add(
+      'Морс нужно процедить, чтобы напиток остался чистым, а не грубым по текстуре.',
+    );
+  }
+  if (!_stepsContainAny(steps, ['остуди', 'охлади'])) {
+    violations.add(
+      'Морс должен остыть перед подачей, иначе он теряет свой холодный ягодный профиль.',
+    );
+  }
+  if (!_stepsContainAny(
+      steps, ['подавай хорошо холодным', 'подавай холодным'])) {
+    violations.add(
+      'Морс должен подаваться холодным.',
+    );
+  }
+  if (_stepsContainAny(steps, ['бурно кипяти', 'кипяти 20 минут'])) {
+    violations.add(
+      'Морс не должен долго и агрессивно кипятиться, иначе вкус становится компотным.',
+    );
   }
 }
 

@@ -4430,6 +4430,75 @@ void main() {
       isFalse,
     );
   });
+  test('builds mors from berry and sugar set', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'sugar',
+            name: 'Сахар',
+            canonicalName: 'сахар',
+            aliases: ['сахар'],
+            category: 'basic',
+            isStarter: true,
+          ),
+        ],
+        productCatalog: const [
+          ProductCatalogEntry(
+            id: 'cranberry',
+            name: 'Клюква',
+            canonicalName: 'клюква',
+            synonyms: ['клюква', 'замороженная клюква'],
+            defaultUnit: Unit.g,
+          ),
+          ProductCatalogEntry(
+            id: 'lemon',
+            name: 'Лимон',
+            canonicalName: 'лимон',
+            synonyms: ['лимон'],
+            defaultUnit: Unit.pcs,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(
+            id: 'cranberry',
+            name: 'Замороженная клюква',
+            amount: 350,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+            id: 'lemon',
+            name: 'Лимон',
+            amount: 1,
+            unit: Unit.pcs,
+          ),
+        ],
+      ),
+    );
+
+    final mors = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Морс'),
+    );
+
+    expect(generated, isNotEmpty);
+    expect(mors.recipe.anchorIngredients, contains('Замороженная клюква'));
+    expect(
+      mors.recipe.ingredients.any((ingredient) => ingredient.name == 'Сахар'),
+      isTrue,
+    );
+    expect(
+      mors.recipe.steps.any((step) => step.contains('отдели сок')),
+      isTrue,
+    );
+    expect(
+      mors.recipe.steps.any((step) => step.contains('Процеди ягодную основу')),
+      isTrue,
+    );
+    expect(
+      mors.recipe.steps.any((step) => step.contains('подавай хорошо холодным')),
+      isTrue,
+    );
+  });
 }
 
 OfflineChefRequest _request({

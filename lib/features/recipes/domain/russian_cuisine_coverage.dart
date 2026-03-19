@@ -415,10 +415,11 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'mors',
     title: 'Морс',
-    status: RussianCuisineCoverageStatus.blockedByCatalog,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'mors',
     familyId: 'mors',
     continuationNote:
-        'Requires berry product expansion and drink-family modeling.',
+        'Covered as a dedicated berry drink family with juice-first extraction, strained base, chilling, and anti-compote drift checks.',
   ),
   RussianCuisineCoverageEntry(
     id: 'kissel',
@@ -426,7 +427,7 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
     status: RussianCuisineCoverageStatus.blockedByCatalog,
     familyId: 'kissel',
     continuationNote:
-        'Requires berry/starch drink-dessert reasoning before implementation.',
+        'Berry drink layer exists, but kissel still needs starch-thickened drink-dessert reasoning.',
   ),
   RussianCuisineCoverageEntry(
     id: 'bread_kvass',

@@ -2488,6 +2488,63 @@ void main() {
           'Тушёная капуста не должна уходить в холодную подачу или запекание.'),
     );
   });
+  test('accepts proper mors with separate juice and chilled finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('mors'),
+      recipe: const Recipe(
+        id: 'mors-valid',
+        title: 'Морс: Клюква',
+        timeMin: 28,
+        tags: ['drink', 'cold'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Клюква', amount: 250, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 80, unit: Unit.g),
+          RecipeIngredient(name: 'Лимон', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Разомни клюкву, отдели сок через сито и убери его в холод.',
+          'Залей ягодный жмых водой, добавь сахар и спокойно прогрей основу 8-10 минут без бурного кипения.',
+          'Процеди ягодную основу, остуди до тёплого состояния и верни отложенный сок с лимоном.',
+          'Охлади морс 2-3 часа и подавай хорошо холодным.',
+        ],
+      ),
+      recipeCanonicals: const {'клюква', 'сахар', 'лимон'},
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects mors that drifts into milkshake', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('mors'),
+      recipe: const Recipe(
+        id: 'mors-milkshake',
+        title: 'Морс ягодный',
+        timeMin: 10,
+        tags: ['drink'],
+        servingsBase: 2,
+        ingredients: [
+          RecipeIngredient(name: 'Клюква', amount: 200, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 50, unit: Unit.g),
+          RecipeIngredient(name: 'Молоко', amount: 300, unit: Unit.ml),
+        ],
+        steps: [
+          'Разомни клюкву и сразу пробей её блендером с молоком и сахаром.',
+          'Остуди и подавай холодным.',
+        ],
+      ),
+      recipeCanonicals: const {'клюква', 'сахар', 'молоко'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Морс не должен превращаться в молочный коктейль, соус или savoury-напиток.',
+      ),
+    );
+  });
 }
 
 ChefBlueprint _blueprint(String id) {

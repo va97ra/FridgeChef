@@ -545,6 +545,44 @@ void main() {
       livelySalad.reasons.any((reason) => reason.contains('хруст')),
       isTrue,
     );
+    expect(
+      livelySalad.warnings.any((warning) => warning.contains('квашен')),
+      isFalse,
+    );
+  });
+
+  test(
+      'chef rules do not mistake cucumber yogurt salad for lightly salted preserve',
+      () {
+    final freshCucumberSalad = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'огурец', 'йогурт', 'укроп', 'чеснок'},
+      matchedCanonicals: const {'огурец', 'йогурт', 'укроп', 'чеснок'},
+      supportCanonicals: const {'соль'},
+      displayByCanonical: const {
+        'огурец': 'Огурец',
+        'йогурт': 'Йогурт',
+        'укроп': 'Укроп',
+        'чеснок': 'Чеснок',
+        'соль': 'Соль',
+      },
+      steps: const [
+        'Нарежь огурцы тонкими полукружьями и слегка посоли.',
+        'Смешай йогурт с чесноком и укропом.',
+        'Заправь огурцы соусом перед подачей и подавай охлаждёнными.',
+      ],
+    );
+
+    expect(freshCucumberSalad.score, greaterThan(0.35));
+    expect(
+      freshCucumberSalad.reasons.any((reason) => reason.contains('салат')),
+      isTrue,
+    );
+    expect(
+      freshCucumberSalad.warnings
+          .any((warning) => warning.contains('малосоль')),
+      isFalse,
+    );
   });
 
   test('chef rules reward fish with herbs and acid over plain fish', () {
@@ -2475,6 +2513,49 @@ void main() {
     expect(
       flatCabbage.warnings
           .any((warning) => warning.contains('тушёной капусте')),
+      isTrue,
+    );
+  });
+  test('chef rules reward proper mors over boiled compote-like version', () {
+    final flatMors = assessChefRules(
+      profile: DishProfile.general,
+      recipeCanonicals: const {'клюква', 'сахар'},
+      matchedCanonicals: const {'клюква'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'клюква': 'Клюква',
+        'сахар': 'Сахар',
+      },
+      steps: const [
+        'Залей клюкву водой и кипяти 20 минут на сильном огне.',
+        'Сразу разлей по стаканам.',
+      ],
+    );
+
+    final properMors = assessChefRules(
+      profile: DishProfile.general,
+      recipeCanonicals: const {'клюква', 'сахар', 'лимон'},
+      matchedCanonicals: const {'клюква', 'лимон'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'клюква': 'Клюква',
+        'сахар': 'Сахар',
+        'лимон': 'Лимон',
+      },
+      steps: const [
+        'Разомни клюкву, отдели сок через сито и убери его в холод.',
+        'Залей ягодный жмых водой, добавь сахар и спокойно прогрей основу 8-10 минут без бурного кипения.',
+        'Процеди ягодную основу, остуди до тёплого состояния и верни отложенный сок с лимоном.',
+        'Охлади морс 2-3 часа и подавай хорошо холодным.',
+      ],
+    );
+
+    expect(properMors.techniqueScore, greaterThan(flatMors.techniqueScore));
+    expect(properMors.balanceScore, greaterThan(flatMors.balanceScore));
+    expect(properMors.flavorScore, greaterThan(flatMors.flavorScore));
+    expect(properMors.score, greaterThan(flatMors.score));
+    expect(
+      flatMors.warnings.any((warning) => warning.contains('компот')),
       isTrue,
     );
   });
