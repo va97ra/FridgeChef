@@ -51,6 +51,7 @@
   {"canonicalName":"горошек","baseUnit":"g","baseAmount":100,"calories":55,"protein":3.6,"fat":0.2,"carbs":9.3},
   {"canonicalName":"кукуруза","baseUnit":"g","baseAmount":100,"calories":58,"protein":2.2,"fat":1.0,"carbs":11.2},
   {"canonicalName":"мука","baseUnit":"g","baseAmount":100,"calories":334,"protein":10.3,"fat":1.1,"carbs":68.9},
+  {"canonicalName":"крахмал","baseUnit":"g","baseAmount":100,"calories":313,"protein":0.1,"fat":0.0,"carbs":77.6},
   {"canonicalName":"сахар","baseUnit":"g","baseAmount":100,"calories":398,"protein":0.0,"fat":0.0,"carbs":99.8},
   {"canonicalName":"соль","baseUnit":"g","baseAmount":100,"calories":0,"protein":0.0,"fat":0.0,"carbs":0.0},
   {"canonicalName":"корица","baseUnit":"g","baseAmount":100,"calories":247,"protein":4.0,"fat":1.2,"carbs":81.0},

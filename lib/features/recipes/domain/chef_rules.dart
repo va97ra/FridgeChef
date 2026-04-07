@@ -291,7 +291,29 @@ double _scoreStructure({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isBerryJam = _isBerryJamDish(profile, recipeCanonicals);
   final isMors = _isMorsDish(recipeCanonicals);
+  final isKissel = _isKisselDish(recipeCanonicals);
+
+  if (isBerryJam) {
+    var score = 0.26;
+    if (_containsAny(matchedCanonicals, _morsBerryCanonicals)) {
+      score += 0.32;
+    }
+    if (recipeCanonicals.contains('сахар')) {
+      score += 0.18;
+    }
+    if (recipeCanonicals.contains('лимон')) {
+      score += 0.06;
+    }
+    if (ingredientCount >= 2 && ingredientCount <= 4) {
+      score += 0.10;
+    }
+    if (!_hasBerryJamDrift(recipeCanonicals)) {
+      score += 0.08;
+    }
+    return score.clamp(0.0, 1.0);
+  }
 
   if (isMors) {
     var score = 0.24;
@@ -308,6 +330,29 @@ double _scoreStructure({
       score += 0.10;
     }
     if (!_hasMorsDrift(recipeCanonicals)) {
+      score += 0.08;
+    }
+    return score.clamp(0.0, 1.0);
+  }
+
+  if (isKissel) {
+    var score = 0.24;
+    if (_containsAny(matchedCanonicals, _morsBerryCanonicals)) {
+      score += 0.30;
+    }
+    if (recipeCanonicals.contains('сахар')) {
+      score += 0.14;
+    }
+    if (recipeCanonicals.contains('крахмал')) {
+      score += 0.20;
+    }
+    if (recipeCanonicals.contains('лимон')) {
+      score += 0.06;
+    }
+    if (ingredientCount >= 3 && ingredientCount <= 5) {
+      score += 0.10;
+    }
+    if (!_hasKisselDrift(recipeCanonicals)) {
       score += 0.08;
     }
     return score.clamp(0.0, 1.0);
@@ -791,7 +836,8 @@ double _scoreStructure({
       matchedBases == 0 &&
       profile != DishProfile.salad &&
       profile != DishProfile.breakfast &&
-      !isMors) {
+      !isMors &&
+      !isKissel) {
     score -= 0.14;
   }
   if (matchedCanonicals.isEmpty) {
@@ -816,7 +862,9 @@ double _scoreSeasoning({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isBerryJam = _isBerryJamDish(profile, recipeCanonicals);
   final isMors = _isMorsDish(recipeCanonicals);
+  final isKissel = _isKisselDish(recipeCanonicals);
   final recommended =
       _recommendedSeasonings(profile, recipeCanonicals).take(3).toList();
   if (recommended.isEmpty) {
@@ -864,12 +912,32 @@ double _scoreSeasoning({
     return score.clamp(0.0, 1.0);
   }
 
+  if (isBerryJam) {
+    if (availableSeasonings.contains('сахар')) {
+      score += 0.30;
+    }
+    if (availableSeasonings.contains('лимон')) {
+      score += 0.08;
+    }
+    return score.clamp(0.0, 1.0);
+  }
+
   if (isMors) {
     if (availableSeasonings.contains('сахар')) {
       score += 0.30;
     }
     if (availableSeasonings.contains('лимон')) {
       score += 0.12;
+    }
+    return score.clamp(0.0, 1.0);
+  }
+
+  if (isKissel) {
+    if (availableSeasonings.contains('сахар')) {
+      score += 0.28;
+    }
+    if (availableSeasonings.contains('лимон')) {
+      score += 0.10;
     }
     return score.clamp(0.0, 1.0);
   }
@@ -1030,7 +1098,9 @@ _TechniqueAnalysis _analyzeTechnique({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isBerryJam = _isBerryJamDish(profile, recipeCanonicals);
   final isMors = _isMorsDish(recipeCanonicals);
+  final isKissel = _isKisselDish(recipeCanonicals);
   final isBitochki =
       normalizedTitle.contains('биточ') || _containsKeyword(stepText, 'биточ');
 
@@ -1044,6 +1114,84 @@ _TechniqueAnalysis _analyzeTechnique({
     if (!warnings.contains(value)) {
       warnings.add(value);
     }
+  }
+
+  if (isBerryJam) {
+    score = 0.30;
+    if (_containsAnyKeyword(
+      stepText,
+      const ['засыпь', 'дали сок', 'собственный сок'],
+    )) {
+      score += 0.16;
+      addReason(
+          'ягоды сначала дают сок с сахаром, а не варятся в лишней жидкости');
+    } else {
+      addWarning('варенью нужно сначала дать ягодам пустить сок с сахаром');
+      hardPenalty *= 0.78;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['слабый огонь', 'слабом огне', 'растворится', 'снимай пену'],
+    )) {
+      score += 0.14;
+      addReason('сироп собирается мягко и не уходит в грубое кипение');
+    } else {
+      addWarning('варенье нужно спокойно варить на слабом огне');
+      hardPenalty *= 0.82;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['густого сиропа', 'капля держалась', 'капля держится', 'увар'],
+    )) {
+      score += 0.14;
+      addReason('варенье доходит до густого сиропа и держит форму');
+    } else {
+      addWarning('варенью нужно увариться до густого сиропа');
+      hardPenalty *= 0.76;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['банкам', 'контейнер', 'остуди', 'в холод'],
+    )) {
+      score += 0.12;
+      addReason(
+          'заготовка остывает и хранится как варенье, а не подаётся сразу как напиток');
+    } else {
+      addWarning('варенье нужно остудить и убрать в банку или контейнер');
+      hardPenalty *= 0.82;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['залей водой', 'влей воду', 'добавь воду'],
+    )) {
+      addWarning('лишняя вода уводит варенье в компотный сироп');
+      hardPenalty *= 0.74;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['процеди', 'процеж', 'разведи крахмал', 'крахмал', 'блендер'],
+    )) {
+      addWarning(
+          'варенье не должно превращаться в процеженный напиток, кисель или пюре-соус');
+      hardPenalty *= 0.70;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['бурно кипяти', 'сильном огне'],
+    )) {
+      addWarning(
+          'варенье нельзя агрессивно кипятить, иначе вкус станет плоским');
+      hardPenalty *= 0.76;
+    }
+    if (!hasServe) {
+      addWarning('не хватает финального шага хранения или подачи');
+    }
+    return _TechniqueAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
   }
 
   if (isMors) {
@@ -1102,6 +1250,96 @@ _TechniqueAnalysis _analyzeTechnique({
     )) {
       addWarning('морс не должен уходить в молочный напиток или кисель');
       hardPenalty *= 0.72;
+    }
+    if (!hasServe) {
+      addWarning('не хватает финального шага подачи или доведения вкуса');
+    }
+    return _TechniqueAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
+  }
+
+  if (isKissel) {
+    score = 0.30;
+    if ((_containsAnyKeyword(stepText, const ['разомни', 'раздав'])) &&
+        (_containsKeyword(stepText, 'залей') ||
+            _containsKeyword(stepText, 'прогрей'))) {
+      score += 0.12;
+      addReason(
+          'ягодная основа сначала собирается отдельно, а не варится хаотично');
+    } else {
+      addWarning('киселю нужна отдельная ягодная основа');
+      hardPenalty *= 0.80;
+    }
+    if (_containsAnyKeyword(stepText, const ['процеди', 'процеж'])) {
+      score += 0.12;
+      addReason('основа процеживается и остаётся мягкой по текстуре');
+    } else {
+      addWarning('ягодную основу для киселя нужно процедить');
+      hardPenalty *= 0.82;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['разведи крахмал', 'крахмал в холодной воде', 'холодной воде'],
+    )) {
+      score += 0.16;
+      addReason('крахмал заранее разводится и не собирается комками');
+    } else {
+      addWarning('крахмал для киселя нужно сначала развести холодной водой');
+      hardPenalty *= 0.74;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['тонкой струйкой', 'помешивая', 'постоянно помешивая'],
+    )) {
+      score += 0.14;
+      addReason('густота собирается постепенно и остаётся ровной');
+    } else {
+      addWarning('крахмал в кисель вводят тонкой струйкой и при помешивании');
+      hardPenalty *= 0.78;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['загуст', 'мягкой густоты', 'слегка густ', 'вязк'],
+    )) {
+      score += 0.12;
+      addReason('напиток доходит до правильной мягкой густоты');
+    } else {
+      addWarning('кисель должен дойти до мягкой густоты');
+      hardPenalty *= 0.80;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const [
+        'подавай тёплым',
+        'подавай теплым',
+        'подавай охлаждённым',
+        'подавай охлажденным'
+      ],
+    )) {
+      score += 0.08;
+      addReason(
+          'режим подачи учитывает, что кисель живёт как густой напиток или десерт');
+    } else {
+      addWarning('киселю нужен явный режим подачи: тёплый или охлаждённый');
+      hardPenalty *= 0.86;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['бурно кипяти', 'сильном огне', 'кипяти 10 минут после крахмала'],
+    )) {
+      addWarning('кисель нельзя долго кипятить после крахмала');
+      hardPenalty *= 0.74;
+    }
+    if (_containsAnyKeyword(
+      stepText,
+      const ['молок', 'кефир', 'йогурт', 'майонез', 'лук', 'чеснок'],
+    )) {
+      addWarning('чужие молочные или savoury-добавки ломают ягодный кисель');
+      hardPenalty *= 0.70;
     }
     if (!hasServe) {
       addWarning('не хватает финального шага подачи или доведения вкуса');
@@ -2532,6 +2770,7 @@ List<String> _buildWarnings({
 }) {
   final warnings = <String>[];
   final isMors = _isMorsDish(matchedCanonicals);
+  final isKissel = _isKisselDish(matchedCanonicals);
   final isSweetBake = profile == DishProfile.bake &&
       supportPlan.aromaticCanonicals.isEmpty &&
       supportPlan.seasoningCanonicals.contains('сахар') &&
@@ -2540,7 +2779,8 @@ List<String> _buildWarnings({
       profile != DishProfile.salad &&
       profile != DishProfile.breakfast &&
       !isSweetBake &&
-      !isMors) {
+      !isMors &&
+      !isKissel) {
     warnings.add('нет ароматической базы');
   }
   if (supportPlan.seasoningCanonicals.isEmpty) {
@@ -2549,7 +2789,8 @@ List<String> _buildWarnings({
   if (!_containsAny(matchedCanonicals, _proteinCanonicals) &&
       !_containsAny(matchedCanonicals, _baseCanonicals) &&
       profile != DishProfile.salad &&
-      !isMors) {
+      !isMors &&
+      !isKissel) {
     warnings.add('не хватает опорного ингредиента');
   }
   for (final warning in techniqueAnalysis.warnings) {
@@ -2665,7 +2906,9 @@ _BalanceAnalysis _analyzeBalance({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isBerryJam = _isBerryJamDish(profile, recipeCanonicals);
   final isMors = _isMorsDish(recipeCanonicals);
+  final isKissel = _isKisselDish(recipeCanonicals);
 
   final reasons = <String>[];
   final warnings = <String>[];
@@ -2682,6 +2925,52 @@ _BalanceAnalysis _analyzeBalance({
     if (!warnings.contains(value)) {
       warnings.add(value);
     }
+  }
+
+  if (isBerryJam) {
+    if (_containsAny(recipeCanonicals, _morsBerryCanonicals)) {
+      score += 0.22;
+      addReason('ягодная база удерживает варенье в понятном фруктовом центре');
+    } else {
+      addWarning('варенью не хватает явной ягодной базы');
+      hardPenalty *= 0.80;
+    }
+    if (availableSet.contains('сахар')) {
+      score += 0.20;
+      addReason('сахар собирает ягоды в сироп, а не оставляет вкус резким');
+    } else {
+      addWarning('варенью не хватает сахарной опоры');
+      hardPenalty *= 0.72;
+    }
+    if (hasAcid || recipeCanonicals.contains('лимон')) {
+      score += 0.10;
+      addReason('лёгкая кислота не даёт сладкому сиропу стать приторным');
+    } else {
+      addWarning('варенью не хватает свежего кислого штриха');
+      hardPenalty *= 0.90;
+    }
+    if (recipeCanonicals.contains('лимон') || hasBrightFinish) {
+      score += 0.06;
+      addReason('яркий финиш делает вкус варенья чище и длиннее');
+    }
+    if (hasFat || hasCreamy || hasTomatoDepth || hasWarmSpice) {
+      addWarning(
+          'жирные, томатные или пряные ноты ломают чистый ягодный профиль варенья');
+      hardPenalty *= 0.74;
+    } else {
+      score += 0.08;
+    }
+    if (_hasBerryJamDrift(recipeCanonicals)) {
+      addWarning(
+          'чужие добавки уводят варенье в кисель, компот или savoury-заготовку');
+      hardPenalty *= 0.68;
+    }
+    return _BalanceAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
   }
 
   if (isMors) {
@@ -2730,6 +3019,60 @@ _BalanceAnalysis _analyzeBalance({
       addWarning(
           'чужие молочные или savory-добавки ломают ягодный профиль морса');
       hardPenalty *= 0.72;
+    }
+    return _BalanceAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
+  }
+
+  if (isKissel) {
+    if (_containsAny(recipeCanonicals, _morsBerryCanonicals)) {
+      score += 0.20;
+      addReason('ягодная база удерживает кисель в правильном фруктовом центре');
+    } else {
+      addWarning('киселю не хватает явной ягодной базы');
+      hardPenalty *= 0.78;
+    }
+    if (availableSet.contains('сахар')) {
+      score += 0.16;
+      addReason('сладость смягчает кислоту и делает кисель собранным');
+    } else {
+      addWarning('киселю не хватает сладкой опоры');
+      hardPenalty *= 0.80;
+    }
+    if (recipeCanonicals.contains('крахмал')) {
+      score += 0.18;
+      addReason('крахмал даёт киселю нужное тело, а не просто жидкий вкус');
+    } else {
+      addWarning('без крахмала кисель распадается в морс или компот');
+      hardPenalty *= 0.70;
+    }
+    if (hasAcid || recipeCanonicals.contains('лимон')) {
+      score += 0.10;
+      addReason(
+          'лёгкая кислота не даёт густому ягодному вкусу стать приторным');
+    } else {
+      addWarning('киселю не хватает освежающего кислого штриха');
+      hardPenalty *= 0.88;
+    }
+    if (recipeCanonicals.contains('лимон') || hasBrightFinish) {
+      score += 0.06;
+      addReason('финиш остаётся ярким, а не просто сладко-густым');
+    }
+    if (hasFat || hasCreamy || hasTomatoDepth || hasWarmSpice) {
+      addWarning(
+          'жирные, томатные или пряные ноты ломают чистый ягодный профиль киселя');
+      hardPenalty *= 0.72;
+    } else {
+      score += 0.08;
+    }
+    if (_hasKisselDrift(recipeCanonicals)) {
+      addWarning(
+          'чужие молочные или savoury-добавки уводят кисель из ягодного десерта');
+      hardPenalty *= 0.70;
     }
     return _BalanceAnalysis(
       score: score.clamp(0.0, 1.0),
@@ -3592,7 +3935,11 @@ _BalanceAnalysis _analyzeBalance({
         'сладкий завтрак опирается не только на сладость, но и на аромат');
   }
 
-  if (!hasProtein && !hasBase && profile != DishProfile.salad && !isMors) {
+  if (!hasProtein &&
+      !hasBase &&
+      profile != DishProfile.salad &&
+      !isMors &&
+      !isKissel) {
     hardPenalty *= 0.82;
   }
 
@@ -3704,7 +4051,48 @@ _FlavorAnalysis _analyzeFlavor({
   final isSauerkrautPreserve = _isSauerkrautPreserveDish(recipeCanonicals);
   final isLightlySaltedCucumbers =
       _isLightlySaltedCucumberDish(recipeCanonicals);
+  final isBerryJam = _isBerryJamDish(profile, recipeCanonicals);
   final isMors = _isMorsDish(recipeCanonicals);
+  final isKissel = _isKisselDish(recipeCanonicals);
+
+  if (isBerryJam) {
+    if (freshness >= 0.16 || acidity >= 0.16) {
+      score += 0.22;
+      addReason('ягоды дают варенью живую кисло-сладкую сердцевину');
+    } else {
+      addWarning('варенью не хватает яркого ягодного вкуса');
+      hardPenalty *= 0.82;
+    }
+    if (sweetness >= 0.16) {
+      score += 0.18;
+      addReason(
+          'сладость собирает ягоды в полноценное варенье, а не в кислый сироп');
+    } else {
+      addWarning('варенью не хватает сладкого тела');
+      hardPenalty *= 0.80;
+    }
+    if (recipeCanonicals.contains('лимон') || hasBrightFinish) {
+      score += 0.08;
+      addReason('кислый финиш делает вкус варенья чище и менее тяжёлым');
+    }
+    if (fat >= 0.08 || creaminess >= 0.08 || umami >= 0.12 || spice >= 0.10) {
+      addWarning(
+          'молочные, жирные или savoury-ноты ломают вкус ягодного варенья');
+      hardPenalty *= 0.72;
+    } else {
+      score += 0.10;
+    }
+    if (_hasBerryJamDrift(recipeCanonicals)) {
+      addWarning('чужие добавки уводят варенье в другой жанр');
+      hardPenalty *= 0.68;
+    }
+    return _FlavorAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
+  }
 
   if (isMors) {
     if (freshness >= 0.18 || acidity >= 0.18) {
@@ -3736,6 +4124,50 @@ _FlavorAnalysis _analyzeFlavor({
     if (_hasMorsDrift(recipeCanonicals)) {
       addWarning('чужие добавки уводят морс из ягодного напитка в другой жанр');
       hardPenalty *= 0.72;
+    }
+    return _FlavorAnalysis(
+      score: score.clamp(0.0, 1.0),
+      hardPenalty: hardPenalty.clamp(0.0, 1.0),
+      reasons: reasons,
+      warnings: warnings,
+    );
+  }
+
+  if (isKissel) {
+    if (freshness >= 0.14 || acidity >= 0.14) {
+      score += 0.20;
+      addReason('ягоды дают киселю живую кисло-сладкую сердцевину');
+    } else {
+      addWarning('киселю не хватает яркого ягодного вкуса');
+      hardPenalty *= 0.82;
+    }
+    if (sweetness >= 0.12) {
+      score += 0.16;
+      addReason('сладость удерживает густой ягодный вкус мягким');
+    } else {
+      addWarning('киселю не хватает сладкого баланса');
+      hardPenalty *= 0.84;
+    }
+    if (recipeCanonicals.contains('крахмал')) {
+      score += 0.14;
+      addReason('лёгкая вязкость делает вкус длиннее и собраннее');
+    } else {
+      addWarning('без крахмальной густоты вкус киселя распадается');
+      hardPenalty *= 0.74;
+    }
+    if (recipeCanonicals.contains('лимон') || hasBrightFinish) {
+      score += 0.08;
+      addReason('кислый финиш поднимает густой ягодный вкус');
+    }
+    if (fat >= 0.08 || creaminess >= 0.08 || umami >= 0.12 || spice >= 0.10) {
+      addWarning('молочные, жирные или savoury-ноты ломают ягодный кисель');
+      hardPenalty *= 0.72;
+    } else {
+      score += 0.10;
+    }
+    if (_hasKisselDrift(recipeCanonicals)) {
+      addWarning('чужие добавки уводят кисель в другой жанр');
+      hardPenalty *= 0.70;
     }
     return _FlavorAnalysis(
       score: score.clamp(0.0, 1.0),
@@ -4899,6 +5331,21 @@ bool _hasLightlySaltedCucumberDrift(Set<String> ingredientCanonicals) {
   );
 }
 
+bool _isBerryJamDish(
+  DishProfile profile,
+  Set<String> ingredientCanonicals,
+) {
+  return profile == DishProfile.salad &&
+      _containsAny(ingredientCanonicals, _morsBerryCanonicals) &&
+      ingredientCanonicals.contains('сахар') &&
+      ingredientCanonicals.every(_berryJamAllowedCanonicals.contains);
+}
+
+bool _hasBerryJamDrift(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals
+      .any((canonical) => !_berryJamAllowedCanonicals.contains(canonical));
+}
+
 bool _isMorsDish(Set<String> ingredientCanonicals) {
   return _containsAny(ingredientCanonicals, _morsBerryCanonicals) &&
       ingredientCanonicals.contains('сахар') &&
@@ -4908,6 +5355,18 @@ bool _isMorsDish(Set<String> ingredientCanonicals) {
 bool _hasMorsDrift(Set<String> ingredientCanonicals) {
   return ingredientCanonicals
       .any((canonical) => !_morsAllowedCanonicals.contains(canonical));
+}
+
+bool _isKisselDish(Set<String> ingredientCanonicals) {
+  return _containsAny(ingredientCanonicals, _morsBerryCanonicals) &&
+      ingredientCanonicals.contains('сахар') &&
+      ingredientCanonicals.contains('крахмал') &&
+      ingredientCanonicals.every(_kisselAllowedCanonicals.contains);
+}
+
+bool _hasKisselDrift(Set<String> ingredientCanonicals) {
+  return ingredientCanonicals
+      .any((canonical) => !_kisselAllowedCanonicals.contains(canonical));
 }
 
 bool _isGreenShchiDish(Set<String> ingredientCanonicals) {
@@ -5178,7 +5637,9 @@ List<String> _recommendedAromatics(
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
-  if (_isMorsDish(ingredientCanonicals) ||
+  if (_isBerryJamDish(profile, ingredientCanonicals) ||
+      _isMorsDish(ingredientCanonicals) ||
+      _isKisselDish(ingredientCanonicals) ||
       _isSauerkrautPreserveDish(ingredientCanonicals) ||
       _isLightlySaltedCucumberDish(ingredientCanonicals)) {
     return const [];
@@ -5262,7 +5723,13 @@ List<String> _recommendedSeasonings(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isBerryJamDish(profile, ingredientCanonicals)) {
+    return const ['сахар'];
+  }
   if (_isMorsDish(ingredientCanonicals)) {
+    return const ['сахар', 'лимон'];
+  }
+  if (_isKisselDish(ingredientCanonicals)) {
     return const ['сахар', 'лимон'];
   }
   if (_isSauerkrautPreserveDish(ingredientCanonicals)) {
@@ -5404,7 +5871,13 @@ List<String> _recommendedFinishes(
   final grainDishKind = _detectGrainDishKind(profile, ingredientCanonicals);
   final soupKind = _detectSoupKind(ingredientCanonicals);
   final stewDishKind = _detectStewDishKind(profile, ingredientCanonicals);
+  if (_isBerryJamDish(profile, ingredientCanonicals)) {
+    return const ['лимон'];
+  }
   if (_isMorsDish(ingredientCanonicals)) {
+    return const ['лимон'];
+  }
+  if (_isKisselDish(ingredientCanonicals)) {
     return const ['лимон'];
   }
   if (_isSauerkrautPreserveDish(ingredientCanonicals) ||
@@ -5688,6 +6161,32 @@ const Set<String> _morsAllowedCanonicals = {
   'черника',
   'облепиха',
   'сахар',
+  'вода',
+  'лимон',
+};
+
+const Set<String> _berryJamAllowedCanonicals = {
+  'клюква',
+  'брусника',
+  'смородина',
+  'вишня',
+  'малина',
+  'черника',
+  'облепиха',
+  'сахар',
+  'лимон',
+};
+
+const Set<String> _kisselAllowedCanonicals = {
+  'клюква',
+  'брусника',
+  'смородина',
+  'вишня',
+  'малина',
+  'черника',
+  'облепиха',
+  'сахар',
+  'крахмал',
   'вода',
   'лимон',
 };

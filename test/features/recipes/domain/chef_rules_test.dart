@@ -2559,4 +2559,97 @@ void main() {
       isTrue,
     );
   });
+
+  test('chef rules reward proper kissel over flat compote-like version', () {
+    final flatKissel = assessChefRules(
+      profile: DishProfile.general,
+      recipeCanonicals: const {'клюква', 'сахар', 'крахмал'},
+      matchedCanonicals: const {'клюква'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'клюква': 'Клюква',
+        'сахар': 'Сахар',
+        'крахмал': 'Крахмал',
+      },
+      steps: const [
+        'Залей клюкву водой, добавь сахар и крахмал, затем кипяти 10 минут на сильном огне.',
+        'Сразу разлей по стаканам.',
+      ],
+    );
+
+    final properKissel = assessChefRules(
+      profile: DishProfile.general,
+      recipeCanonicals: const {'клюква', 'сахар', 'крахмал', 'лимон'},
+      matchedCanonicals: const {'клюква', 'лимон'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'клюква': 'Клюква',
+        'сахар': 'Сахар',
+        'крахмал': 'Крахмал',
+        'лимон': 'Лимон',
+      },
+      steps: const [
+        'Разомни клюкву, залей ягодную основу водой и спокойно прогрей 8-10 минут.',
+        'Процеди основу через сито, а отдельно разведи крахмал в холодной воде без комков.',
+        'Верни основу на спокойный огонь, добавь сахар, затем тонкой струйкой влей разведённый крахмал, постоянно помешивая, и доведи до мягкой густоты.',
+        'Сними с огня, добавь немного лимона и подавай тёплым как густой напиток или охлаждённым как ягодный десерт.',
+      ],
+    );
+
+    expect(
+      properKissel.techniqueScore,
+      greaterThan(flatKissel.techniqueScore),
+    );
+    expect(properKissel.balanceScore, greaterThan(flatKissel.balanceScore));
+    expect(properKissel.flavorScore, greaterThan(flatKissel.flavorScore));
+    expect(properKissel.score, greaterThan(flatKissel.score));
+    expect(
+      flatKissel.warnings.any((warning) => warning.contains('кисель')),
+      isTrue,
+    );
+  });
+
+  test('chef rules reward proper berry jam over rushed syrup version', () {
+    final flatJam = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'клюква', 'сахар'},
+      matchedCanonicals: const {'клюква'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'клюква': 'Клюква',
+        'сахар': 'Сахар',
+      },
+      steps: const [
+        'Засыпь клюкву сахаром и сразу поставь на сильный огонь.',
+        'Прокипяти несколько минут и сразу подавай к чаю.',
+      ],
+    );
+
+    final properJam = assessChefRules(
+      profile: DishProfile.salad,
+      recipeCanonicals: const {'клюква', 'сахар', 'лимон'},
+      matchedCanonicals: const {'клюква', 'лимон'},
+      supportCanonicals: const {'сахар'},
+      displayByCanonical: const {
+        'клюква': 'Клюква',
+        'сахар': 'Сахар',
+        'лимон': 'Лимон',
+      },
+      steps: const [
+        'Перебери клюкву, засыпь ягоды сахаром и оставь на 30-40 минут, чтобы они дали сок.',
+        'Поставь ягоды на слабый огонь, дождись пока сахар полностью растворится, и снимай пену по мере появления.',
+        'Вари до густого сиропа, чтобы капля держалась на холодной тарелке, а в конце добавь немного лимона.',
+        'Разлей варенье по чистым сухим банкам, полностью остуди и убери в холод.',
+      ],
+    );
+
+    expect(properJam.techniqueScore, greaterThan(flatJam.techniqueScore));
+    expect(properJam.balanceScore, greaterThan(flatJam.balanceScore));
+    expect(properJam.flavorScore, greaterThan(flatJam.flavorScore));
+    expect(properJam.score, greaterThan(flatJam.score));
+    expect(
+      flatJam.warnings.any((warning) => warning.contains('варень')),
+      isTrue,
+    );
+  });
 }

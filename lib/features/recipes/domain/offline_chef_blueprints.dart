@@ -9,6 +9,7 @@ enum ChefStepStyle {
   coldSoup,
   preserve,
   morsDrink,
+  kisselDrinkDessert,
   grainPan,
   pastaPan,
   soup,
@@ -49,6 +50,7 @@ enum ChefDishFamily {
   vinegretSalad,
   sauerkrautPreserve,
   lightlySaltedCucumbers,
+  berryJam,
   grainPan,
   buckwheatRusticBowl,
   pastaPan,
@@ -67,6 +69,7 @@ enum ChefDishFamily {
   curdBake,
   charlotte,
   mors,
+  kissel,
   savoryClosedPie,
   shawarmaWrap,
   breakfast,
@@ -170,6 +173,8 @@ class ChefBlueprint {
         return ChefDishFamily.sauerkrautPreserve;
       case ChefStepStyle.morsDrink:
         return ChefDishFamily.mors;
+      case ChefStepStyle.kisselDrinkDessert:
+        return ChefDishFamily.kissel;
       case ChefStepStyle.grainPan:
         return ChefDishFamily.grainPan;
       case ChefStepStyle.pastaPan:
@@ -488,6 +493,46 @@ const chefBlueprints = <ChefBlueprint>[
         candidates: ['укроп', 'чеснок'],
         minCount: 2,
         maxCount: 2,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'berry_jam',
+    profile: DishProfile.salad,
+    titlePrefix: 'Варенье',
+    description:
+        'Русское ягодное варенье строится не как морс или соус: ягоды собираются с сахаром в собственный сок, мягко увариваются до густого сиропа и остывают как сладкая заготовка.',
+    timeMin: 150,
+    servingsBase: 6,
+    tags: ['preserve', 'sweet', 'russian_classic', 'generated_local'],
+    anchorSlot: 'berries',
+    supportSlot: 'accent',
+    preferredStarters: ['сахар'],
+    maxImplicitPantryStarters: 1,
+    titleStyle: ChefTitleStyle.inventoryLead,
+    stepStyle: ChefStepStyle.preserve,
+    family: ChefDishFamily.berryJam,
+    slots: [
+      ChefSlot(
+        key: 'berries',
+        candidates: [
+          'клюква',
+          'брусника',
+          'смородина',
+          'вишня',
+          'малина',
+          'черника',
+          'облепиха',
+        ],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'accent',
+        candidates: ['лимон'],
+        minCount: 0,
+        maxCount: 1,
       ),
     ],
   ),
@@ -1309,6 +1354,46 @@ const chefBlueprints = <ChefBlueprint>[
     titleStyle: ChefTitleStyle.inventoryLead,
     stepStyle: ChefStepStyle.morsDrink,
     family: ChefDishFamily.mors,
+    slots: [
+      ChefSlot(
+        key: 'berries',
+        candidates: [
+          'клюква',
+          'брусника',
+          'смородина',
+          'вишня',
+          'малина',
+          'черника',
+          'облепиха',
+        ],
+        minCount: 1,
+        maxCount: 1,
+        isAnchor: true,
+      ),
+      ChefSlot(
+        key: 'accent',
+        candidates: ['лимон'],
+        minCount: 0,
+        maxCount: 1,
+      ),
+    ],
+  ),
+  ChefBlueprint(
+    id: 'kissel',
+    profile: DishProfile.general,
+    titlePrefix: 'Кисель',
+    description:
+        'Русский ягодный кисель строится не как морс и не как компот: сначала собирают чистую ягодную основу, затем отдельно разводят крахмал и доводят напиток до мягкой густоты.',
+    timeMin: 24,
+    servingsBase: 4,
+    tags: ['drink', 'dessert', 'russian_classic', 'generated_local'],
+    anchorSlot: 'berries',
+    supportSlot: 'accent',
+    preferredStarters: ['сахар', 'крахмал'],
+    maxImplicitPantryStarters: 2,
+    titleStyle: ChefTitleStyle.inventoryLead,
+    stepStyle: ChefStepStyle.kisselDrinkDessert,
+    family: ChefDishFamily.kissel,
     slots: [
       ChefSlot(
         key: 'berries',

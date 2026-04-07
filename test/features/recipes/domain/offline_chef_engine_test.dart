@@ -4499,6 +4499,157 @@ void main() {
       isTrue,
     );
   });
+
+  test('builds kissel from berry sugar and starch set', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'sugar',
+            name: 'Сахар',
+            canonicalName: 'сахар',
+            aliases: ['сахар'],
+            category: 'basic',
+            isStarter: true,
+          ),
+          PantryCatalogEntry(
+            id: 'starch',
+            name: 'Крахмал',
+            canonicalName: 'крахмал',
+            aliases: ['крахмал', 'картофельный крахмал'],
+            category: 'basic',
+            isStarter: true,
+          ),
+        ],
+        productCatalog: const [
+          ProductCatalogEntry(
+            id: 'cranberry',
+            name: 'Клюква',
+            canonicalName: 'клюква',
+            synonyms: ['клюква', 'замороженная клюква'],
+            defaultUnit: Unit.g,
+          ),
+          ProductCatalogEntry(
+            id: 'lemon',
+            name: 'Лимон',
+            canonicalName: 'лимон',
+            synonyms: ['лимон'],
+            defaultUnit: Unit.pcs,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(
+            id: 'cranberry',
+            name: 'Замороженная клюква',
+            amount: 350,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+            id: 'lemon',
+            name: 'Лимон',
+            amount: 1,
+            unit: Unit.pcs,
+          ),
+        ],
+      ),
+    );
+
+    final kissel = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Кисель'),
+    );
+
+    expect(generated, isNotEmpty);
+    expect(kissel.recipe.anchorIngredients, contains('Замороженная клюква'));
+    expect(
+      kissel.recipe.ingredients.any((ingredient) => ingredient.name == 'Сахар'),
+      isTrue,
+    );
+    expect(
+      kissel.recipe.ingredients
+          .any((ingredient) => ingredient.name == 'Крахмал'),
+      isTrue,
+    );
+    expect(
+      kissel.recipe.steps.any(
+        (step) => step.contains('разведи крахмал в холодной воде'),
+      ),
+      isTrue,
+    );
+    expect(
+      kissel.recipe.steps.any((step) => step.contains('мягкой густоты')),
+      isTrue,
+    );
+  });
+
+  test('builds berry jam from berry and sugar set', () {
+    final generated = const OfflineChefEngine().generate(
+      _request(
+        pantryCatalog: const [
+          PantryCatalogEntry(
+            id: 'sugar',
+            name: 'Сахар',
+            canonicalName: 'сахар',
+            aliases: ['сахар'],
+            category: 'basic',
+            isStarter: true,
+          ),
+        ],
+        productCatalog: const [
+          ProductCatalogEntry(
+            id: 'cranberry',
+            name: 'Клюква',
+            canonicalName: 'клюква',
+            synonyms: ['клюква', 'замороженная клюква'],
+            defaultUnit: Unit.g,
+          ),
+          ProductCatalogEntry(
+            id: 'lemon',
+            name: 'Лимон',
+            canonicalName: 'лимон',
+            synonyms: ['лимон'],
+            defaultUnit: Unit.pcs,
+          ),
+        ],
+        fridgeItems: const [
+          FridgeItem(
+            id: 'cranberry',
+            name: 'Замороженная клюква',
+            amount: 500,
+            unit: Unit.g,
+          ),
+          FridgeItem(
+            id: 'lemon',
+            name: 'Лимон',
+            amount: 1,
+            unit: Unit.pcs,
+          ),
+        ],
+      ),
+    );
+
+    final jam = generated.firstWhere(
+      (candidate) => candidate.recipe.title.contains('Варенье'),
+    );
+
+    expect(generated, isNotEmpty);
+    expect(jam.recipe.anchorIngredients, contains('Замороженная клюква'));
+    expect(
+      jam.recipe.ingredients.any((ingredient) => ingredient.name == 'Сахар'),
+      isTrue,
+    );
+    expect(
+      jam.recipe.steps.any((step) => step.contains('дали сок')),
+      isTrue,
+    );
+    expect(
+      jam.recipe.steps.any((step) => step.contains('густого сиропа')),
+      isTrue,
+    );
+    expect(
+      jam.recipe.steps.any((step) => step.contains('чистым сухим банкам')),
+      isTrue,
+    );
+  });
 }
 
 OfflineChefRequest _request({

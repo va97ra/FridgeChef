@@ -18,6 +18,15 @@
     "isStarter": true
   },
   {
+    "id": "starch",
+    "name": "Крахмал",
+    "canonicalName": "крахмал",
+    "aliases": ["крахмал", "картофельный крахмал", "кукурузный крахмал"],
+    "category": "basic",
+    "supportCanonicals": [],
+    "isStarter": true
+  },
+  {
     "id": "black_pepper",
     "name": "Черный перец",
     "canonicalName": "перец",

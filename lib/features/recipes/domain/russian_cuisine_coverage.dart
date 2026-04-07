@@ -424,10 +424,11 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'kissel',
     title: 'Кисель',
-    status: RussianCuisineCoverageStatus.blockedByCatalog,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'kissel',
     familyId: 'kissel',
     continuationNote:
-        'Berry drink layer exists, but kissel still needs starch-thickened drink-dessert reasoning.',
+        'Covered as a dedicated berry drink-dessert family with starch slurry thickening, validator checks, and anti-mors drift logic.',
   ),
   RussianCuisineCoverageEntry(
     id: 'bread_kvass',
@@ -458,9 +459,10 @@ const russianCuisineCoverage = <RussianCuisineCoverageEntry>[
   RussianCuisineCoverageEntry(
     id: 'berry_jam',
     title: 'Варенье',
-    status: RussianCuisineCoverageStatus.blockedByCatalog,
+    status: RussianCuisineCoverageStatus.covered,
+    blueprintId: 'berry_jam',
     familyId: 'berryJam',
     continuationNote:
-        'Preserve-family modeling exists; now blocked by berry product expansion.',
+        'Covered as a dedicated berry preserve family with sugar maceration, syrup reduction, cooling or jar logic, and anti-compote drift checks.',
   ),
 ];

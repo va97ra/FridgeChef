@@ -61,6 +61,7 @@
   {"id":"split_peas","name":"Горох","canonicalName":"Горох","synonyms":["горох","сухой горох","сушеный горох","сушёный горох","колотый горох","горох колотый","split peas","yellow split peas"],"defaultUnit":"g"},
   {"id":"corn","name":"Кукуруза","canonicalName":"Кукуруза","synonyms":["кукуруза","corn"],"defaultUnit":"g"},
   {"id":"flour","name":"Мука","canonicalName":"Мука","synonyms":["мука","flour"],"defaultUnit":"g"},
+  {"id":"starch","name":"Крахмал","canonicalName":"Крахмал","synonyms":["крахмал","картофельный крахмал","кукурузный крахмал","potato starch","corn starch","starch"],"defaultUnit":"g"},
   {"id":"sugar","name":"Сахар","canonicalName":"Сахар","synonyms":["сахар","sugar"],"defaultUnit":"g"},
   {"id":"salt","name":"Соль","canonicalName":"Соль","synonyms":["соль","salt"],"defaultUnit":"g"},
   {"id":"cinnamon","name":"Корица","canonicalName":"Корица","synonyms":["корица","cinnamon"],"defaultUnit":"g"},

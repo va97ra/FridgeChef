@@ -2545,6 +2545,121 @@ void main() {
       ),
     );
   });
+
+  test('accepts proper kissel with starch slurry and soft thickness', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('kissel'),
+      recipe: const Recipe(
+        id: 'kissel-valid',
+        title: 'Кисель: Клюква',
+        timeMin: 24,
+        tags: ['drink', 'dessert'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Клюква', amount: 250, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 70, unit: Unit.g),
+          RecipeIngredient(name: 'Крахмал', amount: 45, unit: Unit.g),
+          RecipeIngredient(name: 'Лимон', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Разомни клюкву, залей ягодную основу водой и спокойно прогрей 8-10 минут.',
+          'Процеди основу через сито, а отдельно разведи крахмал в холодной воде без комков.',
+          'Верни основу на спокойный огонь, добавь сахар, затем тонкой струйкой влей разведённый крахмал, постоянно помешивая, и доведи до мягкой густоты.',
+          'Сними с огня, добавь немного лимона и подавай тёплым как густой напиток или охлаждённым как ягодный десерт.',
+        ],
+      ),
+      recipeCanonicals: const {'клюква', 'сахар', 'крахмал', 'лимон'},
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects kissel that stays a thin compote without starch logic', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('kissel'),
+      recipe: const Recipe(
+        id: 'kissel-flat',
+        title: 'Кисель ягодный',
+        timeMin: 12,
+        tags: ['drink'],
+        servingsBase: 3,
+        ingredients: [
+          RecipeIngredient(name: 'Клюква', amount: 220, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 60, unit: Unit.g),
+        ],
+        steps: [
+          'Залей клюкву водой с сахаром и кипяти 15 минут.',
+          'Сразу разлей по стаканам и подавай.',
+        ],
+      ),
+      recipeCanonicals: const {'клюква', 'сахар'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Киселю нужен крахмал, иначе получится морс или компот, а не густой ягодный напиток-десерт.',
+      ),
+    );
+  });
+
+  test('accepts proper berry jam with sugar maceration and jar finish', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('berry_jam'),
+      recipe: const Recipe(
+        id: 'berry-jam-valid',
+        title: 'Варенье: Клюква',
+        timeMin: 75,
+        tags: ['preserve', 'sweet'],
+        servingsBase: 6,
+        ingredients: [
+          RecipeIngredient(name: 'Клюква', amount: 450, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 320, unit: Unit.g),
+          RecipeIngredient(name: 'Лимон', amount: 1, unit: Unit.pcs),
+        ],
+        steps: [
+          'Перебери клюкву, засыпь ягоды сахаром и оставь на 30-40 минут, чтобы они дали сок.',
+          'Поставь ягоды на слабый огонь, дождись пока сахар полностью растворится, и снимай пену по мере появления.',
+          'Вари до густого сиропа, чтобы капля держалась на холодной тарелке, а в конце добавь немного лимона.',
+          'Разлей варенье по чистым сухим банкам, полностью остуди и убери в холод.',
+        ],
+      ),
+      recipeCanonicals: const {'клюква', 'сахар', 'лимон'},
+    );
+
+    expect(result.isValid, isTrue, reason: result.violations.join('\n'));
+  });
+
+  test('rejects berry jam that drifts into thin compote logic', () {
+    final result = validateChefDish(
+      blueprint: _blueprint('berry_jam'),
+      recipe: const Recipe(
+        id: 'berry-jam-flat',
+        title: 'Варенье ягодное',
+        timeMin: 18,
+        tags: ['sweet'],
+        servingsBase: 4,
+        ingredients: [
+          RecipeIngredient(name: 'Клюква', amount: 350, unit: Unit.g),
+          RecipeIngredient(name: 'Сахар', amount: 140, unit: Unit.g),
+        ],
+        steps: [
+          'Сразу залей клюкву водой, добавь сахар и кипяти 15 минут на сильном огне.',
+          'Процеди сироп и подавай горячим.',
+        ],
+      ),
+      recipeCanonicals: const {'клюква', 'сахар'},
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.violations,
+      contains(
+        'Варенью не нужна лишняя вода: ягоды должны собраться в собственном соке, а не уйти в компот.',
+      ),
+    );
+  });
 }
 
 ChefBlueprint _blueprint(String id) {
